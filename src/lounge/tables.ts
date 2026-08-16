@@ -25,7 +25,7 @@ import {
   AUTO_STAND_AFTER_MS,
   AUTO_STAND_DISTANCE,
   BOT_THINK_MS,
-  ELEVATOR,
+  ELEVATORS,
   ELEVATOR_RADIUS,
   FLOORS,
   HEARTBEAT_MS,
@@ -97,8 +97,9 @@ export const local = {
   offline: false,
   startedAt: 0,
   toast: { text: '', until: 0 },
-  /** Elevator: panel open while the player stands on a pad; the floor they are on. */
+  /** Elevator: panel open while the player stands on a pad; which shaft; the floor they are on. */
   elevatorOpen: false,
+  elevatorIndex: 0,
   floor: 0,
   /** Set after a ride so the panel does not reopen until the player steps off the pad. */
   elevatorArmed: true
@@ -426,21 +427,30 @@ export function floorAt(y: number): FloorDef {
   return best
 }
 
-/** Teleport onto a floor's landing next to its elevator pad, facing the plaza. */
+/** Teleport onto a floor's landing just outside the shaft the player is in, facing the plaza. */
 export function rideTo(f: FloorDef): void {
   local.elevatorOpen = false
   local.elevatorArmed = false
-  const landing = { x: ELEVATOR.x, y: f.y, z: ELEVATOR.z + 2.4 }
+  const pad = ELEVATORS[local.elevatorIndex] ?? ELEVATORS[0]
+  // step out towards the plaza so the panel does not reopen on arrival
+  const dx = PLAZA.x - pad.x
+  const dz = PLAZA.z - pad.z
+  const len = Math.sqrt(dx * dx + dz * dz) || 1
+  const landing = { x: pad.x + (dx / len) * 2.4, y: f.y, z: pad.z + (dz / len) * 2.4 }
   const target = Vector3.create(PLAZA.x, f.y, PLAZA.z)
   movePlayerTo({ newRelativePosition: landing, cameraTarget: target, avatarTarget: target }).catch(() => {
     /* ignore if the client refuses */
   })
 }
 
-function distanceToPad(p: Vector3): number {
-  const dx = p.x - ELEVATOR.x
-  const dz = p.z - ELEVATOR.z
-  return Math.sqrt(dx * dx + dz * dz)
+/** Index of the elevator pad under the player (horizontal distance), or -1. */
+function padAt(p: Vector3): number {
+  for (let i = 0; i < ELEVATORS.length; i++) {
+    const dx = p.x - ELEVATORS[i].x
+    const dz = p.z - ELEVATORS[i].z
+    if (Math.sqrt(dx * dx + dz * dz) <= ELEVATOR_RADIUS) return i
+  }
+  return -1
 }
 
 function playerPosition(): Vector3 | null {
@@ -500,9 +510,12 @@ function proximitySystem(dt: number): void {
   if (local.dismissedTableId >= 0 && local.dismissedTableId !== local.nearTableId) local.dismissedTableId = -1
   // elevator pads: stepping on one opens the floor panel, stepping off closes it
   local.floor = floorAt(p.y).id
-  const onPad = distanceToPad(p) <= ELEVATOR_RADIUS && Math.abs(p.y - FLOORS[local.floor].y) < 2
-  if (onPad && local.elevatorArmed && !findMySeat()) local.elevatorOpen = true
-  if (!onPad) {
+  const pad = padAt(p)
+  const onPad = pad >= 0 && Math.abs(p.y - FLOORS[local.floor].y) < 2
+  if (onPad) {
+    local.elevatorIndex = pad
+    if (local.elevatorArmed && !findMySeat()) local.elevatorOpen = true
+  } else {
     local.elevatorOpen = false
     local.elevatorArmed = true
   }
