@@ -24,7 +24,7 @@ const CENTER_Y = TABLE_TOP_Y + 0.08 + BOARD / 2
 const HALF_T = 0.02
 
 /** Symbol i (0..7): shape = i % 4, colour = i < 4 ? warm : cool. */
-export const SHAPE_SPRITES = ['images/ui/disc.png', 'images/ui/pixel.png', 'images/ui/mark-o.png', 'images/ui/mark-x.png']
+export const SHAPE_SPRITES = ['images/ui/disc.png', 'images/ui/button.png', 'images/ui/mark-o.png', 'images/ui/mark-x.png']
 export const SYMBOL_TINTS: [Color4, Color4] = [PALETTE.yellow, Color4.fromHexString('#3fc1d9ff')]
 export const OWNER_TINTS: [Color4, Color4] = [Color4.fromHexString('#f2d98cff'), Color4.fromHexString('#e8a29aff')]
 const CARD_BACK = Color4.fromHexString('#2f4858ff')

@@ -23,12 +23,10 @@ const ROWS = 5
 const COLS = 5
 
 const IMG = {
-  board: 'images/ui/board.png',
   dot: 'images/ui/hole.png',
   ring: 'images/ui/ring.png',
   yellow: 'images/ui/disc-yellow.png',
-  red: 'images/ui/disc-red.png',
-  pixel: 'images/ui/pixel.png'
+  red: 'images/ui/disc-red.png'
 }
 
 interface Wire {
@@ -126,7 +124,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
         <UiEntity
           key={`b${r}-${c}`}
           uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2 + 4, top: r * cell + cell / 2 + 4 }, width: cell - 8, height: cell - 8 }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: o === 0 ? Color4.create(0.96, 0.77, 0.1, 0.5) : Color4.create(0.89, 0.27, 0.24, 0.5) }}
+          uiBackground={{ color: o === 0 ? Color4.create(0.96, 0.77, 0.1, 0.5) : Color4.create(0.89, 0.27, 0.24, 0.5) }}
         />
       )
     }
@@ -140,7 +138,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
         <UiEntity
           key={`h${r}-${c}`}
           uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2, top: r * cell + cell / 2 - LINE_T / 2 }, width: cell, height: LINE_T }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: on ? (isLast('h', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
+          uiBackground={{ color: on ? (isLast('h', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
         />
       )
     }
@@ -152,7 +150,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
         <UiEntity
           key={`v${r}-${c}`}
           uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2 - LINE_T / 2, top: r * cell + cell / 2 }, width: LINE_T, height: cell }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: on ? (isLast('v', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
+          uiBackground={{ color: on ? (isLast('v', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
         />
       )
     }
@@ -179,7 +177,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
     }
 
   return (
-    <UiEntity uiTransform={{ width: size + 16, height: size + 16, padding: 8 }} uiBackground={{ texture: { src: IMG.board }, textureMode: 'stretch', color: Color4.fromHexString('#e9dcc4ff') }}>
+    <UiEntity uiTransform={{ width: size + 16, height: size + 16, padding: 8 }} uiBackground={{ color: Color4.fromHexString('#e9dcc4ff') }}>
       <UiEntity uiTransform={{ width: size, height: size }}>{items}</UiEntity>
     </UiEntity>
   )

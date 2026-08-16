@@ -32,7 +32,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const REVEAL_MS = 1200
-const IMG = { pixel: 'images/ui/pixel.png', ring: 'images/ui/ring.png', chipA: 'images/ui/disc-yellow.png', chipB: 'images/ui/disc-red.png' }
+const IMG = { ring: 'images/ui/ring.png', chipA: 'images/ui/disc-yellow.png', chipB: 'images/ui/disc-red.png' }
 
 interface Wire {
   /** one char per card: symbol index 0-7 */
@@ -121,7 +121,7 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; compact: b
         <UiEntity
           key={`c${i}`}
           uiTransform={{ width: cell, height: cell, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: body }}
+          uiBackground={{ color: body }}
           onMouseDown={() => {
             if (ctx.myTurn && !up && state.flippedIndices.length < 2) ctx.act({ flip: i } as PairsAction)
           }}
@@ -137,7 +137,7 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; compact: b
     )
   }
   return (
-    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: Color4.fromHexString('#3a3230ff') }}>
+    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ color: Color4.fromHexString('#3a3230ff') }}>
       {rows}
     </UiEntity>
   )

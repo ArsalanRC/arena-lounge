@@ -50,6 +50,8 @@ export interface TableGame<S = unknown, A = unknown> {
   seatNames: [string, string]
   /** UI sprite paths for the two sides (disc / chip images). */
   seatSprites: [string, string]
+  /** Optional tints applied to seatSprites in chips (for white sprites). */
+  seatSpriteTints?: [Color4, Color4]
   /** Button tints for the two sides (seat buttons, turn colour). */
   seatColors: [Color4, Color4]
 

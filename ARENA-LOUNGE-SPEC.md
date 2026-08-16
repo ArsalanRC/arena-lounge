@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 16:25 (Europe/Berlin)
+Last update: 2026-08-16 16:40 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -66,11 +66,11 @@ version works as well", 16 Aug 11:30):
 - First-person camera only on the local player's own seat pad; sitting snaps
   the avatar to the pad facing the board (yaw re-issued after the switch).
 - Sounds: synthesised WAVs (drop, win chime, your-move ding, sit click, lose).
-- Perf (4 tables): 590 entities (74% of the 800 cap for 4 parcels), ~14.8k
-  triangles (37%), 17 textures (74%), 60 fps desktop. Entity budget is the
-  next constraint: per-cell colliders (Reversi 64, Dot Lines 36, C4 7 per
-  table) can collapse to one collider + hit-position math; Reversi keeps two
-  sprites per cell because its felt is opaque.
+- Perf (7 tables, six games): 642 entities (80% of the 800 soft cap for 4
+  parcels), 28k triangles (71%), explorer reports 26 "textures" vs a soft cap
+  of 23 (the metric counts runtime texture instances, not files; the files are
+  16 PNGs, mostly 128px sprites, so memory is small). Headroom is fine for
+  the buildathon; more tables would need a bigger parcel footprint.
 - Tests: 30 vitest tests on the pure engine. `pnpm build` strict type-check green.
 - How to play: "?" buttons + info kiosk at spawn open a panel with the rules
   overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
