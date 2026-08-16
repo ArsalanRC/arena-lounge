@@ -54,6 +54,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Backgammon is an ancient 2-player strategy game. Each side starts with 15 checkers arranged around a 24-point loop and races them toward their home board. Roll two dice, move any two checkers, and bear them off once all 15 are in your home quadrant. First to bear off all 15 wins."
+      },
+      "ludo": {
+        "name": "Ludo",
+        "overview": "Ludo is a strategy board game for 2–4 players. Race your 4 pieces from the yard, around the board, and into your home column to win."
       }
     }
   },
@@ -97,6 +101,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "El backgammon es un juego de estrategia milenario para 2 jugadores. Cada lado empieza con 15 fichas distribuidas en un circuito de 24 puntas y las lleva hacia su tablero interior. Tira dos dados, mueve dos fichas y sácalas cuando las 15 estén en tu cuadrante. El primero en sacar las 15 gana."
+      },
+      "ludo": {
+        "name": "Parchís",
+        "overview": "Ludo es un juego de estrategia para 2–4 jugadores. Lleva tus 4 fichas desde el patio, alrededor del tablero, hasta la columna final para ganar."
       }
     }
   },
@@ -140,6 +148,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Gamão",
         "overview": "Backgammon é um antigo jogo de estratégia para 2 jogadores. Cada lado começa com 15 peças dispostas em um circuito de 24 pontos e as direciona para seu quadrante interno. Role dois dados, mova peças e retire-as quando todas as 15 estiverem no quadrante. O primeiro a retirar todas as 15 vence."
+      },
+      "ludo": {
+        "name": "Ludo",
+        "overview": "Ludo é um jogo de estratégia para 2–4 jogadores. Leve suas 4 peças do pátio, ao redor do tabuleiro, até a coluna final para vencer."
       }
     }
   },
@@ -183,6 +195,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Backgammon ist ein uraltes 2-Spieler-Strategiespiel. Jede Seite startet mit 15 Steinen auf einem 24-Punkte-Rundkurs und rennt zum eigenen Heimfeld. Würfle zwei Würfel, bewege Steine und trage sie ab, sobald alle 15 im Heimfeld sind. Wer zuerst alle 15 abträgt, gewinnt."
+      },
+      "ludo": {
+        "name": "Mensch ärgere Dich nicht",
+        "overview": "Ludo ist ein Strategiespiel für 2–4 Spieler. Bring deine 4 Figuren vom Hof über das Brett ins Ziel, um zu gewinnen."
       }
     }
   },
@@ -226,6 +242,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Le backgammon est un jeu de stratégie ancien pour 2 joueurs. Chaque camp commence avec 15 pions disposés autour d'un circuit de 24 flèches et les fait avancer vers son jan intérieur. Lancez deux dés, déplacez deux pions et sortez-les quand les 15 sont dans votre cadran. Le premier à sortir les 15 gagne."
+      },
+      "ludo": {
+        "name": "Petits chevaux",
+        "overview": "Le Ludo est un jeu de stratégie pour 2 à 4 joueurs. Faites courir vos 4 pions depuis la cour, autour du plateau, jusqu'à votre colonne finale pour gagner."
       }
     }
   },
@@ -269,6 +289,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Il Backgammon è un antico gioco di strategia per 2 giocatori. Ogni lato inizia con 15 pedine disposte su un circuito di 24 punte e le dirige verso il proprio quadrante interno. Lancia due dadi, muovi le pedine e toglile quando tutte le 15 sono nel quadrante. Il primo a toglierle tutte vince."
+      },
+      "ludo": {
+        "name": "Non t'arrabbiare",
+        "overview": "Ludo è un gioco di strategia per 2–4 giocatori. Porta le tue 4 pedine dal recinto, attorno al tabellone, fino alla colonna finale per vincere."
       }
     }
   },
@@ -312,6 +336,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Tryktrak",
         "overview": "Tryktrak to starożytna gra strategiczna dla 2 graczy. Każda strona ma 15 kamieni na 24-punktowej pętli. Rzucaj dwiema kostkami, przesuwaj kamienie i zdejmij je. Pierwszy, kto zdejmie 15, wygrywa."
+      },
+      "ludo": {
+        "name": "Chińczyk",
+        "overview": "Chińczyk to strategiczna gra planszowa dla 2–4 graczy. Przeprowadź 4 pionki ze stajni po torze i do kolumny mety, aby wygrać."
       }
     }
   },
@@ -355,6 +383,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Tavla",
         "overview": "Tavla 2 oyunculu eski bir strateji oyunudur. Her taraf 24 noktalı döngüde 15 pulla başlar. İki zar at, pulları ilerlet ve eve getir. İlk 15'ini kıran kazanır."
+      },
+      "ludo": {
+        "name": "Kızma Birader",
+        "overview": "Ludo 2–4 oyunculu bir strateji oyunudur. 4 taşını avludan parkurda ilerlet ve ev sütununa ulaştırarak kazan."
       }
     }
   },
@@ -398,6 +430,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Нарды",
         "overview": "Нарды, древняя стратегическая игра для 2 игроков. Каждая сторона начинает с 15 шашками на 24-точечном кольце. Бросайте два кубика, перемещайте шашки и выводите их. Первый, кто выведет все 15, побеждает."
+      },
+      "ludo": {
+        "name": "Лудо",
+        "overview": "Лудо, стратегическая настольная игра для 2–4 игроков. Проведите 4 фишки из двора по дорожке и в домашнюю колонну, чтобы победить."
       }
     }
   },
@@ -441,6 +477,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "西洋双陆棋",
         "overview": "西洋双陆棋是古老的2人策略游戏。每方在24点环路上各有15枚棋子，向自己的内场推进。掷两颗骰子移动棋子，当全部15枚都进入内场后开始撤子。先撤完所有棋子的一方获胜。"
+      },
+      "ludo": {
+        "name": "飞行棋",
+        "overview": "飞行棋是2–4人策略棋盘游戏。将4颗棋子从起点区出发，绕棋盘一周进入终点列，率先完成的玩家获胜。"
       }
     }
   },
@@ -484,6 +524,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "バックギャモン",
         "overview": "バックギャモンは2人用の古代戦略ゲーム。各プレイヤーは24ポイントのループに15個のチェッカーを配置し、ホームボードを目指します。サイコロ2個を振ってチェッカーを動かし、全15個をホームに入れてからベアオフ。先にベアオフ完了した方が勝ちです。"
+      },
+      "ludo": {
+        "name": "ルドー",
+        "overview": "ルドーは2〜4人向けの戦略ボードゲーム。4つのコマをヤードからボードを一周してホームコラムに入れ、最初にゴールした人が勝ちです。"
       }
     }
   },
@@ -527,6 +571,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "बैकगैमन",
         "overview": "बैकगैमन 2 खिलाड़ियों का प्राचीन रणनीति खेल। 15 चेकर्स होम बोर्ड में पहुंचाएं।"
+      },
+      "ludo": {
+        "name": "लूडो",
+        "overview": "लूडो 2–4 खिलाड़ियों का रणनीति बोर्ड गेम है। अपनी 4 गोटियों को होम कॉलम तक पहुंचाएं।"
       }
     }
   },
@@ -570,6 +618,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Backgammon adalah permainan strategi kuno untuk 2 pemain. Setiap sisi memulai dengan 15 bidak yang diatur di lingkaran 24 titik dan berlomba menuju papan rumah. Lempar dua dadu, gerakkan dua bidak, dan keluarkan setelah semua 15 berada di kuadran rumahmu. Yang pertama mengeluarkan semua 15 menang."
+      },
+      "ludo": {
+        "name": "Ludo",
+        "overview": "Ludo adalah permainan papan strategi untuk 2–4 pemain. Lomba 4 bidakmu dari halaman, mengelilingi papan, dan masuk ke kolom rumah untuk menang."
       }
     }
   },
@@ -613,6 +665,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Backgammon là trò chiến thuật cổ đại cho 2 người. Mỗi bên có 15 quân sắp trên vòng 24 điểm và đua về sân nhà. Tung hai xúc xắc, di chuyển hai quân, và đưa ra ngoài khi cả 15 ở sân nhà. Người đầu tiên đưa hết 15 quân ra thắng."
+      },
+      "ludo": {
+        "name": "Cờ Cá Ngựa",
+        "overview": "Ludo là trò chơi bàn cờ chiến thuật cho 2–4 người. Đua 4 quân từ sân, quanh bàn cờ, và vào cột đích để thắng."
       }
     }
   },
@@ -656,6 +712,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Ang Backgammon ay isang sinaunang 2-player strategy game. Ang bawat panig ay nagsisimula ng 15 checkers sa 24-point loop at nagre-race papuntang home board. Mag-roll ng dalawang dice, igalaw ang dalawang checkers, at i-bear off kapag lahat ng 15 ay nasa home quadrant mo na. Unang maka-bear off ng lahat ng 15 ang panalo."
+      },
+      "ludo": {
+        "name": "Ludo",
+        "overview": "Ang Ludo ay isang strategic board game para sa 2–4 manlalaro. I-race ang 4 piyesa mo mula sa yard, paikot sa board, at papasok sa home column para manalo."
       }
     }
   },
@@ -699,6 +759,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "ব্যাকগ্যামন",
         "overview": "ব্যাকগ্যামন ২ খেলোয়াড়ের প্রাচীন কৌশল খেলা।"
+      },
+      "ludo": {
+        "name": "লুডু",
+        "overview": "লুডু ২–৪ খেলোয়াড়ের কৌশল বোর্ড গেম। ৪ গুটি হোম কলামে পৌঁছান।"
       }
     }
   },
@@ -742,6 +806,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "बॅकगॅमन",
         "overview": "बॅकगॅमन 2 खेळाडूंचा प्राचीन रणनीती खेळ."
+      },
+      "ludo": {
+        "name": "लूडो",
+        "overview": "लूडो 2–4 खेळाडूंचा रणनीती बोर्ड गेम. 4 गोट्या होम कॉलममध्ये पोहोचवा."
       }
     }
   },
@@ -785,6 +853,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "பேக்கேமன்",
         "overview": "பேக்கம்மன் 2 வீரர்களுக்கான பண்டைய உத்தி."
+      },
+      "ludo": {
+        "name": "லூடோ",
+        "overview": "லூடோ 2–4 வீரர்களுக்கான உத்தி போர்டு விளையாட்டு."
       }
     }
   },
@@ -828,6 +900,10 @@ export const LOCALES: LocaleInfo[] = [
       "backgammon": {
         "name": "Backgammon",
         "overview": "Backgammon na ancient 2-player strategy game. Each side start with 15 checkers around 24-point loop and race dem towards home board. Roll two dice, move two checkers, bear dem off once all 15 dey your home quadrant. First person to bear off all 15 win."
+      },
+      "ludo": {
+        "name": "Ludo",
+        "overview": "Ludo na strategy board game for 2–4 people. Race your 4 pieces from di yard, round di board, enter your home column to win."
       }
     }
   }
