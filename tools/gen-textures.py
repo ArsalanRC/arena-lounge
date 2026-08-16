@@ -221,6 +221,49 @@ def gen_reversi_board():
         return (*col, 1.0)
     write_png('images/reversi-board.png', W, H, px)
 
+def gen_checkers_board():
+    W = H = 512
+    N = 8
+    light, dark, edge = hex_rgb('#e8d9bd'), hex_rgb('#6b4a35'), hex_rgb('#3a2a1e')
+    cell = W / N
+    def px(x, y):
+        cx, cy = int(x // cell), int(y // cell)
+        # rank 0 (white's back rank) is drawn at the BOTTOM: flip cy
+        rank = N - 1 - cy
+        col = dark if (cx + rank) % 2 == 1 else light
+        n = fbm(x / 60, y / 60, 2) - 0.5
+        col = mix(col, edge if col is dark else light, 0.15 * n)
+        if x < 3 or y < 3 or x >= W - 3 or y >= H - 3:
+            col = edge
+        return (*col, 1.0)
+    write_png('images/checkers-board.png', W, H, px)
+
+def gen_king_disc(path, base, dark, light, crown):
+    """Shaded disc with a small crown ring drawn on top."""
+    S = 128
+    b, d, l, c = hex_rgb(base), hex_rgb(dark), hex_rgb(light), hex_rgb(crown)
+    R = S / 2 - 3
+    def px(x, y):
+        cov = circle_cov(x, y, S / 2, S / 2, R)
+        if cov <= 0:
+            return (0, 0, 0, 0)
+        dx, dy = (x + .5 - S / 2) / R, (y + .5 - S / 2) / R
+        dd = math.hypot(dx, dy)
+        col = mix(b, d, smoothstep(0.72, 1.0, dd) * 0.7)
+        col = mix(col, l, 0.22 * (1 - smoothstep(0.0, 0.6, dd)))
+        spec = math.exp(-((dx + .42) ** 2 + (dy + .42) ** 2) / 0.10)
+        col = mix(col, (1, 1, 1), 0.55 * spec)
+        # crown: a ring plus three bumps
+        ring = math.exp(-((dd - 0.42) ** 2) / 0.006)
+        bumps = 0
+        for ang in (-90, 30, 150):
+            a = math.radians(ang)
+            bx, by = 0.42 * math.cos(a), 0.42 * math.sin(a)
+            bumps = max(bumps, math.exp(-((dx - bx) ** 2 + (dy - by) ** 2) / 0.012))
+        col = mix(col, c, min(1.0, ring + bumps))
+        return (*col, cov)
+    write_png(path, S, S, px)
+
 def gen_mark_x(path='images/ui/mark-x.png', rgb=(1, 1, 1)):
     S = 128
     def px(x, y):
@@ -323,6 +366,9 @@ if __name__ == '__main__':
     gen_mark_x()
     gen_mark_o()
     gen_mark_x('images/ui/mark-x-yellow.png', hex_rgb('#f5c518'))
+    gen_checkers_board()
+    gen_king_disc('images/ui/disc-light-king.png', '#f2e8d5', '#b9ab92', '#ffffff', '#c9931a')
+    gen_king_disc('images/ui/disc-dark-king.png', '#2a2422', '#0d0b0a', '#6a5f5a', '#f0c040')
     gen_mark_o('images/ui/mark-o-red.png', hex_rgb('#e2453d'))
     gen_ui_hole()
     gen_ui_ring()

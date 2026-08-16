@@ -162,9 +162,13 @@ export function buildTableVisual(t: Table): TableVisual {
   }
 
   // the game itself
-  const view = t.game.createView3D(root, (action) => {
-    act(t, action)
-  })
+  const view = t.game.createView3D(
+    root,
+    (action) => {
+      act(t, action)
+    },
+    () => gameStateOf(t)
+  )
 
   // seat pads
   const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.padYellow)
