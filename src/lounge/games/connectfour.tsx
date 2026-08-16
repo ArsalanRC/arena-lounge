@@ -1,5 +1,5 @@
 /**
- * Connect Four table game: bridges the pure engine (src/engine/connectfour)
+ * Four in a Row table game: bridges the pure engine (src/engine/connectfour)
  * to the TableGame contract, and provides the touch controller.
  *
  * Sync payload: a compact JSON object (42-char cell string + turn + status +
@@ -190,7 +190,7 @@ function Controls(props: { state: ConnectFourGameState; ctx: GameContext; phone:
 
 export const connectFourGame: TableGame<ConnectFourGameState, C4Action> = {
   id: 'connectfour',
-  label: 'Connect Four',
+  label: 'Four in a Row',
   seatNames: ['Yellow', 'Red'],
   seatSprites: [IMG.yellow, IMG.red],
   seatColors: [UI.yellow, UI.red],

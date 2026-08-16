@@ -144,7 +144,7 @@ function makeSign(parent: Entity, y: number): Entity {
   return e
 }
 
-/** Height of the sign above the table; games taller than Connect Four can bump this. */
+/** Height of the sign above the table; games taller than Four in a Row can bump this. */
 const SIGN_Y = TABLE_TOP_Y + 0.05 + 1.04 + 0.55
 
 export function buildTableVisual(t: Table): TableVisual {

@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 16:05 (Europe/Berlin), random sides
+Last update: 2026-08-16 16:15 (Europe/Berlin), Four in a Row
 
 ## 1. What this is
 
@@ -321,6 +321,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 16:15 names: "Connect Four" (Hasbro trademark, also its local brand names Vier gewinnt / Conecta 4 / Puissance 4 / Forza 4 / Lig 4) replaced by the generic "Four in a Row" everywhere the lounge shows or documents it; the catalog extraction overrides the name per language and scrubs the brand from overviews. Other lounge games use generic or Game-Arena IP-safe names (Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo); planned ones too (Super Tic Tac Toe, Snakes & Ladders, Sea Strike, Dice Royale). Code ids stay `connectfour`.
 - 2026-08-16 16:05 random sides: TableBoard.swap decides which chair plays the first colour (random at a new pairing, alternating per round, bot included); plugins see sides via ctx.mySeat and the chair via ctx.behind (rows follow the colour, mirroring follows the chair); one "Take a seat" button, neutral seat pads, "You play White this round" toast; strings in five languages
 - 2026-08-16 15:37 lounge chrome i18n: every lounge string (hint, toasts, table card, controller, elevator panel, table signs, banners, kiosk, gateway, floor labels, per-game hints, seat colours) through `t()` in EN/DE/ES/PT/FR written natively; `uiLang` shared by UI, toasts and 3D labels; relabelSystem for TextShapes; game names on signs from the catalog; house bot name localised per viewer
 - 2026-08-16 15:28 Ludo plugin (engine ported, 69 tests): red vs green duel, board texture from the engine's constants, eight sliding pieces, roll/piece/skip actions with client-chosen die, pending skip, mini board + move buttons; catalog rows in 19 languages + tips EN/DE/ES; game room west corner live, all four game-room corners built
