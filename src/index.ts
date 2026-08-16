@@ -8,11 +8,13 @@
 import { engine } from '@dcl/sdk/ecs'
 import { buildLounge } from './lounge/lounge3d'
 import { buildTableVisual, tableVisualsSystem } from './lounge/table3d'
+import { setupPersonalSfx } from './lounge/sfx'
 import { createTables, startTableSystems, tables } from './lounge/tables'
 import { setupUi } from './lounge/ui'
 
 export function main(): void {
   buildLounge()
+  setupPersonalSfx()
   createTables()
   for (const t of tables) buildTableVisual(t)
   startTableSystems()

@@ -38,6 +38,7 @@ import { COLS, ROWS } from '../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE, SEAT_PAD_OFFSET } from './config'
 import { CELL_COUNT, SEAT_A, SEAT_B, Status, Winner, cellCol, cellRow, type Seat } from './state'
 import { boardOf, drop, local, mySeatAt, seatOf, sit, sitWithBot, inviteBot, type Table } from './tables'
+import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 
 // ---------------------------------------------------------------- geometry
 /** Board plane size in metres (matches the pre-distorted texture). */
@@ -68,12 +69,17 @@ export interface TableVisual {
   padB: Entity
   camA: Entity
   camB: Entity
+  sfx: TableSfx
   rendered: {
     round: number
     cells: number[]
     winKey: string
     signText: string
     signVisible: boolean
+    /** round:moveCount of the last state we reacted to (sounds, cues). */
+    moveKey: string
+    myTurnKey: string
+    seated: boolean
   }
 }
 
@@ -171,7 +177,7 @@ function applyDiscMaterial(e: Entity, v: number, glow: boolean): void {
     castShadows: false,
     // a touch of self-illumination keeps discs vivid in shade; winners glow
     emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
-    emissiveIntensity: glow ? 1.6 : 0.15
+    emissiveIntensity: glow ? 0.7 : 0.12
   })
 }
 
@@ -349,7 +355,17 @@ export function buildTableVisual(t: Table): TableVisual {
     padB,
     camA,
     camB,
-    rendered: { round: -1, cells: new Array<number>(CELL_COUNT).fill(0), winKey: '', signText: '', signVisible: true }
+    sfx: createTableSfx(root, Vector3.create(0, BOARD_CENTER_Y, 0)),
+    rendered: {
+      round: -1,
+      cells: new Array<number>(CELL_COUNT).fill(0),
+      winKey: '',
+      signText: '',
+      signVisible: true,
+      moveKey: '',
+      myTurnKey: '',
+      seated: false
+    }
   }
   visuals.push(vis)
   return vis
@@ -438,6 +454,7 @@ export function updateTableVisual(vis: TableVisual): void {
       const start = Vector3.create(end.x, BOARD_TOP + 0.25, 0)
       Transform.getMutable(disc).position = start
       Tween.setMove(disc, start, end, 380, EasingFunction.EF_EASEOUTBOUNCE)
+      play(vis.sfx.drop)
     } else {
       Tween.deleteFrom(disc)
       Transform.getMutable(disc).position = end
@@ -459,7 +476,21 @@ export function updateTableVisual(vis: TableVisual): void {
       for (const i of b.winCells) {
         if (vis.rendered.cells[i] !== 0) setDisc(vis.discs[i], vis.rendered.cells[i], true)
       }
+      play(vis.sfx.win)
+      if (mine && b.winner !== mine) playPersonal('lose')
     }
+  }
+
+  // personal cues: sit click, "your move" ding
+  const seated = mine !== 0
+  if (seated !== vis.rendered.seated) {
+    vis.rendered.seated = seated
+    if (seated) playPersonal('sit')
+  }
+  const turnKey = `${b.round}:${b.moveCount}:${b.turn}`
+  if (turnKey !== vis.rendered.myTurnKey) {
+    vis.rendered.myTurnKey = turnKey
+    if (seated && b.status === Status.Playing && b.turn === mine) playPersonal('turn')
   }
 }
 
