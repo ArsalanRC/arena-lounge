@@ -1,11 +1,11 @@
 /**
- * Table logic: seats, turns, drops, the house bot, and housekeeping.
+ * Table logic: seats, turns, actions, the house bot, and housekeeping.
  *
- * All game rules come from the pure engine (../engine/connectfour). This file
- * owns the *who may write what* rules for the CRDT-synced components (see
- * state.ts) and the local player's relationship to the tables.
+ * Game rules come from the table's game plugin (games/*). This file owns the
+ * *who may write what* rules for the CRDT-synced components (see state.ts)
+ * and the local player's relationship to the tables.
  *
- * Every mutation goes through a small set of functions (sit / stand / drop /
+ * Every mutation goes through a small set of functions (sit / stand / act /
  * inviteBot / rematch / vacate) so the write discipline stays in one place:
  *  - a seat component is written by its holder (claim, heartbeat, leave) or by
  *    a janitor when the holder went silent;
@@ -19,7 +19,7 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
 import { movePlayerTo } from '~system/RestrictedActions'
-import { applyMove, getBotMove, isColumnPlayable, type ConnectFourDifficulty } from '../engine/connectfour'
+import type { BotDifficulty } from '../engine/types'
 import {
   AFK_MS,
   AUTO_STAND_AFTER_MS,
@@ -34,22 +34,20 @@ import {
   TURN_LIMIT_MS,
   type TableDef
 } from './config'
+import { getGame } from './games/registry'
+import type { TableGame } from './games/types'
 import {
   BOT_ADDR,
   BOT_NAME,
-  C4Board,
-  C4SeatA,
-  C4SeatB,
   SEAT_A,
   SEAT_B,
   Status,
+  TableBoard,
+  TableSeatA,
+  TableSeatB,
   Winner,
-  cellIndex,
   emptyBoard,
-  emptyCells,
   emptySeat,
-  fromEngineGrid,
-  toEngineState,
   type BoardData,
   type Seat,
   type SeatData
@@ -57,8 +55,11 @@ import {
 
 export interface Table {
   def: TableDef
-  /** Entity carrying the synced C4Board / C4SeatA / C4SeatB components. */
+  game: TableGame
+  /** Entity carrying the synced TableBoard / TableSeatA / TableSeatB components. */
   root: Entity
+  /** Decoded engine state cache, keyed by round:moveCount. */
+  cache: { key: string; state: unknown; lastAction: unknown }
 }
 
 export const tables: Table[] = []
@@ -77,11 +78,11 @@ export const local = {
   farSince: 0,
   /** Table whose seat card the player dismissed; cleared when they walk away. */
   dismissedTableId: -1,
-  /** Mobile controller: show the mini board instead of the compact drop strip. */
+  /** Mobile controller: show the full board instead of the compact controls. */
   showMiniBoard: false,
   /** Bot strength for games this client drives (local choice, no sync needed). */
-  botDifficulty: 'medium' as ConnectFourDifficulty,
-  /** Last time the local player did something at a table (sit / drop / rematch). */
+  botDifficulty: 'medium' as BotDifficulty,
+  /** Last time the local player did something at a table (sit / act / rematch). */
   lastActionAt: 0,
   /** Set when the CRDT room never connected; local play is still allowed. */
   offline: false,
@@ -98,15 +99,15 @@ export function createTables(): void {
       position: def.position,
       rotation: Quaternion.fromEulerDegrees(0, def.rotationY, 0)
     })
-    C4Board.create(root, emptyBoard())
-    C4SeatA.create(root, emptySeat())
-    C4SeatB.create(root, emptySeat())
+    TableBoard.create(root, emptyBoard(def.gameId))
+    TableSeatA.create(root, emptySeat())
+    TableSeatB.create(root, emptySeat())
     syncEntity(
       root,
-      [C4Board.componentId, C4SeatA.componentId, C4SeatB.componentId],
+      [TableBoard.componentId, TableSeatA.componentId, TableSeatB.componentId],
       SYNC_TABLE_BASE + def.id
     )
-    tables.push({ def, root })
+    tables.push({ def, game: getGame(def.gameId), root, cache: { key: '', state: null, lastAction: null } })
   }
   local.startedAt = Date.now()
   onLeaveScene((userId) => vacateEverywhere(userId.toLowerCase()))
@@ -119,15 +120,39 @@ export function getTable(id: number): Table | undefined {
 // ---------------------------------------------------------------- accessors
 
 export function boardOf(t: Table): BoardData {
-  return C4Board.get(t.root)
+  return TableBoard.get(t.root)
+}
+
+/** Decoded engine state for the current round, or null while waiting. */
+export function gameStateOf(t: Table): unknown | null {
+  const b = TableBoard.get(t.root)
+  if (b.state === '') return null
+  const key = `${b.round}:${b.moveCount}:${b.status}`
+  if (t.cache.key !== key) {
+    let state: unknown = null
+    let lastAction: unknown = null
+    try {
+      state = t.game.decode(b.state)
+      lastAction = b.lastAction === '' ? null : JSON.parse(b.lastAction)
+    } catch (e) {
+      console.log('[arena] failed to decode table state', e)
+    }
+    t.cache = { key, state, lastAction }
+  }
+  return t.cache.state
+}
+
+export function lastActionOf(t: Table): unknown | null {
+  gameStateOf(t)
+  return t.cache.lastAction
 }
 
 export function seatOf(t: Table, seat: Seat): SeatData {
-  return seat === SEAT_A ? C4SeatA.get(t.root) : C4SeatB.get(t.root)
+  return seat === SEAT_A ? TableSeatA.get(t.root) : TableSeatB.get(t.root)
 }
 
 function seatMutable(t: Table, seat: Seat) {
-  return seat === SEAT_A ? C4SeatA.getMutable(t.root) : C4SeatB.getMutable(t.root)
+  return seat === SEAT_A ? TableSeatA.getMutable(t.root) : TableSeatB.getMutable(t.root)
 }
 
 export function otherSeat(seat: Seat): Seat {
@@ -145,8 +170,8 @@ export function seatHeldByMe(s: SeatData): boolean {
 /** 0 when the local player is not seated at this table. */
 export function mySeatAt(t: Table): 0 | Seat {
   if (!me.ready) return 0
-  if (C4SeatA.get(t.root).addr === me.addr) return SEAT_A
-  if (C4SeatB.get(t.root).addr === me.addr) return SEAT_B
+  if (TableSeatA.get(t.root).addr === me.addr) return SEAT_A
+  if (TableSeatB.get(t.root).addr === me.addr) return SEAT_B
   return 0
 }
 
@@ -178,14 +203,13 @@ function writeSeat(t: Table, seat: Seat, data: SeatData): void {
 }
 
 function resetBoard(t: Table, resetSeries: boolean): void {
-  const cur = C4Board.get(t.root)
-  const b = C4Board.getMutable(t.root)
-  b.cells = emptyCells()
+  const cur = TableBoard.get(t.root)
+  const b = TableBoard.getMutable(t.root)
+  b.state = ''
+  b.lastAction = ''
   b.status = Status.Waiting
   b.turn = 0
   b.winner = Winner.None
-  b.winCells = []
-  b.lastCell = -1
   b.moveCount = 0
   b.round = cur.round + 1
   if (resetSeries) {
@@ -197,21 +221,23 @@ function resetBoard(t: Table, resetSeries: boolean): void {
 
 /** Deal a new round if both seats are taken and nothing is in progress. */
 export function maybeStart(t: Table): void {
-  const a = C4SeatA.get(t.root)
-  const bs = C4SeatB.get(t.root)
+  const a = TableSeatA.get(t.root)
+  const bs = TableSeatB.get(t.root)
   if (a.addr === '' || bs.addr === '') return
-  const cur = C4Board.get(t.root)
+  const cur = TableBoard.get(t.root)
   if (cur.status === Status.Playing) return
-  const b = C4Board.getMutable(t.root)
   const round = cur.round + 1
-  b.cells = emptyCells()
+  // Alternate who opens; the human always opens against the bot.
+  const opening: Seat = bs.bot ? SEAT_A : a.bot ? SEAT_B : round % 2 === 1 ? SEAT_A : SEAT_B
+  const state = t.game.newGame(opening)
+  const b = TableBoard.getMutable(t.root)
+  b.gameId = t.game.id
+  b.state = t.game.encode(state)
+  b.lastAction = ''
   b.round = round
   b.status = Status.Playing
-  // Alternate who opens; the human always opens against the bot.
-  b.turn = bs.bot ? SEAT_A : a.bot ? SEAT_B : round % 2 === 1 ? SEAT_A : SEAT_B
+  b.turn = opening
   b.winner = Winner.None
-  b.winCells = []
-  b.lastCell = -1
   b.moveCount = 0
   b.updatedAt = Date.now()
 }
@@ -250,7 +276,7 @@ export function stand(t: Table): void {
  * A house bot never sits alone, so it leaves with its human.
  */
 export function vacate(t: Table, seat: Seat): void {
-  const cur = C4Board.get(t.root)
+  const cur = TableBoard.get(t.root)
   const other = otherSeat(seat)
   const otherData = seatOf(t, other)
   if (!seatIsOpen(seatOf(t, seat))) writeSeat(t, seat, emptySeat())
@@ -261,8 +287,8 @@ export function vacate(t: Table, seat: Seat): void {
 function vacateEverywhere(addr: string): void {
   if (!addr) return
   for (const t of tables) {
-    if (C4SeatA.get(t.root).addr === addr) vacate(t, SEAT_A)
-    if (C4SeatB.get(t.root).addr === addr) vacate(t, SEAT_B)
+    if (TableSeatA.get(t.root).addr === addr) vacate(t, SEAT_A)
+    if (TableSeatB.get(t.root).addr === addr) vacate(t, SEAT_B)
   }
 }
 
@@ -277,7 +303,7 @@ export function inviteBot(t: Table): void {
   maybeStart(t)
 }
 
-/** One-tap solo start: take the free seat (yellow first) and seat the bot opposite. */
+/** One-tap solo start: take the free seat (A first) and seat the bot opposite. */
 export function sitWithBot(t: Table): void {
   if (!canWrite()) {
     toast('Connecting to the lounge, one moment…')
@@ -285,8 +311,8 @@ export function sitWithBot(t: Table): void {
   }
   let mine = mySeatAt(t)
   if (!mine) {
-    const a = C4SeatA.get(t.root)
-    const b = C4SeatB.get(t.root)
+    const a = TableSeatA.get(t.root)
+    const b = TableSeatB.get(t.root)
     const free: 0 | Seat = a.addr === '' ? SEAT_A : b.addr === '' ? SEAT_B : 0
     if (!free) {
       toast('That table is full')
@@ -313,51 +339,38 @@ export function rematch(t: Table): void {
   maybeStart(t)
 }
 
-/** Drop a disc for the local player. Returns false if not allowed right now. */
-export function drop(t: Table, col: number): boolean {
+/** Perform a game action for the local player. Returns false if not allowed. */
+export function act(t: Table, action: unknown): boolean {
   if (!canWrite()) return false
-  const board = C4Board.get(t.root)
+  const board = TableBoard.get(t.root)
   if (board.status !== Status.Playing) return false
   const seat = mySeatAt(t)
   if (!seat || board.turn !== seat) return false
   local.lastActionAt = Date.now()
-  return applyDrop(t, col)
+  return applyAction(t, action, seat)
 }
 
-/** Apply a drop for whoever's turn it is (used by drop() and the bot). */
-function applyDrop(t: Table, col: number): boolean {
-  const board = C4Board.get(t.root)
-  const st = toEngineState(board)
-  if (!isColumnPlayable(st.board, col)) return false
-  const player = st.players[st.currentPlayerIndex]
-  const next = applyMove(st, {
-    kind: 'drop',
-    column: col,
-    row: 0,
-    playerId: player.id,
-    color: player.color,
-    timestamp: Date.now()
-  })
-  const mover = board.turn as Seat
-  const b = C4Board.getMutable(t.root)
-  b.cells = fromEngineGrid(next.board)
-  b.lastCell = next.lastMove ? cellIndex(next.lastMove.row, col) : -1
+/** Apply an action for `seat` (used by act() and the bot driver). */
+function applyAction(t: Table, action: unknown, seat: Seat): boolean {
+  const board = TableBoard.get(t.root)
+  const state = gameStateOf(t)
+  if (state === null) return false
+  const next = t.game.apply(state, action, seat)
+  if (next === null) return false
+  const b = TableBoard.getMutable(t.root)
+  b.state = t.game.encode(next)
+  b.lastAction = JSON.stringify(action)
   b.moveCount = board.moveCount + 1
   b.updatedAt = Date.now()
-  if (next.status === 'finished') {
+  if (t.game.finished(next)) {
     b.status = Status.Finished
     b.turn = 0
-    if (next.winningCells) {
-      b.winner = mover
-      b.winCells = next.winningCells.map(([r, c]) => cellIndex(r, c))
-      if (mover === SEAT_A) b.winsA = board.winsA + 1
-      else b.winsB = board.winsB + 1
-    } else {
-      b.winner = Winner.Draw
-      b.winCells = []
-    }
+    const w = t.game.winner(next)
+    b.winner = w
+    if (w === SEAT_A) b.winsA = board.winsA + 1
+    else if (w === SEAT_B) b.winsB = board.winsB + 1
   } else {
-    b.turn = otherSeat(mover)
+    b.turn = t.game.turnSeat(next) || otherSeat(seat)
   }
   return true
 }
@@ -468,26 +481,25 @@ function janitorSystem(dt: number): void {
   if (!canWrite()) return
   const now = Date.now()
   for (const t of tables) {
-    const a = C4SeatA.get(t.root)
-    const b = C4SeatB.get(t.root)
+    const a = TableSeatA.get(t.root)
+    const b = TableSeatB.get(t.root)
     // seats whose holder went silent
     if (a.addr !== '' && !a.bot && now - a.beat > SEAT_STALE_MS) vacate(t, SEAT_A)
     if (b.addr !== '' && !b.bot && now - b.beat > SEAT_STALE_MS) vacate(t, SEAT_B)
     // a bot never sits alone
-    const a2 = C4SeatA.get(t.root)
-    const b2 = C4SeatB.get(t.root)
+    const a2 = TableSeatA.get(t.root)
+    const b2 = TableSeatB.get(t.root)
     if (a2.bot && b2.addr === '') vacate(t, SEAT_A)
     if (b2.bot && a2.addr === '') vacate(t, SEAT_B)
     // turn timer, applied by a seated player
-    const board = C4Board.get(t.root)
+    const board = TableBoard.get(t.root)
     if (board.status === Status.Playing && mySeatAt(t) && now - board.updatedAt > TURN_LIMIT_MS) {
       const loser = board.turn as Seat
       const winner = otherSeat(loser)
-      const m = C4Board.getMutable(t.root)
+      const m = TableBoard.getMutable(t.root)
       m.status = Status.Finished
       m.turn = 0
       m.winner = winner
-      m.winCells = []
       if (winner === SEAT_A) m.winsA = board.winsA + 1
       else m.winsB = board.winsB + 1
       m.updatedAt = now
@@ -524,7 +536,7 @@ function janitorSystem(dt: number): void {
 function botSystem(): void {
   if (!canWrite()) return
   for (const t of tables) {
-    const board = C4Board.get(t.root)
+    const board = TableBoard.get(t.root)
     if (board.status !== Status.Playing || board.turn === 0) continue
     const turnSeat = seatOf(t, board.turn as Seat)
     if (!turnSeat.bot) continue
@@ -534,12 +546,15 @@ function botSystem(): void {
     if (botPending.get(t.def.id) === key) continue
     botPending.set(t.def.id, key)
     timers.setTimeout(() => {
-      const b2 = C4Board.get(t.root)
+      const b2 = TableBoard.get(t.root)
       if (b2.status !== Status.Playing) return
       if (`${b2.round}:${b2.moveCount}` !== key) return
-      if (!seatOf(t, b2.turn as Seat).bot) return
-      const move = getBotMove(toEngineState(b2), local.botDifficulty)
-      if (move) applyDrop(t, move.column)
+      const seat = b2.turn as Seat
+      if (!seatOf(t, seat).bot) return
+      const state = gameStateOf(t)
+      if (state === null) return
+      const action = t.game.botAction(state, local.botDifficulty)
+      if (action !== null) applyAction(t, action, seat)
     }, BOT_THINK_MS)
   }
 }

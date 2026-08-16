@@ -9,6 +9,7 @@
  * Seat A (yellow) is on the -Z side, seat B (red) on the +Z side.
  */
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import type { GameId } from './games/types'
 
 /** Scene edge length in metres (2x2 parcels). */
 export const SCENE_SIZE = 32
@@ -19,6 +20,8 @@ export const SPAWN = Vector3.create(16, 0, 10)
 export interface TableDef {
   /** 0-based table index, also used to derive the network sync id. */
   id: number
+  /** Which game plugin this table hosts. */
+  gameId: GameId
   /** Human label shown on the floating sign. */
   label: string
   position: Vector3
@@ -28,9 +31,9 @@ export interface TableDef {
 
 /** Three tables in a shallow arc north of the spawn point. */
 export const TABLES: TableDef[] = [
-  { id: 0, label: 'Table 1', position: Vector3.create(9.5, 0, 19), rotationY: 35 },
-  { id: 1, label: 'Table 2', position: Vector3.create(16, 0, 21.5), rotationY: 0 },
-  { id: 2, label: 'Table 3', position: Vector3.create(22.5, 0, 19), rotationY: -35 }
+  { id: 0, gameId: 'connectfour', label: 'Table 1', position: Vector3.create(9.5, 0, 19), rotationY: 35 },
+  { id: 1, gameId: 'connectfour', label: 'Table 2', position: Vector3.create(16, 0, 21.5), rotationY: 0 },
+  { id: 2, gameId: 'connectfour', label: 'Table 3', position: Vector3.create(22.5, 0, 19), rotationY: -35 }
 ]
 
 /** Base network sync id for table entities (table i uses SYNC_TABLE_BASE + i). */

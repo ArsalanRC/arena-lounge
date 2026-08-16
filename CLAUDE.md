@@ -14,9 +14,11 @@ against a friend or the house bot. Everything is CRDT-synced, no server.
 ## Layout
 - `src/engine/`          pure TS game engines + tests (no SDK imports allowed)
 - `src/lounge/config.ts` layout, tunables, palette
-- `src/lounge/state.ts`  synced components (C4Board, C4SeatA, C4SeatB) + engine bridge
+- `src/lounge/state.ts`  synced components (TableBoard, TableSeatA, TableSeatB)
+- `src/lounge/games/`    TableGame contract (types.ts), registry, one plugin per game (rules bridge + controls UI)
+- `src/lounge/views/`    per-game 3D views + shared primitive builders
 - `src/lounge/tables.ts` seat / turn / bot / janitor logic and systems (write discipline lives here)
-- `src/lounge/table3d.ts` 3D table + discs + sign, reconciles visuals with synced state
+- `src/lounge/table3d.ts` generic 3D table (top, pads, robot, sign, sfx) hosting the game view
 - `src/lounge/lounge3d.ts` floor, walls, decor
 - `src/lounge/ui.tsx`    React-ECS UI (banner, table card, seated controller)
 - `tools/gen-textures.py` regenerates images/*.png procedurally

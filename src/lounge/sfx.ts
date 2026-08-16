@@ -34,13 +34,14 @@ function makeSource(clip: ClipName, opts: { parent?: Entity; position?: Vector3;
 
 /** Per-table spatial sources, created by table3d for each table root. */
 export interface TableSfx {
-  drop: Entity
+  /** Played on every move (the Connect Four "disc lands" thunk). */
+  move: Entity
   win: Entity
 }
 
 export function createTableSfx(root: Entity, at: Vector3): TableSfx {
   return {
-    drop: makeSource('drop', { parent: root, position: at, volume: 0.9 }),
+    move: makeSource('drop', { parent: root, position: at, volume: 0.9 }),
     win: makeSource('win', { parent: root, position: at, volume: 0.8 })
   }
 }
