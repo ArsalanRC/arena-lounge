@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 18:35 (Europe/Berlin), sky room + Sea Strike + Dice Royale (14 games)
+Last update: 2026-08-16 19:21 (Europe/Berlin), curved neon marquee over the entrance, 20:00 sky
 
 ## 1. What this is
 
@@ -81,8 +81,11 @@ version works as well", 16 Aug 11:30):
   facade around the ground floor just inside the ribs (y 1 to 7.5, copper
   rails, teal glow strip on top, physics collider) with the entrance gap to
   the south; the entrance portal there (two copper pylons, arched canopy with
-  a glow strip, marquee plate with the ARENA LOUNGE sign and the welcome
-  line); string lights between the plaza columns and around the tree; big
+  a glow strip, and since 19:21 a curved neon marquee: dark plate on the
+  tower's plan radius above the arch, teal neon frame, ARENA LOUNGE in thick
+  warm neon tube letters, all baked geometry in decor.glb via stroke glyphs
+  in tools/gen-models.py; the welcome line hangs on the inner gateway);
+  string lights between the plaza columns and around the tree; big
   billboard game names 5.4 m above every corner (readable from the entrance
   and from the other floors); a directory board next to the kiosk listing the
   games per floor in the UI language; every rug glows at its edge in the
@@ -90,9 +93,10 @@ version works as well", 16 Aug 11:30):
   plaza tree and two bar counters by the entrance (models/sofa.glb, bar.glb).
   Idle scene after this: 401 entities, 450 renderers.
 - Night lighting (Arsalan, 16 Aug 18:00: "very nice lighting inside and
-  outside for nighttime"): the World runs at a fixed 21:00 (scene.json
-  worldConfiguration.skyboxConfig.fixedTime 75600 + SkyboxTime on the root so
-  the preview matches; DCL night keeps everything readable). Fixtures are one
+  outside for nighttime"): the World runs at a fixed 20:00 (scene.json
+  worldConfiguration.skyboxConfig.fixedTime 72000 + SkyboxTime on the root so
+  the preview matches; DCL night keeps everything readable; it was 21:00
+  until 19:21, see Gotchas for the moon artefact). Fixtures are one
   warm-emissive mesh in decor.glb: beacons at every rib crossing and on the
   crown, uplight collars on all columns, string lights on the ground floor,
   in the game room and a ring over the rooftop; plus the glow rims, teal
@@ -361,6 +365,16 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - Auto-height panels: a `height: 'auto'` panel whose children are auto-height
   wrappers loses its padding top and bottom; give the inner wrapper explicit
   vertical margins (see the phone bar in ui.tsx) or the last row a fixed height.
+- Fixed skybox time: at 21:00 (75600) and 22:00 the moon sits low in the
+  south and the client draws a large blocky black shape (staircase edges,
+  emissives shine through) around the moon's direction, visible from inside
+  the lounge behind the marquee. Not glass, not the sign, not point-light
+  shadows (all ruled out on 16 Aug). 20:00 (72000) has no artefact and the
+  same night look; if the time ever changes, screenshot the entrance from
+  inside first.
+- Baked text: the client mirrors glTF x, so geometry letters must be laid
+  out with negative arc length (see `sign_pt` in tools/gen-models.py);
+  TextShapes read from their -Z side.
 - The 16 Aug session log below (12:00 to 16:55) ran ahead of the clock; git
   says the same work landed 12:00 to 13:28. The afternoon session made the
   same mistake and was corrected against git at 15:45: when in doubt, the
@@ -378,6 +392,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 19:21 curved neon marquee (Arsalan: "the name at the entrance ... very nice and clean and evident", then "curved, matching the curvature of the building ... neon signs, thick letters and glowing"): baked geometry in decor.glb (curved dark plate on the portal radius, teal neon frame, warm neon tube letters from stroke glyphs, posts to the pylon collars); billboarded TextShape sign and the duplicate name on the inner gateway removed; sky moved to 20:00 because the 21:00 moon drew a blocky black artefact behind the marquee when seen from inside; entrance screenshot refreshed
 - 2026-08-16 18:35 fourth floor + two games: rooftop moved to 24 m (new slab inside the crown), the 16 m slab is the Sky room with Sea Strike (N) and a Dice Royale duel (S), sofas E/W; shafts to 28 m; Sea Strike engine (40 tests) with random fleets and a two-grid public 3D board; Dice Royale duel wrapper (32 tests) with die-face sprites; strings in five languages, catalog rows in 19; 14 games / 15 tables; sea grid as a texture (36 line boxes fewer), upper-floor lamp posts dropped (string lights + collars light them); idle 512 entities / 529 renderers (the phone shows amber above 500 while idle; each running table adds 10 to 90, so expect a red line during busy hours; cosmetic)
 - 2026-08-16 18:05 night lighting: fixed 21:00 skybox (scene.json + SkyboxTime), beacon lattice on the rib crossings and crown, column collars, string lights on every floor, bar light strips, seven point lights; README hero screenshots at night
 - 2026-08-16 17:55 Snakes & Ladders plugin (engine ported, 65 tests): generated 10x10 board texture with numbers, snakes and ladders from the engine layout, sliding pieces, roll-only controls, catalog rows in 19 languages + tips in five, seat colour Blue added; game room SW corner live, no "coming soon" left (12 games, 13 tables)
