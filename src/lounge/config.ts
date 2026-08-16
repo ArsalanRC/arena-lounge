@@ -170,8 +170,8 @@ export const PALETTE = {
   frameDark: Color4.fromHexString('#173b48ff'),
   yellow: Color4.fromHexString('#f5c518ff'),
   red: Color4.fromHexString('#e2453dff'),
-  padYellow: Color4.fromHexString('#c9a012ff'),
-  padRed: Color4.fromHexString('#b8362fff'),
+  /** Seat pads are neutral: colours are dealt at random each round. */
+  pad: Color4.fromHexString('#b89a70ff'),
   cream: Color4.fromHexString('#f2e8d5ff'),
   lamp: Color4.fromHexString('#ffd9a0ff'),
   plant: Color4.fromHexString('#3f7d4eff'),

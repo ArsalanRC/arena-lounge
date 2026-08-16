@@ -40,6 +40,12 @@ export const TableBoard = engine.defineComponent('arena::tableBoard', {
   moveCount: Schemas.Int,
   /** Increments every time a fresh board is dealt; drives visual resets. */
   round: Schemas.Int,
+  /**
+   * Which physical seat plays the game's first side (colour): false = seat A,
+   * true = seat B. Random when a pairing starts, then alternates each round,
+   * so nobody picks white / yellow / X by choosing a chair.
+   */
+  swap: Schemas.Boolean,
   winsA: Schemas.Int,
   winsB: Schemas.Int,
   /** Date.now() of the last state change (turn timer + staleness). */
@@ -70,6 +76,7 @@ export function emptyBoard(gameId: string): BoardData {
     winner: Winner.None,
     moveCount: 0,
     round: 0,
+    swap: false,
     winsA: 0,
     winsB: 0,
     updatedAt: 0

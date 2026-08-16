@@ -33,7 +33,7 @@ import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
-import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, otherSeat, seatOf, sit, sitWithBot, toast, type Table } from './tables'
+import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, otherSeat, seatOf, sideOf, sit, sitWithBot, toast, type Table } from './tables'
 import { TABLE_TOP_Y, box, woodBox } from './views/shared'
 
 export { TABLE_TOP_Y, box } from './views/shared'
@@ -172,17 +172,17 @@ export function buildTableVisual(t: Table): TableVisual {
   )
 
   // seat pads
-  const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.padYellow)
-  const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.padRed)
-  const [nameA, nameB] = t.game.seatNames.map(seatLabel)
+  // both pads look the same: chairs carry no colour, sides are dealt at random per round
+  const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.pad)
+  const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.pad)
   pointerEventsSystem.onPointerDown(
-    { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: `Sit here (${nameA})`, maxDistance: 8 } },
+    { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
     () => {
       sit(t, SEAT_A)
     }
   )
   pointerEventsSystem.onPointerDown(
-    { entity: padB, opts: { button: InputAction.IA_POINTER, hoverText: `Sit here (${nameB})`, maxDistance: 8 } },
+    { entity: padB, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
     () => {
       sit(t, SEAT_B)
     }
@@ -277,12 +277,13 @@ export function updateTableVisual(vis: TableVisual): void {
     VisibilityComponent.getMutable(vis.sign).visible = signVisible
   }
 
-  // game state -> view
+  // game state -> view; a fresh deal also tells the seated player which colour they got
   if (b.round !== r.round) {
     r.round = b.round
     r.moveCount = -1
     r.winner = -1
     vis.view.reset()
+    if (mine && b.status === Status.Playing) toast(L().youPlaySide(seatLabel(t.game.seatNames[sideOf(t, mine) - 1])))
   }
   if (b.moveCount !== r.moveCount || b.status !== r.status || b.winner !== r.winner) {
     const state = gameStateOf(t)

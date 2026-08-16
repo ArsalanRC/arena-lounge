@@ -233,6 +233,14 @@ function resetBoard(t: Table, resetSeries: boolean): void {
   b.updatedAt = Date.now()
 }
 
+/**
+ * Game side (1 = the game's first colour, 2 = the second) played by a physical
+ * seat, and back: the mapping is an involution, so one function serves both.
+ */
+export function sideOf(t: Table, seat: Seat): Seat {
+  return TableBoard.get(t.root).swap ? otherSeat(seat) : seat
+}
+
 /** Deal a new round if both seats are taken and nothing is in progress. */
 export function maybeStart(t: Table): void {
   const a = TableSeatA.get(t.root)
@@ -241,16 +249,18 @@ export function maybeStart(t: Table): void {
   const cur = TableBoard.get(t.root)
   if (cur.status === Status.Playing) return
   const round = cur.round + 1
-  // Alternate who opens; the human always opens against the bot.
-  const opening: Seat = bs.bot ? SEAT_A : a.bot ? SEAT_B : round % 2 === 1 ? SEAT_A : SEAT_B
-  const state = t.game.newGame(opening)
+  // Sides: random when a pairing starts (also against the bot), then they
+  // alternate every round so both players get each colour and each opening.
+  const swap = cur.status === Status.Finished ? !cur.swap : Math.random() < 0.5
+  const state = t.game.newGame(1)
   const b = TableBoard.getMutable(t.root)
   b.gameId = t.game.id
   b.state = t.game.encode(state)
   b.lastAction = ''
   b.round = round
+  b.swap = swap
   b.status = Status.Playing
-  b.turn = opening
+  b.turn = swap ? SEAT_B : SEAT_A
   b.winner = Winner.None
   b.moveCount = 0
   b.updatedAt = Date.now()
@@ -338,6 +348,18 @@ export function sitWithBot(t: Table): void {
   inviteBot(t)
 }
 
+/** Take the first free seat (A, then B): chairs carry no colour, sides are dealt at random. */
+export function sitAnywhere(t: Table): boolean {
+  const a = TableSeatA.get(t.root)
+  const b = TableSeatB.get(t.root)
+  const free: 0 | Seat = a.addr === '' || a.addr === me.addr ? SEAT_A : b.addr === '' || b.addr === me.addr ? SEAT_B : 0
+  if (!free) {
+    toast(L().tableFull)
+    return false
+  }
+  return sit(t, free)
+}
+
 export function dismissBot(t: Table): void {
   const mine = mySeatAt(t)
   if (!mine) return
@@ -364,12 +386,12 @@ export function act(t: Table, action: unknown): boolean {
   return applyAction(t, action, seat)
 }
 
-/** Apply an action for `seat` (used by act() and the bot driver). */
+/** Apply an action for physical `seat` (used by act() and the bot driver); the plugin sees game sides. */
 function applyAction(t: Table, action: unknown, seat: Seat): boolean {
   const board = TableBoard.get(t.root)
   const state = gameStateOf(t)
   if (state === null) return false
-  const next = t.game.apply(state, action, seat)
+  const next = t.game.apply(state, action, sideOf(t, seat))
   if (next === null) return false
   const b = TableBoard.getMutable(t.root)
   b.state = t.game.encode(next)
@@ -380,11 +402,14 @@ function applyAction(t: Table, action: unknown, seat: Seat): boolean {
     b.status = Status.Finished
     b.turn = 0
     const w = t.game.winner(next)
-    b.winner = w
-    if (w === SEAT_A) b.winsA = board.winsA + 1
-    else if (w === SEAT_B) b.winsB = board.winsB + 1
+    // winner comes back as a game side; store the chair that holds it
+    const chair = w === 1 || w === 2 ? sideOf(t, w) : w
+    b.winner = chair
+    if (chair === SEAT_A) b.winsA = board.winsA + 1
+    else if (chair === SEAT_B) b.winsB = board.winsB + 1
   } else {
-    b.turn = t.game.turnSeat(next) || otherSeat(seat)
+    const side = t.game.turnSeat(next)
+    b.turn = side ? sideOf(t, side) : otherSeat(seat)
   }
   return true
 }

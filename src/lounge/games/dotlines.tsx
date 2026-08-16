@@ -4,8 +4,8 @@
  *
  * Input is "connect the dots": tap a dot, then a neighbouring dot. Dots are
  * big targets, edges are not, which is what makes this playable on a phone.
- * Seat B stands on the far side of the upright board and sees it mirrored,
- * so the UI mirrors columns for seat B to match.
+ * The player behind the upright board sees it mirrored, so the UI mirrors
+ * columns for them to match (`ctx.behind`); colours are dealt per round.
  */
 import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
@@ -109,7 +109,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boole
   const cell = props.phone ? 60 : CELL
   const dot = props.phone ? 30 : DOT
   const lineT = props.phone ? 10 : LINE_T
-  const mirror = ctx.mySeat === 2
+  const mirror = ctx.behind // columns as seen from behind the upright board
   const size = cell * (COLS + 1)
   const root = ctx.root
   const sel = dotSelection.get(root)

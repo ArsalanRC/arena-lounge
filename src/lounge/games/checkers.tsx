@@ -100,16 +100,17 @@ export function tapSquare(root: Entity, state: CheckersGameState, sq: number, ac
 function Board(props: { state: CheckersGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
   const cell = props.phone ? 56 : 36
-  const mirror = ctx.mySeat === 2
+  const flip = ctx.mySeat === 2 // my colour at the bottom of my board
+  const mirror = ctx.behind // files as seen from behind the upright board
   const legal = ctx.myTurn ? getValidMoves(state) : []
   const sel = checkersSelection.get(ctx.root)
   const movable = new Set(legal.map((m) => m.from))
   const targets = new Set(sel === undefined ? [] : legal.filter((m) => m.from === sel).map((m) => m.to))
   const last = state.lastMove
   const rows = []
-  // rank 7 at the top for seat A; seat B sees the board mirrored (their side at the bottom)
+  // rank 7 at the top for white; black sees its own side at the bottom
   for (let r = 0; r < N; r++) {
-    const rank = mirror ? r : N - 1 - r
+    const rank = flip ? r : N - 1 - r
     const cells = []
     for (let c = 0; c < N; c++) {
       const file = mirror ? N - 1 - c : c

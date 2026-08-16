@@ -44,6 +44,9 @@ export interface LoungeStrings {
   waitingForRival: (name: string) => string
   oneSeatFree: string
   sitAs: (seat: string) => string
+  takeSeat: string
+  /** Toast at the deal: which colour the local player got this round. */
+  youPlaySide: (side: string) => string
   playBot: string
   notNow: string
   toMove: (name: string) => string
@@ -133,7 +136,7 @@ export interface LoungeStrings {
 
 const EN: LoungeStrings = {
   howToPlay: 'How to play',
-  howToSit: 'Walk up to a table and tap a seat button. Alone? Tap "Play the house bot".',
+  howToSit: 'Walk up to a table and tap "Take a seat"; colours are dealt at random each round. Alone? Tap "Play the house bot".',
   move: {
     connectfour: 'Tap a column to drop your disc.',
     dotlines: 'Tap a dot, then a neighbouring dot, to draw the line between them. Closing a box gives you another turn.',
@@ -167,6 +170,8 @@ const EN: LoungeStrings = {
   waitingForRival: (name) => `${name} is waiting for a rival`,
   oneSeatFree: 'One seat free',
   sitAs: (seat) => `Sit as ${seat}`,
+  takeSeat: 'Take a seat',
+  youPlaySide: (side) => `You play ${side} this round`,
   playBot: 'Play the house bot',
   notNow: 'Not now',
   toMove: (name) => `${name} to move`,
@@ -252,7 +257,7 @@ const EN: LoungeStrings = {
 
 const DE: LoungeStrings = {
   howToPlay: 'So wird gespielt',
-  howToSit: 'Geh zu einem Tisch und tippe auf einen Platz-Button. Allein? Tippe auf "Gegen den Bot spielen".',
+  howToSit: 'Geh zu einem Tisch und tippe auf "Platz nehmen"; die Farben werden jede Runde ausgelost. Allein? Tippe auf "Gegen den Bot spielen".',
   move: {
     connectfour: 'Tippe auf eine Spalte, um deinen Stein fallen zu lassen.',
     dotlines: 'Tippe auf einen Punkt und dann auf einen Nachbarpunkt, um die Linie dazwischen zu zeichnen. Wer ein Kästchen schließt, ist noch einmal dran.',
@@ -286,6 +291,8 @@ const DE: LoungeStrings = {
   waitingForRival: (name) => `${name} wartet auf einen Gegner`,
   oneSeatFree: 'Ein Platz frei',
   sitAs: (seat) => `Als ${seat} setzen`,
+  takeSeat: 'Platz nehmen',
+  youPlaySide: (side) => `Du spielst diese Runde ${side}`,
   playBot: 'Gegen den Bot spielen',
   notNow: 'Nicht jetzt',
   toMove: (name) => `${name} ist dran`,
@@ -371,7 +378,7 @@ const DE: LoungeStrings = {
 
 const ES: LoungeStrings = {
   howToPlay: 'Cómo se juega',
-  howToSit: 'Acércate a una mesa y toca un botón de asiento. ¿Solo? Toca "Jugar contra el bot".',
+  howToSit: 'Acércate a una mesa y toca "Tomar asiento"; los colores se sortean en cada ronda. ¿Solo? Toca "Jugar contra el bot".',
   move: {
     connectfour: 'Toca una columna para soltar tu ficha.',
     dotlines: 'Toca un punto y luego un punto vecino para dibujar la línea entre ellos. Si cierras una caja, vuelves a jugar.',
@@ -405,6 +412,8 @@ const ES: LoungeStrings = {
   waitingForRival: (name) => `${name} espera rival`,
   oneSeatFree: 'Un asiento libre',
   sitAs: (seat) => `Sentarse como ${seat}`,
+  takeSeat: 'Tomar asiento',
+  youPlaySide: (side) => `Esta ronda juegas con ${side}`,
   playBot: 'Jugar contra el bot',
   notNow: 'Ahora no',
   toMove: (name) => `Le toca a ${name}`,
@@ -490,7 +499,7 @@ const ES: LoungeStrings = {
 
 const PT: LoungeStrings = {
   howToPlay: 'Como jogar',
-  howToSit: 'Vá até uma mesa e toque num botão de assento. Sozinho? Toque em "Jogar contra o bot".',
+  howToSit: 'Vá até uma mesa e toque em "Sentar-se"; as cores são sorteadas a cada rodada. Sozinho? Toque em "Jogar contra o bot".',
   move: {
     connectfour: 'Toque numa coluna para soltar a sua ficha.',
     dotlines: 'Toque num ponto e depois num ponto vizinho para traçar a linha entre eles. Fechar uma caixa dá outra jogada.',
@@ -524,6 +533,8 @@ const PT: LoungeStrings = {
   waitingForRival: (name) => `${name} espera um adversário`,
   oneSeatFree: 'Um assento livre',
   sitAs: (seat) => `Sentar como ${seat}`,
+  takeSeat: 'Sentar-se',
+  youPlaySide: (side) => `Nesta rodada você joga com ${side}`,
   playBot: 'Jogar contra o bot',
   notNow: 'Agora não',
   toMove: (name) => `Vez de ${name}`,
@@ -609,7 +620,7 @@ const PT: LoungeStrings = {
 
 const FR: LoungeStrings = {
   howToPlay: 'Comment jouer',
-  howToSit: 'Approche-toi d\'une table et touche un bouton de siège. Seul ? Touche « Jouer contre le bot ».',
+  howToSit: 'Approche-toi d\'une table et touche « S\'asseoir » ; les couleurs sont tirées au sort à chaque manche. Seul ? Touche « Jouer contre le bot ».',
   move: {
     connectfour: 'Touche une colonne pour lâcher ton jeton.',
     dotlines: 'Touche un point, puis un point voisin, pour tracer la ligne entre eux. Fermer une case donne un tour de plus.',
@@ -643,6 +654,8 @@ const FR: LoungeStrings = {
   waitingForRival: (name) => `${name} attend un adversaire`,
   oneSeatFree: 'Un siège libre',
   sitAs: (seat) => `Jouer ${seat}`,
+  takeSeat: 'S\'asseoir',
+  youPlaySide: (side) => `Cette manche tu joues ${side}`,
   playBot: 'Jouer contre le bot',
   notNow: 'Pas maintenant',
   toMove: (name) => `À ${name} de jouer`,

@@ -30,7 +30,7 @@ import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
-import { LOCALES, localeInfo, seatLabel, t as L, uiLang } from './i18n'
+import { LOCALES, localeInfo, t as L, uiLang } from './i18n'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
 import {
   act,
@@ -47,7 +47,8 @@ import {
   rematch,
   rideTo,
   seatOf,
-  sit,
+  sideOf,
+  sitAnywhere,
   sitWithBot,
   stand,
   tables,
@@ -198,12 +199,13 @@ function secondsLeft(updatedAt: number): number {
 }
 
 function contextFor(t: Table): GameContext {
-  const mySeat = mySeatAt(t)
+  const chair = mySeatAt(t)
   const b = boardOf(t)
   return {
     root: t.root,
-    mySeat,
-    myTurn: mySeat !== 0 && b.status === Status.Playing && b.turn === mySeat,
+    mySeat: chair === 0 ? 0 : sideOf(t, chair),
+    behind: chair === SEAT_B,
+    myTurn: chair !== 0 && b.status === Status.Playing && b.turn === chair,
     act: (action) => act(t, action)
   }
 }
@@ -270,7 +272,6 @@ function TableCard() {
   const b = boardOf(t)
   const a = seatOf(t, SEAT_A)
   const s = seatOf(t, SEAT_B)
-  const [nameA, nameB] = t.game.seatNames.map(seatLabel)
   const str = L()
   const bothTaken = a.addr !== '' && s.addr !== ''
   const line = bothTaken
@@ -289,13 +290,8 @@ function TableCard() {
       <Text value={`${tableTitle(t)}`} size={T.title} />
       <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
       {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
-      {!bothTaken && (
-        <Row>
-          {a.addr === '' && <Btn label={str.sitAs(nameA)} color={seatTint(t, SEAT_A)} textColor={textOn(seatTint(t, SEAT_A))} onClick={() => sit(t, SEAT_A)} width={205} fontSize={18} />}
-          {s.addr === '' && <Btn label={str.sitAs(nameB)} color={seatTint(t, SEAT_B)} textColor={textOn(seatTint(t, SEAT_B))} onClick={() => sit(t, SEAT_B)} width={205} fontSize={18} />}
-        </Row>
-      )}
       <Row>
+        {!bothTaken && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={220} />}
         {!bothTaken && a.addr === '' && s.addr === '' && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
         <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} />
@@ -325,6 +321,9 @@ function Controller() {
   const mobile = phone()
   const state = gameStateOf(t)
   const sprites = t.game.seatSprites
+  // colours are dealt per round: chips and the turn tint follow the game side, not the chair
+  const mySide = sideOf(t, seat)
+  const oppSide = otherSeat(mySide)
 
   const str = L()
   let status = ''
@@ -336,7 +335,7 @@ function Controller() {
     const secs = secondsLeft(b.updatedAt)
     status = myTurn ? str.yourMove(secs) : str.thinking(displayName(opp), secs)
     if (myTurn) {
-      const tint = seatTint(t, seat)
+      const tint = seatTint(t, mySide)
       statusColor = textOn(tint) === UI.text ? UI.text : tint
     } else statusColor = UI.muted
   } else if (b.winner === Winner.Draw) status = str.draw
@@ -350,9 +349,9 @@ function Controller() {
 
   const header = (
     <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Chip sprite={sprites[seat - 1]} label={str.you} tint={t.game.seatSpriteTints?.[seat - 1]} />
+      <Chip sprite={sprites[mySide - 1]} label={str.you} tint={t.game.seatSpriteTints?.[mySide - 1]} />
       <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
-      <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : displayName(opp)} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
+      <Chip sprite={sprites[oppSide - 1]} label={opp.addr === '' ? '—' : displayName(opp)} reverse tint={t.game.seatSpriteTints?.[oppSide - 1]} />
     </UiEntity>
   )
   const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
