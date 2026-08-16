@@ -490,6 +490,50 @@ for i in range(24):
     a = 2 * math.pi * i / 24
     box_mesh(lights, (5.4 * math.cos(a), 3.6 + 0.25 * math.sin(a * 6), 5.4 * math.sin(a)), (0.11, 0.11, 0.11))
 
+# night lighting fixtures, all in the one warm-emissive "lights" mesh:
+#  - beacons where the two rib families cross (a lattice of light points on the tower) and on the crown
+#  - uplight collars around the ground and game-room columns (angles mirror lounge3d.ts)
+#  - string lights in the game room (between its columns) and a ring over the rooftop
+def rib_angle(theta0, direction, y):
+    return theta0 + direction * TWIST * (y / H)
+crossings = []
+for i in range(RIBS):
+    for j in range(RIBS):
+        a0 = BASE_ROT + 2 * math.pi * i / RIBS
+        b0 = BASE_ROT + 2 * math.pi * j / RIBS + math.pi / RIBS
+        # a0 + T t = b0 - T t + 2 pi k  ->  t = (b0 - a0 + 2 pi k) / (2 T)
+        for k in (-1, 0, 1):
+            t = (b0 - a0 + 2 * math.pi * k) / (2 * TWIST)
+            if 0.03 < t < 0.985:
+                y = H * t
+                th = rib_angle(a0, 1, y)
+                r = rib_radius(y) + 0.22
+                crossings.append((r * math.cos(th), y, r * math.sin(th)))
+for (x, y, z) in crossings:
+    box_mesh(lights, (x, y, z), (0.16, 0.16, 0.16))
+for i in range(24):
+    a = 2 * math.pi * i / 24
+    box_mesh(lights, (R_TOP * math.cos(a), H + 0.42, R_TOP * math.sin(a)), (0.2, 0.2, 0.2))
+def collar(deg, r, y):
+    t = math.radians(deg)
+    cx, cz = r * math.sin(t), r * math.cos(t)     # scene ring(): x = sin, z = cos
+    box_strip(lights, [((cx + 0.42 * math.cos(a), y, cz + 0.42 * math.sin(a)), (-math.sin(a), 0, math.cos(a)), (math.cos(a), 0, math.sin(a))) for a in [2 * math.pi * k / 16 for k in range(17)]], 0.07, 0.07)
+for deg in [160, 200, 259, 304, 0, 56, 101]:
+    collar(deg, 11.4, 0.55)
+    collar(deg, 11.4, 7.3)
+for deg in [112, 158, 202, 338]:
+    collar(deg, 9.9, 8.55)
+    collar(deg, 9.9, 15.3)
+def string(p0, p1, y, n=10, sag=0.7):
+    for i in range(1, n):
+        t = i / n
+        box_mesh(lights, (p0[0] + (p1[0] - p0[0]) * t, y - sag * math.sin(math.pi * t), p0[1] + (p1[1] - p0[1]) * t), (0.12, 0.12, 0.12))
+gr = [(9.9 * math.sin(math.radians(d)), 9.9 * math.cos(math.radians(d))) for d in [112, 158, 202, 338]]
+string(gr[0], gr[1], 14.6); string(gr[1], gr[2], 14.6); string(gr[3], gr[0], 14.6, 14, 1.0); string(gr[2], gr[3], 14.6, 14, 1.0)
+for i in range(32):
+    a = 2 * math.pi * i / 32
+    box_mesh(lights, (8.6 * math.cos(a), 19.2 + 0.25 * math.sin(a * 8), 8.6 * math.sin(a)), (0.12, 0.12, 0.12))
+
 # directory board near the gateway (text is a TextShape in the scene): dark plate + copper frame
 board, board_frame = Mesh(), Mesh()
 box_mesh(board, (0, 0, 0), (2.6, 1.9, 0.08))
@@ -526,10 +570,12 @@ write_glb('models/sofa.glb', [("base", sofa_base, 0), ("cushions", sofa_cushion,
     {"name": "sofaBase", "pbrMetallicRoughness": {"baseColorFactor": [0.16, 0.36, 0.42, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}},
     {"name": "cushion", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.68, 0.45, 1], "metallicFactor": 0.0, "roughnessFactor": 0.95}},
 ])
-bar_wood, bar_top = Mesh(), Mesh()
+bar_wood, bar_top, bar_glow = Mesh(), Mesh(), Mesh()
 box_mesh(bar_wood, (0, 0.55, 0), (3.6, 1.1, 0.6))
 box_mesh(bar_top, (0, 1.13, 0), (3.8, 0.06, 0.8))
+box_mesh(bar_glow, (0, 1.08, -0.36), (3.7, 0.04, 0.05))     # under-counter light strip on the guest side
+box_mesh(bar_glow, (0, 0.06, -0.31), (3.6, 0.04, 0.03))     # kick strip
 for x in (-1.2, 0, 1.2):
     prism(bar_wood, x, -1.0, 0.05, 0, 0.7, 8)
     prism(bar_top, x, -1.0, 0.24, 0.7, 0.78, 12)
-write_glb('models/bar.glb', [("wood", bar_wood, 0), ("top", bar_top, 1)], [WOOD_DARK, {"name": "barTop", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.44, 0.20, 1], "metallicFactor": 0.6, "roughnessFactor": 0.35}}])
+write_glb('models/bar.glb', [("wood", bar_wood, 0), ("top", bar_top, 1), ("glow", bar_glow, 2)], [WOOD_DARK, {"name": "barTop", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.44, 0.20, 1], "metallicFactor": 0.6, "roughnessFactor": 0.35}}, LAMP])

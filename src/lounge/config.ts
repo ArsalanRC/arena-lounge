@@ -47,6 +47,25 @@ export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 18.5), Vector3.crea
 /** Standing within this distance of a pad opens the floor panel. */
 export const ELEVATOR_RADIUS = 1.3
 
+/** Fixed time of day for the skybox (seconds since midnight): 21:00, a lit lounge at night, DCL night stays readable. */
+export const DUSK_TIME = 75600
+
+/**
+ * Real point lights (LightSource). Warm amber inside, teal at the entrance;
+ * the client renders the few closest to the player and culls the rest, so
+ * they are spread out: plaza, portal, game room, rooftop. Everything else that
+ * looks lit is emissive (string lights, collars, rims, rug rings).
+ */
+export const LIGHTS: Array<{ x: number; y: number; z: number; color: Color3; intensity: number; range: number }> = [
+  { x: 24, y: 5.6, z: 25.5, color: Color3.create(1, 0.78, 0.5), intensity: 3200, range: 16 },
+  { x: 24, y: 6.5, z: 11.2, color: Color3.create(0.55, 0.9, 1), intensity: 2400, range: 12 },
+  { x: 18.5, y: 4.2, z: 16, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
+  { x: 29.5, y: 4.2, z: 16, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
+  { x: 24, y: 13.5, z: 32, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
+  { x: 24, y: 13.5, z: 19, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
+  { x: 24, y: 20.5, z: 25.5, color: Color3.create(1, 0.82, 0.55), intensity: 3000, range: 16 }
+]
+
 export interface TableDef {
   /** 0-based table index, also used to derive the network sync id. */
   id: number

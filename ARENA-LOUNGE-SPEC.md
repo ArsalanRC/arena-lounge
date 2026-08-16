@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 17:55 (Europe/Berlin), Snakes & Ladders (12 games)
+Last update: 2026-08-16 18:20 (Europe/Berlin), night lighting
 
 ## 1. What this is
 
@@ -89,6 +89,18 @@ version works as well", 16 Aug 11:30):
   corner colour (emissive ring mask, no extra entity); four sofas facing the
   plaza tree and two bar counters by the entrance (models/sofa.glb, bar.glb).
   Idle scene after this: 401 entities, 450 renderers.
+- Night lighting (Arsalan, 16 Aug 18:00: "very nice lighting inside and
+  outside for nighttime"): the World runs at a fixed 21:00 (scene.json
+  worldConfiguration.skyboxConfig.fixedTime 75600 + SkyboxTime on the root so
+  the preview matches; DCL night keeps everything readable). Fixtures are one
+  warm-emissive mesh in decor.glb: beacons at every rib crossing and on the
+  crown, uplight collars on all columns, string lights on the ground floor,
+  in the game room and a ring over the rooftop; plus the glow rims, teal
+  facade strip, portal strip, elevator rings, rug rings, bar under-counter
+  strips, lamp cubes. Seven real point lights (config LIGHTS: plaza, portal
+  teal, two by the bars, two in the game room, rooftop) for the desktop
+  client; the phone renders whichever it can, the emissives carry the look.
+  Idle scene 464 entities / 494 renderers.
 - Elevators: two glass shafts (SE beside the entrance at 29.5/18.5, NW at
   16.6/30.5), four posts + translucent panes from the ground to above the
   rooftop, open towards the plaza, glowing pad + light ring + ELEVATOR sign
@@ -352,6 +364,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 18:20 night lighting: fixed 21:00 skybox (scene.json + SkyboxTime), beacon lattice on the rib crossings and crown, column collars, string lights on every floor, bar light strips, seven point lights; README hero screenshots at night
 - 2026-08-16 17:55 Snakes & Ladders plugin (engine ported, 65 tests): generated 10x10 board texture with numbers, snakes and ladders from the engine layout, sliding pieces, roll-only controls, catalog rows in 19 languages + tips in five, seat colour Blue added; game room SW corner live, no "coming soon" left (12 games, 13 tables)
 - 2026-08-16 17:45 Super Tic Tac Toe plugin (engine ported, 47 tests): 9x9 upright board with forced-board glow + won-board plates, 9x9 touch grid, catalog rows in 19 languages + tips in five; game room NE corner live, SW corner reserved for Snakes & Ladders; game-room columns/lamps moved between the six corners. Desktop Explorer had to be restarted (scene stopped loading after a rebuild storm; `sdk-commands start --mcp --skip-auth-screen true`)
 - 2026-08-16 18:05 design pass 1: glass facade + entrance portal (marquee sign), string lights, big billboard game names per corner, directory board, glowing rug rings per corner, sofas + bar counters (models/decor.glb, board.glb, sofa.glb, bar.glb); Four in a Row naming everywhere
