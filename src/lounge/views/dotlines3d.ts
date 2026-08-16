@@ -4,24 +4,12 @@
  * mirrors too (see games/dotlines.tsx). Dots are tappable in 3D as well:
  * tap one dot, then a neighbour, to draw the edge between them.
  */
-import {
-  ColliderLayer,
-  Entity,
-  InputAction,
-  Material,
-  MaterialTransparencyMode,
-  MeshCollider,
-  MeshRenderer,
-  Transform,
-  VisibilityComponent,
-  engine,
-  pointerEventsSystem
-} from '@dcl/sdk/ecs'
+import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color4, Vector3 } from '@dcl/sdk/math'
 import type { DotLinesGameState } from '../../engine/dotlines'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, box } from './shared'
+import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface DotAction {
   o: 'h' | 'v'
@@ -113,25 +101,25 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
   box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD + 0.2, 0.06, 0.26), PALETTE.woodDark)
   box(root, Vector3.create(0, CENTER_Y - BOARD / 2 - 0.03 - rim / 2, 0), Vector3.create(BOARD + 0.06, rim, HALF_T * 2 + 0.01), PALETTE.woodDark)
 
-  // dots (clickable)
+  // dots (visual only; one click area below maps a hit to the nearest dot)
   const dots: Entity[] = []
   for (let r = 0; r <= ROWS; r++) {
     for (let c = 0; c <= COLS; c++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: dotLocal(r, c), scale: Vector3.create(0.045, 0.045, HALF_T * 2 + 0.03) })
       MeshRenderer.setBox(e)
-      MeshCollider.setBox(e, ColliderLayer.CL_POINTER)
       Material.setPbrMaterial(e, { albedoColor: PALETTE.woodDark, roughness: 0.6, metallic: 0.1 })
-      pointerEventsSystem.onPointerDown(
-        { entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'Connect dots', maxDistance: 6, showHighlight: true } },
-        () => tapDot(root, r, c, (a) => {
-          onAction(a)
-          return true
-        })
-      )
       dots.push(e)
     }
   }
+  boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Connect dots', (local) => {
+    const c = clampInt((local.x + BOARD / 2) / PITCH, 0, COLS)
+    const r = clampInt((CENTER_Y + BOARD / 2 - local.y) / PITCH, 0, ROWS)
+    tapDot(root, r, c, (a) => {
+      onAction(a)
+      return true
+    })
+  })
 
   // lines: pooled, hidden until drawn
   const hLines: Entity[][] = []
