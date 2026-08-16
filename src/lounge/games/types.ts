@@ -68,6 +68,12 @@ export interface TableGame<S = unknown, A = unknown> {
    */
   apply(state: S, action: A, seat: SeatNo): S | null
   botAction(state: S, difficulty: BotDifficulty): A | null
+  /**
+   * Optional: an action the game wants applied on its own after a delay,
+   * e.g. flipping mismatched cards back. Applied for the seat to move by the
+   * client driving that seat (the human sharing the table when it is a bot).
+   */
+  pending?(state: S): { delayMs: number; action: A } | null
 
   /** Build the game's 3D presentation parented to the table root. */
   createView3D(root: Entity, onAction: (action: A) => void): View3DHandle

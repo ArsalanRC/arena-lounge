@@ -19,7 +19,7 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
 import { movePlayerTo } from '~system/RestrictedActions'
-import type { BotDifficulty } from '../engine/types'
+import { botSettings } from './games/botSettings'
 import {
   AFK_MS,
   AUTO_STAND_AFTER_MS,
@@ -80,8 +80,6 @@ export const local = {
   dismissedTableId: -1,
   /** Mobile controller: show the full board instead of the compact controls. */
   showMiniBoard: false,
-  /** Bot strength for games this client drives (local choice, no sync needed). */
-  botDifficulty: 'medium' as BotDifficulty,
   /** UI language code (see i18n); 'en' until the player picks another. */
   lang: 'en',
   /** Whether the "How to play" panel is open, which game tab it shows, and whether the language grid is expanded. */
@@ -555,9 +553,37 @@ function botSystem(): void {
       if (!seatOf(t, seat).bot) return
       const state = gameStateOf(t)
       if (state === null) return
-      const action = t.game.botAction(state, local.botDifficulty)
+      const action = t.game.botAction(state, botSettings.difficulty)
       if (action !== null) applyAction(t, action, seat)
     }, BOT_THINK_MS)
+  }
+}
+
+const autoPending = new Map<number, string>()
+
+/** Applies game-requested follow-up actions (see TableGame.pending) for seats this client drives. */
+function autoActionSystem(): void {
+  if (!canWrite()) return
+  for (const t of tables) {
+    if (!t.game.pending) continue
+    const board = TableBoard.get(t.root)
+    if (board.status !== Status.Playing || board.turn === 0) continue
+    const seat = board.turn as Seat
+    const holder = seatOf(t, seat)
+    const driver = holder.bot ? seatHeldByMe(seatOf(t, otherSeat(seat))) : seatHeldByMe(holder)
+    if (!driver) continue
+    const state = gameStateOf(t)
+    if (state === null) continue
+    const pend = t.game.pending(state)
+    if (!pend) continue
+    const key = `${board.round}:${board.moveCount}`
+    if (autoPending.get(t.def.id) === key) continue
+    autoPending.set(t.def.id, key)
+    timers.setTimeout(() => {
+      const b2 = TableBoard.get(t.root)
+      if (b2.status !== Status.Playing || `${b2.round}:${b2.moveCount}` !== key) return
+      applyAction(t, pend.action, seat)
+    }, pend.delayMs)
   }
 }
 
@@ -568,4 +594,5 @@ export function startTableSystems(): void {
   engine.addSystem(heartbeatSystem)
   engine.addSystem(janitorSystem)
   engine.addSystem(botSystem)
+  engine.addSystem(autoActionSystem)
 }
