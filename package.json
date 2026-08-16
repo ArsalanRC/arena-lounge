@@ -6,6 +6,7 @@
     "start": "sdk-commands start",
     "deploy": "sdk-commands deploy",
     "build": "sdk-commands build",
+    "build:prod": "sdk-commands build --production",
     "upgrade-sdk": "pnpm add -D @dcl/sdk@latest @dcl/sdk-commands@latest",
     "test": "vitest run",
     "test:watch": "vitest",

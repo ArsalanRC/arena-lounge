@@ -40,6 +40,12 @@ pnpm build
 pnpm deploy -- --target-content https://worlds-content-server.decentraland.org
 ```
 
+`deploy` rebuilds the bundle in production mode itself (about 0.7 MB
+minified; the dev bundle in `bin/` is 7 MB with sourcemaps, so never judge
+size from that). `pnpm build:prod` produces the same bundle for a size check.
+`.dclignore` keeps tools, docs and the spec out of the upload; the GLBs in
+`models/` (tower 0.65 MB, canopy 25 KB) and the PNGs in `images/` go up.
+
 A browser tab opens; connect the wallet that owns the name and click
 **Sign and Deploy** (a signature, no gas). Uploading + asset conversion takes a
 few minutes; the scene is playable after stage 2 of 3.
