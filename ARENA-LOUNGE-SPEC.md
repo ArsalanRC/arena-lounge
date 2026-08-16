@@ -65,7 +65,11 @@ version works as well", 16 Aug 11:30):
 - First-person camera only on the local player's own seat pad; sitting snaps
   the avatar to the pad facing the board (yaw re-issued after the switch).
 - Sounds: synthesised WAVs (drop, win chime, your-move ding, sit click, lose).
-- Perf: 269 entities, ~12k triangles (30% of the 4-parcel cap), 60 fps desktop.
+- Perf (4 tables): 590 entities (74% of the 800 cap for 4 parcels), ~14.8k
+  triangles (37%), 17 textures (74%), 60 fps desktop. Entity budget is the
+  next constraint: per-cell colliders (Reversi 64, Dot Lines 36, C4 7 per
+  table) can collapse to one collider + hit-position math; Reversi keeps two
+  sprites per cell because its felt is opaque.
 - Tests: 30 vitest tests on the pure engine. `pnpm build` strict type-check green.
 - How to play: "?" buttons + info kiosk at spawn open a panel with the rules
   overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
