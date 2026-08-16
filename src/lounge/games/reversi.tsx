@@ -77,9 +77,9 @@ function seatOfIndex(i: number): SeatNo {
 
 // ---------------------------------------------------------------- controls
 
-function Board(props: { state: ReversiGameState; ctx: GameContext; compact: boolean }) {
+function Board(props: { state: ReversiGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
-  const cell = props.compact ? 32 : 36
+  const cell = props.phone ? 56 : 36
   const mirror = ctx.mySeat === 2
   const legal = new Set(ctx.myTurn ? getLegalMoves(state).map((m) => m.r * N + m.c) : [])
   const last = state.lastMove ? state.lastMove.r * N + state.lastMove.c : -1
@@ -105,7 +105,7 @@ function Board(props: { state: ReversiGameState; ctx: GameContext; compact: bool
             </UiEntity>
           )}
           {v === 'empty' && legal.has(idx) && (
-            <UiEntity uiTransform={{ width: 12, height: 12 }} uiBackground={{ texture: { src: IMG.disc }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.55) }} />
+            <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={{ texture: { src: IMG.disc }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.55) }} />
           )}
         </UiEntity>
       )
@@ -123,12 +123,12 @@ function Board(props: { state: ReversiGameState; ctx: GameContext; compact: bool
   )
 }
 
-function Controls(props: { state: ReversiGameState; ctx: GameContext; compact: boolean }) {
+function Controls(props: { state: ReversiGameState; ctx: GameContext; phone: boolean }) {
   const sc = score(props.state.board)
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Discs  ${sc.black} : ${sc.white}${props.ctx.myTurn ? '   ·   Tap a marked square' : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
-      <Board state={props.state} ctx={props.ctx} compact={props.compact} />
+      <Board state={props.state} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )
 }

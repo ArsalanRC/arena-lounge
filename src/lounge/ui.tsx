@@ -11,7 +11,8 @@
  *  - Toast   top centre below the hint, tinted, short-lived feedback
  *  - Card    near a table: seat buttons, or the live board when both seats
  *            are taken (spectating)
- *  - Controller  seated: the game's own controls (compact on phones) + status
+ *  - Controller  seated: the game's own controls + status; a right-docked
+ *            column on desktop, a three-column bar along the bottom on phones
  *  - Help    "How to play": one tab per game, rules overview in the chosen
  *            language, lounge tips, language picker behind a toggle
  *
@@ -24,7 +25,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
-import { TURN_LIMIT_MS, UI } from './config'
+import { DEBUG_MOBILE_UI, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
@@ -52,7 +53,15 @@ import {
 } from './tables'
 
 export function setupUi(): void {
-  ReactEcsRenderer.setUiRenderer(LoungeUi, { virtualWidth: 1920, virtualHeight: 1080 })
+  // Phones get a 1600x720 virtual canvas (the SDK overrides any 16:9 request
+  // with it); desktop keeps 1920x1080. The debug flag emulates the phone canvas.
+  const size = DEBUG_MOBILE_UI ? { virtualWidth: 1600, virtualHeight: 720 } : { virtualWidth: 1920, virtualHeight: 1080 }
+  ReactEcsRenderer.setUiRenderer(LoungeUi, size)
+}
+
+/** True on the phone client (or when the phone layout is being emulated). */
+function phone(): boolean {
+  return DEBUG_MOBILE_UI || isMobile()
 }
 
 // ---------------------------------------------------------------- tokens
@@ -152,8 +161,8 @@ function Row(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; 
   )
 }
 
-/** Rounded dark panel; `place` positions it absolutely. */
-function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; width: number; place: UiTransformProps; padding?: number }) {
+/** Rounded dark panel; `place` positions it absolutely ('auto' width hugs the content). */
+function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; width: Width; place: UiTransformProps; padding?: number }) {
   return (
     <UiEntity
       uiTransform={{ ...props.place, width: props.width, height: 'auto', padding: props.padding ?? 16, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
@@ -165,7 +174,7 @@ function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]
 }
 
 /** Segmented control: equal-width options, one active. */
-function Segmented(props: { options: Array<{ key: string; label: string }>; active: string; onPick: (key: string) => void; width?: number }) {
+function Segmented(props: { options: Array<{ key: string; label: string }>; active: string; onPick: (key: string) => void; width?: number; fontSize?: number }) {
   return (
     <UiEntity uiTransform={{ width: 'auto', height: 40, flexDirection: 'row', alignItems: 'center' }}>
       {props.options.map((o) => (
@@ -173,7 +182,7 @@ function Segmented(props: { options: Array<{ key: string; label: string }>; acti
           key={o.key}
           uiTransform={{ width: props.width ?? 92, height: 40, margin: 2, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
           uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: props.active === o.key ? UI.accent : UI.panelSoft }}
-          uiText={{ value: o.label, fontSize: 16, color: props.active === o.key ? UI.text : UI.muted, textAlign: 'middle-center' }}
+          uiText={{ value: o.label, fontSize: props.fontSize ?? 16, color: props.active === o.key ? UI.text : UI.muted, textAlign: 'middle-center' }}
           onMouseDown={() => props.onPick(o.key)}
         />
       ))}
@@ -264,7 +273,7 @@ function TableCard() {
     <Panel width={W} place={bottomCentre(W, 36)}>
       <Text value={`${t.def.label} · ${t.game.label}`} size={T.title} />
       <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
-      {bothTaken && state !== null && <t.game.Controls state={state} ctx={contextFor(t)} compact={false} />}
+      {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
       {!bothTaken && (
         <Row>
           {a.addr === '' && <Btn label={`Sit as ${nameA}`} color={seatTint(t, SEAT_A)} textColor={textOn(seatTint(t, SEAT_A))} onClick={() => sit(t, SEAT_A)} width={205} />}
@@ -282,6 +291,12 @@ function TableCard() {
 
 // ---------------------------------------------------------------- controller
 
+/**
+ * Seated controller. Desktop: a column docked to the right (header, status,
+ * the game's board, actions). Phone: a wide bar along the bottom of the
+ * 1600x720 canvas with three columns, info | game controls | actions, so a
+ * board with finger-sized cells fits next to its status instead of above it.
+ */
 function Controller() {
   const mine = findMySeat()
   if (!mine) return null
@@ -292,8 +307,7 @@ function Controller() {
   const myTurn = b.status === Status.Playing && b.turn === seat
   const myWins = seat === SEAT_A ? b.winsA : b.winsB
   const oppWins = seat === SEAT_A ? b.winsB : b.winsA
-  const mobile = isMobile()
-  const compact = mobile && !local.showMiniBoard
+  const mobile = phone()
   const state = gameStateOf(t)
   const sprites = t.game.seatSprites
 
@@ -313,39 +327,87 @@ function Controller() {
   else if (b.winner === seat) status = 'You win the round!'
   else status = `${opp.name} takes the round`
 
-  const W = mobile ? 480 : 420
-  const place = mobile ? bottomCentre(W, 14) : rightMiddle(W, 250)
+  const showBotRow = opp.bot && b.status !== Status.Playing
+  const showBotInvite = b.status === Status.Waiting && opp.addr === ''
+  const showRematch = b.status === Status.Finished && opp.addr !== ''
+  const showBoardToggle = mobile && t.game.hasStrip === true
 
-  return (
-    <Panel width={W} place={place} padding={14}>
-      <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Chip sprite={sprites[seat - 1]} label="You" tint={t.game.seatSpriteTints?.[seat - 1]} />
-        <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
-        <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : opp.name} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
+  const header = (
+    <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Chip sprite={sprites[seat - 1]} label="You" tint={t.game.seatSpriteTints?.[seat - 1]} />
+      <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
+      <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : opp.name} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
+    </UiEntity>
+  )
+  const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
+  const difficulty = (
+    <Segmented
+      options={[{ key: 'easy', label: 'Easy' }, { key: 'medium', label: 'Medium' }, { key: 'hard', label: 'Hard' }]}
+      active={botSettings.difficulty}
+      onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
+      width={mobile ? 66 : 92}
+      fontSize={mobile ? 15 : 16}
+    />
+  )
+  // Bot strength: caption beside the control on desktop, above it on the narrow phone column
+  const botRow = !showBotRow ? null : mobile ? (
+    <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'column', alignItems: 'center', margin: { top: 4 } }}>
+      <Text value="Bot" size={T.small} color={UI.muted} />
+      {difficulty}
+    </UiEntity>
+  ) : (
+    <Row height={46} margin={{ top: 6 }}>
+      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: 'Bot', fontSize: T.small, color: UI.muted }} />
+      {difficulty}
+    </Row>
+  )
+
+  if (mobile) {
+    // Phone bar: the actions column stacks its buttons; the info column is fixed
+    // width so the board stays centred as names and status change.
+    const btnW = 190
+    return (
+      <UiEntity uiTransform={{ positionType: 'absolute', position: { bottom: 10, left: 0 }, width: '100%', height: 'auto', flexDirection: 'row', justifyContent: 'center' }}>
+        <Panel width="auto" place={{}} padding={12}>
+          <UiEntity uiTransform={{ width: 'auto', height: 'auto', flexDirection: 'row', alignItems: 'center' }}>
+            <UiEntity uiTransform={{ width: 320, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { right: 12 } }}>
+              {header}
+              <Text value={`${t.def.label} · ${t.game.label}`} size={T.small} color={UI.muted} margin={{ top: 4 }} />
+              <Text value={status} size={T.status} color={statusColor} margin={{ top: 4 }} />
+            </UiEntity>
+            {/* explicit vertical margins: nested auto-height wrappers eat the panel padding */}
+            <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { top: 10, bottom: 10 } }}>{controls}</UiEntity>
+            <UiEntity uiTransform={{ width: 220, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { left: 12 } }}>
+              {showBotInvite && <Btn label="Play the house bot" onClick={() => inviteBot(t)} width={btnW} fontSize={18} />}
+              {showRematch && <Btn label="Play again" onClick={() => rematch(t)} width={btnW} />}
+              {showBotRow && <Btn label="Dismiss bot" quiet onClick={() => dismissBot(t)} width={btnW} />}
+              {botRow}
+              {showBoardToggle && <Btn label={local.showMiniBoard ? 'Hide board' : 'Show board'} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} />}
+              <Row height={60}>
+                <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
+                <Btn label="Stand up" color={UI.danger} onClick={() => stand(t)} width={126} />
+              </Row>
+            </UiEntity>
+          </UiEntity>
+        </Panel>
       </UiEntity>
+    )
+  }
+
+  const W = 420
+  return (
+    <Panel width={W} place={rightMiddle(W, 250)} padding={14}>
+      {header}
       <Text value={`${t.def.label} · ${t.game.label}`} size={T.small} color={UI.muted} margin={{ top: 2 }} />
       <Text value={status} size={T.status} color={statusColor} margin={{ top: 4, bottom: 6 }} />
-
-      {state !== null && <t.game.Controls state={state} ctx={contextFor(t)} compact={compact} />}
-
-      {opp.bot && b.status !== Status.Playing && (
-        <Row height={46} margin={{ top: 6 }}>
-          <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: 'Bot', fontSize: T.small, color: UI.muted }} />
-          <Segmented
-            options={[{ key: 'easy', label: 'Easy' }, { key: 'medium', label: 'Medium' }, { key: 'hard', label: 'Hard' }]}
-            active={botSettings.difficulty}
-            onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
-          />
-        </Row>
-      )}
-
-      <Row wrap height={b.status === Status.Finished || (b.status === Status.Waiting && opp.addr === '') ? 60 : 0}>
-        {b.status === Status.Waiting && opp.addr === '' && <Btn label="Play the house bot" onClick={() => inviteBot(t)} />}
-        {b.status === Status.Finished && opp.addr !== '' && <Btn label="Play again" onClick={() => rematch(t)} />}
-        {opp.bot && b.status !== Status.Playing && <Btn label="Dismiss bot" quiet onClick={() => dismissBot(t)} />}
+      {controls}
+      {botRow}
+      <Row wrap height={showRematch || showBotInvite ? 60 : 0}>
+        {showBotInvite && <Btn label="Play the house bot" onClick={() => inviteBot(t)} />}
+        {showRematch && <Btn label="Play again" onClick={() => rematch(t)} />}
+        {showBotRow && <Btn label="Dismiss bot" quiet onClick={() => dismissBot(t)} />}
       </Row>
       <Row>
-        {mobile && <Btn label={local.showMiniBoard ? 'Hide board' : 'Show board'} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} />}
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
         <Btn label="Stand up" color={UI.danger} onClick={() => stand(t)} />
       </Row>
@@ -378,8 +440,8 @@ function HelpPanel() {
   const info = localeInfo(local.lang)
   const str = stringsFor(local.lang)
   const rules = info.games[gameId] ?? info.games.connectfour ?? { name: game.label, overview: '' }
-  const mobile = isMobile()
-  const width = mobile ? 780 : 720
+  const mobile = phone()
+  const width = mobile ? 1000 : 720
   return (
     <UiEntity
       uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
@@ -393,14 +455,14 @@ function HelpPanel() {
             options={hostedGames().map((id) => ({ key: id, label: localeInfo(local.lang).games[id]?.name ?? getGame(id).label }))}
             active={gameId}
             onPick={(k) => (local.helpGame = k)}
-            width={mobile ? 118 : 132}
+            width={mobile ? 150 : 132}
           />
         </Row>
         <Para value={rules.overview} size={19} margin={{ bottom: 6 }} rtl={info.rtl} />
         <Para value={`• ${str.howToSit}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
         <Para value={`• ${str.move[gameId] ?? str.move.connectfour}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
         <Para value={`• ${str.timer}`} color={UI.muted} margin={{ top: 4, bottom: 6 }} rtl={info.rtl} />
-        <Row height={48}>
+        <Row height={48} margin={{ bottom: 6 }}>
           <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={260} />
           <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={170} />
         </Row>
@@ -425,7 +487,13 @@ function HelpPanel() {
 // ---------------------------------------------------------------- root
 
 const LoungeUi = () => (
-  <UiEntity uiTransform={{ width: '100%', height: '100%', positionType: 'absolute' }}>
+  // In phone emulation the root is pinned to a 720-unit-high strip at the
+  // bottom of the desktop window (a phone's whole safe area is 720 units high)
+  // and tinted so the phone screen edge is visible.
+  <UiEntity
+    uiTransform={DEBUG_MOBILE_UI ? { width: '100%', height: 720, positionType: 'absolute', position: { bottom: 0, left: 0 } } : { width: '100%', height: '100%', positionType: 'absolute' }}
+    uiBackground={DEBUG_MOBILE_UI ? { color: Color4.create(1, 0, 1, 0.08) } : undefined}
+  >
     <Hint />
     <Toast />
     <TableCard />

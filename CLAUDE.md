@@ -6,7 +6,7 @@ against a friend or the house bot. Everything is CRDT-synced, no server.
 
 ## Commands (pnpm, hoisted node_modules — see pnpm-workspace.yaml)
 - `pnpm install`  — deps
-- `pnpm start`    — desktop preview (`pnpm start --mobile` prints a QR for the phone, `--mcp` enables the explorer MCP server)
+- `pnpm start`    — desktop preview (`pnpm start:mobile` prints a QR for the phone on port 8001, `pnpm start:mcp` enables the explorer MCP server, `pnpm start:pair` serves desktop + phone from one process so both share the comms room)
 - `pnpm build`    — bundle + strict type-check (this is what CI runs)
 - `pnpm test`     — vitest over the pure engines only
 - `pnpm deploy -- --target-content https://worlds-content-server.decentraland.org` — publish to the World in scene.json
@@ -29,5 +29,5 @@ against a friend or the house bot. Everything is CRDT-synced, no server.
 - Decentraland SDK skills live in `.claude/skills` (restore with `npx skills add decentraland/sdk-skills`); follow them for SDK APIs.
 - Never call `syncEntity` / `engine.addSystem` at module top level; everything boots from `main()`.
 - Keep `src/engine/**` free of `@dcl/*` imports.
-- Mobile first: touch targets >= 48px, no `borderRadius`, no dynamic lights / particles, test with `pnpm start --mobile`.
+- Mobile first: the phone canvas is 1600x720 virtual units (any 16:9 request is overridden to it), touch targets >= 48 units (board cells 56+), no `borderRadius`, no dynamic lights / particles. Preview the phone layout on the desktop with `DEBUG_MOBILE_UI` in `src/lounge/config.ts` (see tools/dev/README.md), then test on the phone with `pnpm start:mobile`.
 - No AI attribution in commits or PRs.

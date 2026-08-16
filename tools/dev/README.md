@@ -17,5 +17,10 @@ so a scene can be tested without a human at the keyboard.
    parallax misses them.
 5. `tools/dev/ghrc <gh args>` runs `gh` as ArsalanRC (loads the game-platform
    direnv token first; plain `gh` picks the wrong account).
+6. Phone layout on the desktop: set `DEBUG_MOBILE_UI = true` in
+   `src/lounge/config.ts` (never commit it). The UI then uses the phone's
+   1600x720 virtual canvas, pinned to a tinted 720-unit strip at the bottom of
+   the window, with the phone controller (bottom bar) and card. Sit at a table
+   through the robot token and screenshot as usual.
 
 Session state files default to `/tmp/arena-dev` (override with `DEV_TMP`).

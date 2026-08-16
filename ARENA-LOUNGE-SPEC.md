@@ -23,7 +23,7 @@ and stay public; nothing gets published beyond that without asking; the
 lounge stays one floor (six corners) for the buildathon, the multi-floor
 house is for later.
 
-Last update: 2026-08-16 16:55 (Europe/Berlin), session handoff
+Last update: 2026-08-16 14:25 (Europe/Berlin), phone controller bar
 
 ## 1. What this is
 
@@ -77,10 +77,16 @@ version works as well", 16 Aug 11:30):
   stale seat cleanup (30 s), onLeaveScene cleanup, orphan-bot cleanup,
   60 s turn timer applied by seated players, auto-stand at 7 m for 8 s.
 - House bot: minimax alpha-beta (medium), driven by the seated human's client.
-- UI (React-ECS, virtual 1920x1080): top banner + toasts, table card near a
-  table (Sit as Yellow / Sit as Red / Play the house bot / Not now), seated
-  controller (desktop: right-docked with mini board; mobile: bottom strip with
-  seven drop buttons + "Show board" toggle), Stand up / Play again / Dismiss bot.
+- UI (React-ECS; desktop canvas 1920x1080, phone canvas 1600x720, the SDK
+  overrides any 16:9 request on phones): top hint + toasts, table card near a
+  table (Sit as Yellow / Sit as Red / Play the house bot / Not now; the
+  spectator mini board is desktop-only), seated controller (desktop:
+  right-docked column with the board; phone: a three-column bar along the
+  bottom, info | game controls | actions, with finger-sized boards: 8x8 cells
+  56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76 +
+  "Show board" toggle), Stand up / Play again / Dismiss bot / bot strength.
+  `DEBUG_MOBILE_UI` in config.ts previews the phone layout on the desktop
+  (tools/dev/README.md).
 - First-person camera only on the local player's own seat pad; sitting snaps
   the avatar to the pad facing the board (yaw re-issued after the switch).
 - Sounds: synthesised WAVs (drop, win chime, your-move ding, sit click, lose).
@@ -89,7 +95,7 @@ version works as well", 16 Aug 11:30):
   of 23 (the metric counts runtime texture instances, not files; the files are
   16 PNGs, mostly 128px sprites, so memory is small). Headroom is fine for
   the buildathon; more tables would need a bigger parcel footprint.
-- Tests: 30 vitest tests on the pure engine. `pnpm build` strict type-check green.
+- Tests: 199 vitest tests over the six pure engines. `pnpm build` strict type-check green.
 - How to play: "?" buttons + info kiosk at spawn open a panel with the rules
   overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
@@ -100,10 +106,17 @@ version works as well", 16 Aug 11:30):
    screenshots (the mobile controller layout has never been seen by Claude).
 2. Arsalan: guest-login on the phone + Claude seated on desktop = first real
    two-player test (seat claiming, moves, turn timer, opponent-left toast).
+   Both clients must use the SAME preview server (each `sdk-commands start`
+   process serves its own comms room, `/mini-comms/room-1`, verified in
+   sdk-commands/start/server/realm.js): stop the 8000/8001 pair and run one
+   `pnpm start:pair` (desktop Explorer + MCP + phone QR on one port).
 3. Arsalan: buy the NAME (docs/DEPLOY.md), then Claude deploys the World and
    both test it from the real app; keep deploying often after that.
-4. Claude: mobile layout tuning from the phone screenshots; the compact
-   controller for Dot Lines / Reversi / Checkers on a 720-high virtual screen.
+4. Claude: mobile layout tuning from the phone screenshots (open: where the
+   phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
+   does, switch the main UI to `screenInset: 'interactable'` or narrow the
+   bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
+   finger-sized boards for all six games, verified in the desktop emulation.
 5. Claude: lounge chrome strings in DE/ES/PT/FR (help panel tips exist in
    EN/DE/ES); native review of imported overviews.
 6. Claude: README + submission text refresh (six games, corners), phone
@@ -165,7 +178,8 @@ call (loads the ArsalanRC token from game-platform's direnv).
 cd ~/PR-PROJECT/arena-lounge
 pnpm install
 pnpm start:mcp      # desktop preview + explorer MCP at http://127.0.0.1:8123/unity-explorer-mcp
-pnpm start:mobile   # QR for the phone (same Wi-Fi), port 8001
+pnpm start:mobile   # QR for the phone (same Wi-Fi), port 8001 (its own comms room!)
+pnpm start:pair     # ONE server for desktop + phone: use this for two-player tests
 pnpm test           # engine tests
 pnpm build          # bundle + strict type-check
 ```
@@ -183,6 +197,11 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - `sdk-commands start` rewrites package.json trailing newline; harmless.
 - Creator Hub autosaves `assets/scene/main.composite`; do not edit it while
   the scene is open there. Gameplay entities are code, composite is decor only.
+- Auto-height panels: a `height: 'auto'` panel whose children are auto-height
+  wrappers loses its padding top and bottom; give the inner wrapper explicit
+  vertical margins (see the phone bar in ui.tsx) or the last row a fixed height.
+- The 16 Aug session log below (12:00 to 16:55) ran ahead of the clock; git
+  says the same work landed 12:00 to 13:28. From 14:00 on the times are real.
 
 ## 8b. Session log 16 Aug (what happened, for orientation)
 
@@ -196,6 +215,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 14:25 phone controller bar: on phones the seated controller is a wide bottom bar (info | game controls | actions) with finger-sized boards (8x8 at 56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76); TableGame.Controls now takes `phone` + `fullBoard` (was `compact`), `hasStrip` marks games with a "Show board" toggle (Connect Four); spectator mini board desktop-only; help panel 1000 wide on phones; bot-strength control stacked in the phone column; Dot Lines undrawn-edge hints visible; `DEBUG_MOBILE_UI` flag + tools/dev/shot.sh fix
 - 2026-08-16 10:35 scaffold, engine port, sync model, first playable build
 - 2026-08-16 11:05 textures, UI sprites, bar tables, robot token, seat camera
 - 2026-08-16 11:20 card layout fix, SDK pins, mobile QR script

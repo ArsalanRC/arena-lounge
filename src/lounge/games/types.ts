@@ -83,6 +83,17 @@ export interface TableGame<S = unknown, A = unknown> {
    * resolve multi-step input such as select-then-move.
    */
   createView3D(root: Entity, onAction: (action: A) => void, getState: () => S | null): View3DHandle
-  /** Seated controller / spectator board. */
-  Controls: (props: { state: S; ctx: GameContext; compact: boolean }) => ReactEcs.JSX.Element
+  /**
+   * Seated controller / spectator board. `phone` asks for the phone layout:
+   * touch targets of 56+ units and at most ~520 units of height (the phone
+   * canvas is 1600x720). Games with a strip mode (see `hasStrip`) render the
+   * strip on the phone unless `fullBoard` is set.
+   */
+  Controls: (props: { state: S; ctx: GameContext; phone: boolean; fullBoard: boolean }) => ReactEcs.JSX.Element
+  /**
+   * True when the phone controller is a compact strip rather than the board
+   * itself, so the UI offers a "Show board" toggle. Games whose controller is
+   * the board leave it unset.
+   */
+  hasStrip?: boolean
 }
