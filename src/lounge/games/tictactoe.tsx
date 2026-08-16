@@ -54,9 +54,9 @@ function seatOfIndex(i: number): SeatNo {
 
 // ---------------------------------------------------------------- controls
 
-function Board(props: { state: TTTGameState; ctx: GameContext; compact: boolean }) {
+function Board(props: { state: TTTGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
-  const cell = props.compact ? 76 : 88
+  const cell = props.phone ? 96 : 88
   const win = new Set(state.winLine ?? [])
   const rows = []
   for (let r = 0; r < 3; r++) {
@@ -92,14 +92,14 @@ function Board(props: { state: TTTGameState; ctx: GameContext; compact: boolean 
   )
 }
 
-function Controls(props: { state: TTTGameState; ctx: GameContext; compact: boolean }) {
+function Controls(props: { state: TTTGameState; ctx: GameContext; phone: boolean }) {
   const mine: Mark | null = props.ctx.mySeat === 1 ? 'X' : props.ctx.mySeat === 2 ? 'O' : null
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       {mine !== null && (
         <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `You play ${mine}${props.ctx.myTurn ? '   ·   Tap an empty square' : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       )}
-      <Board state={props.state} ctx={props.ctx} compact={props.compact} />
+      <Board state={props.state} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )
 }

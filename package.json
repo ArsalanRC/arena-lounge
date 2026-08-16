@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "start:mobile": "sdk-commands start --mobile --port 8001",
-    "start:mcp": "sdk-commands start --mcp"
+    "start:mcp": "sdk-commands start --mcp",
+    "start:pair": "sdk-commands start --mcp --mobile"
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.26.0",

@@ -103,10 +103,11 @@ const CELL = 42 // dot pitch in UI px
 const DOT = 22
 const LINE_T = 8
 
-function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boolean }) {
+function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
-  const cell = props.compact ? 38 : CELL
-  const dot = props.compact ? 20 : DOT
+  const cell = props.phone ? 60 : CELL
+  const dot = props.phone ? 30 : DOT
+  const lineT = props.phone ? 10 : LINE_T
   const mirror = ctx.mySeat === 2
   const size = cell * (COLS + 1)
   const root = ctx.root
@@ -137,8 +138,8 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
       items.push(
         <UiEntity
           key={`h${r}-${c}`}
-          uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2, top: r * cell + cell / 2 - LINE_T / 2 }, width: cell, height: LINE_T }}
-          uiBackground={{ color: on ? (isLast('h', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
+          uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2, top: r * cell + cell / 2 - lineT / 2 }, width: cell, height: lineT }}
+          uiBackground={{ color: on ? (isLast('h', r, c) ? UI.win : UI.text) : Color4.create(0, 0, 0, 0.08) }}
         />
       )
     }
@@ -149,8 +150,8 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
       items.push(
         <UiEntity
           key={`v${r}-${c}`}
-          uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2 - LINE_T / 2, top: r * cell + cell / 2 }, width: LINE_T, height: cell }}
-          uiBackground={{ color: on ? (isLast('v', r, c) ? UI.win : UI.text) : Color4.create(1, 1, 1, 0.12) }}
+          uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2 - lineT / 2, top: r * cell + cell / 2 }, width: lineT, height: cell }}
+          uiBackground={{ color: on ? (isLast('v', r, c) ? UI.win : UI.text) : Color4.create(0, 0, 0, 0.08) }}
         />
       )
     }
@@ -183,13 +184,13 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; compact: boo
   )
 }
 
-function Controls(props: { state: DotLinesGameState; ctx: GameContext; compact: boolean }) {
+function Controls(props: { state: DotLinesGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
   const hint = props.ctx.myTurn ? 'Tap a dot, then a neighbour' : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Boxes  ${s.scores[0]} : ${s.scores[1]}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
-      <Board state={s} ctx={props.ctx} compact={props.compact} />
+      <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )
 }

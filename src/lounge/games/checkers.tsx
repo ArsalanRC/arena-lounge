@@ -96,9 +96,9 @@ export function tapSquare(root: Entity, state: CheckersGameState, sq: number, ac
 
 // ---------------------------------------------------------------- controls
 
-function Board(props: { state: CheckersGameState; ctx: GameContext; compact: boolean }) {
+function Board(props: { state: CheckersGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
-  const cell = props.compact ? 32 : 36
+  const cell = props.phone ? 56 : 36
   const mirror = ctx.mySeat === 2
   const legal = ctx.myTurn ? getValidMoves(state) : []
   const sel = checkersSelection.get(ctx.root)
@@ -134,7 +134,7 @@ function Board(props: { state: CheckersGameState; ctx: GameContext; compact: boo
               {movable.has(sq) && sel === undefined && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
             </UiEntity>
           )}
-          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: 12, height: 12 }} uiBackground={{ texture: { src: IMG.dot }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.75) }} />}
+          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={{ texture: { src: IMG.dot }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.75) }} />}
         </UiEntity>
       )
     }
@@ -157,7 +157,7 @@ function countPieces(board: CheckersBoard, color: 'white' | 'black'): number {
   return n
 }
 
-function Controls(props: { state: CheckersGameState; ctx: GameContext; compact: boolean }) {
+function Controls(props: { state: CheckersGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
   const sel = checkersSelection.get(props.ctx.root)
   const forced = props.ctx.myTurn && getValidMoves(s).some((m) => m.captures.length > 0)
@@ -165,7 +165,7 @@ function Controls(props: { state: CheckersGameState; ctx: GameContext; compact: 
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Pieces  ${countPieces(s.board, 'white')} : ${countPieces(s.board, 'black')}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
-      <Board state={s} ctx={props.ctx} compact={props.compact} />
+      <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )
 }

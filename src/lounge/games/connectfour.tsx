@@ -168,21 +168,22 @@ function DropStrip(props: { state: ConnectFourGameState; ctx: GameContext }) {
     buttons.push(
       <UiEntity
         key={`d${c}`}
-        uiTransform={{ width: 62, height: 66, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block', opacity: playable ? 1 : 0.35 }}
+        uiTransform={{ width: 70, height: 76, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block', opacity: playable ? 1 : 0.35 }}
         uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.boardBg }}
         onMouseDown={() => {
           if (playable) ctx.act({ col: c } as C4Action)
         }}
       >
-        <UiEntity uiTransform={{ width: 40, height: 40 }} uiBackground={{ texture: { src: sprite }, textureMode: 'stretch' }} />
+        <UiEntity uiTransform={{ width: 46, height: 46 }} uiBackground={{ texture: { src: sprite }, textureMode: 'stretch' }} />
       </UiEntity>
     )
   }
   return <UiEntity uiTransform={{ flexDirection: 'row', width: 'auto', height: 'auto' }}>{buttons}</UiEntity>
 }
 
-function Controls(props: { state: ConnectFourGameState; ctx: GameContext; compact: boolean }) {
-  return props.compact ? <DropStrip state={props.state} ctx={props.ctx} /> : <Board state={props.state} ctx={props.ctx} />
+/** Phone: the drop strip (the 3D board is the show) unless the player asked for the full board. */
+function Controls(props: { state: ConnectFourGameState; ctx: GameContext; phone: boolean; fullBoard: boolean }) {
+  return props.phone && !props.fullBoard ? <DropStrip state={props.state} ctx={props.ctx} /> : <Board state={props.state} ctx={props.ctx} />
 }
 
 // ---------------------------------------------------------------- plugin
@@ -230,5 +231,6 @@ export const connectFourGame: TableGame<ConnectFourGameState, C4Action> = {
     return move ? { col: move.column } : null
   },
   createView3D: createConnectFourView,
-  Controls
+  Controls,
+  hasStrip: true
 }

@@ -105,9 +105,9 @@ let memory: BotMemory = createBotMemory()
 
 // ---------------------------------------------------------------- controls
 
-function Board(props: { state: MatchPairsGameState; ctx: GameContext; compact: boolean }) {
+function Board(props: { state: MatchPairsGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
-  const cell = props.compact ? 60 : 68
+  const cell = props.phone ? 74 : 68
   const rows = []
   for (let r = 0; r < ROWS; r++) {
     const cells = []
@@ -143,13 +143,13 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; compact: b
   )
 }
 
-function Controls(props: { state: MatchPairsGameState; ctx: GameContext; compact: boolean }) {
+function Controls(props: { state: MatchPairsGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
   const hint = props.ctx.myTurn ? (s.flippedIndices.length === 2 ? 'No match, flipping back…' : s.flippedIndices.length === 1 ? 'Find its twin' : 'Flip a card') : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Pairs  ${s.scores.A ?? 0} : ${s.scores.B ?? 0}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
-      <Board state={s} ctx={props.ctx} compact={props.compact} />
+      <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )
 }

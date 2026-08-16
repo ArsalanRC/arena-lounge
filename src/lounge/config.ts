@@ -108,6 +108,13 @@ export const AFK_MS = 150_000 // idle at a table (when it is on you to act) free
 /** Distance from a table centre to each seat pad centre (local Z). */
 export const SEAT_PAD_OFFSET = 1.8
 
+/**
+ * Dev aid: preview the phone layout in the desktop Explorer (1600x720 virtual
+ * canvas, compact controller, phone panel placement). Flip it locally while
+ * tuning the mobile UI; never commit `true`.
+ */
+export const DEBUG_MOBILE_UI = false
+
 // ---------------------------------------------------------------- palette
 export const PALETTE = {
   floor: Color4.fromHexString('#2b2320ff'),
