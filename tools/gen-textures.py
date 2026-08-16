@@ -9,6 +9,7 @@
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
   images/rug.png           512  round woven rug with alpha outside the circle
+  images/rug-ring.png      256  ring mask, emissive on rugs (tinted per corner)
 UI (all alpha):
   images/ui/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
   images/ui/disc-yellow.png / disc-red.png  128  shaded discs
@@ -356,6 +357,19 @@ def gen_ui_plain():
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
 
+# ------------------------------------------------------------------ rug ring (emissive mask)
+def gen_rug_ring(path='images/rug-ring.png'):
+    """White ring on black: used as the emissive texture of every rug, tinted
+    with the corner's colour, so each game corner glows at its edge."""
+    S = 256
+    def px(x, y):
+        d = math.hypot(x + 0.5 - S / 2, y + 0.5 - S / 2) / (S / 2)
+        ring = 1 - smoothstep(0.03, 0.05, abs(d - 0.93))
+        inner = 0.35 * (1 - smoothstep(0.02, 0.035, abs(d - 0.80)))
+        v = max(ring, inner)
+        return (v, v, v, 1.0)
+    write_png(path, S, S, px)
+
 # ------------------------------------------------------------------ backgammon board
 def gen_backgammon_board(path='images/backgammon-board.png'):
     """Two rows of twelve triangular points with a bar in the middle, on a
@@ -621,4 +635,5 @@ if __name__ == '__main__':
     gen_croc_face()
     gen_backgammon_board()
     gen_ludo_board()
+    gen_rug_ring()
     gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')
