@@ -74,6 +74,10 @@ export const local = {
   hasEverSat: false,
   /** Timestamp when the player first wandered far from their table. */
   farSince: 0,
+  /** Table whose seat card the player dismissed; cleared when they walk away. */
+  dismissedTableId: -1,
+  /** Mobile controller: show the mini board instead of the compact drop strip. */
+  showMiniBoard: false,
   /** Set when the CRDT room never connected; local play is still allowed. */
   offline: false,
   startedAt: 0,
@@ -266,6 +270,27 @@ export function inviteBot(t: Table): void {
   maybeStart(t)
 }
 
+/** One-tap solo start: take the free seat (yellow first) and seat the bot opposite. */
+export function sitWithBot(t: Table): void {
+  if (!canWrite()) {
+    toast('Connecting to the lounge, one moment…')
+    return
+  }
+  let mine = mySeatAt(t)
+  if (!mine) {
+    const a = C4SeatA.get(t.root)
+    const b = C4SeatB.get(t.root)
+    const free: 0 | Seat = a.addr === '' ? SEAT_A : b.addr === '' ? SEAT_B : 0
+    if (!free) {
+      toast('That table is full')
+      return
+    }
+    if (!sit(t, free)) return
+    mine = free
+  }
+  inviteBot(t)
+}
+
 export function dismissBot(t: Table): void {
   const mine = mySeatAt(t)
   if (!mine) return
@@ -337,17 +362,26 @@ export function seatPadWorldPosition(t: Table, seat: Seat): Vector3 {
   return Vector3.add(t.def.position, Vector3.rotate(localOffset, rot))
 }
 
-/** Move the avatar onto its seat pad, facing the board. */
+/**
+ * Move the avatar onto its seat pad, facing the board. The pad carries a
+ * first-person CameraModeArea; the client adopts the avatar heading when it
+ * switches camera, so after the move we re-issue the heading once more (yaw
+ * only: pitch is left level, which is why the tables are bar height).
+ */
 function snapToSeat(t: Table, seat: Seat): void {
   const pos = seatPadWorldPosition(t, seat)
-  const target = Vector3.create(t.def.position.x, 1.3, t.def.position.z)
+  const target = Vector3.create(t.def.position.x, 1.6, t.def.position.z)
+  const swallow = () => {
+    /* moving the player is a nicety; ignore if the client refuses */
+  }
   movePlayerTo({
     newRelativePosition: { x: pos.x, y: 0, z: pos.z },
     cameraTarget: target,
     avatarTarget: target
-  }).catch(() => {
-    /* moving the player is a nicety; ignore if the client refuses */
-  })
+  }).catch(swallow)
+  timers.setTimeout(() => {
+    movePlayerTo({ newRelativePosition: { x: pos.x, y: 0, z: pos.z }, avatarTarget: target }).catch(swallow)
+  }, 450)
 }
 
 function playerPosition(): Vector3 | null {
@@ -402,6 +436,7 @@ function proximitySystem(dt: number): void {
   }
   local.nearDistance = bestD
   local.nearTableId = bestD <= NEAR_TABLE_DISTANCE ? best : -1
+  if (local.dismissedTableId >= 0 && local.dismissedTableId !== local.nearTableId) local.dismissedTableId = -1
 }
 
 let heartbeatTimer = 0

@@ -13,6 +13,8 @@
 import {
   Billboard,
   BillboardMode,
+  CameraModeArea,
+  CameraType,
   ColliderLayer,
   EasingFunction,
   Entity,
@@ -24,6 +26,7 @@ import {
   MeshRenderer,
   TextAlignMode,
   TextShape,
+  TextureWrapMode,
   Transform,
   Tween,
   VisibilityComponent,
@@ -34,18 +37,19 @@ import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { COLS, ROWS } from '../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE, SEAT_PAD_OFFSET } from './config'
 import { CELL_COUNT, SEAT_A, SEAT_B, Status, Winner, cellCol, cellRow, type Seat } from './state'
-import { boardOf, drop, seatOf, sit, type Table } from './tables'
+import { boardOf, drop, local, mySeatAt, seatOf, sit, sitWithBot, inviteBot, type Table } from './tables'
 
 // ---------------------------------------------------------------- geometry
 /** Board plane size in metres (matches the pre-distorted texture). */
 const BOARD_W = 1.2
 const BOARD_H = 1.04
-const BOARD_CENTER_Y = 1.3
+/** Bar-height table: a standing player in first person sees the board level. */
+const TABLE_TOP_Y = 1.02
+const BOARD_CENTER_Y = TABLE_TOP_Y + 0.05 + BOARD_H / 2
 const CELL_PITCH = 0.16
 const HALF_GAP = 0.035 // planes sit at z = ±HALF_GAP
 const DISC_R = 0.13 // disc diameter as scale (0.13 m)
 const DISC_T = 0.06 // disc thickness
-const TABLE_TOP_Y = 0.75
 
 const BOARD_TOP = BOARD_CENTER_Y + BOARD_H / 2
 
@@ -63,11 +67,14 @@ export interface TableVisual {
   sign: Entity
   padA: Entity
   padB: Entity
+  camA: Entity
+  camB: Entity
   rendered: {
     round: number
     cells: number[]
     winKey: string
     signText: string
+    signVisible: boolean
   }
 }
 
@@ -81,6 +88,41 @@ function box(parent: Entity, pos: Vector3, scale: Vector3, color: Color4, rotY =
   MeshRenderer.setBox(e)
   Material.setPbrMaterial(e, { albedoColor: color, roughness: 0.85, metallic: 0 })
   return e
+}
+
+function woodBox(parent: Entity, pos: Vector3, scale: Vector3, tiling: Vector3 = Vector3.One()): Entity {
+  const e = engine.addEntity()
+  Transform.create(e, { parent, position: pos, scale })
+  MeshRenderer.setBox(e)
+  Material.setPbrMaterial(e, {
+    texture: Material.Texture.Common({
+      src: 'images/wood.png',
+      wrapMode: TextureWrapMode.TWM_REPEAT,
+      tiling: { x: tiling.x, y: tiling.y }
+    }),
+    roughness: 0.7,
+    metallic: 0
+  })
+  return e
+}
+
+function rugPlane(parent: Entity, size: number): void {
+  const e = engine.addEntity()
+  Transform.create(e, {
+    parent,
+    position: Vector3.create(0, 0.012, 0),
+    rotation: Quaternion.fromEulerDegrees(90, 0, 0),
+    scale: Vector3.create(size, size, 1)
+  })
+  MeshRenderer.setPlane(e)
+  Material.setPbrMaterial(e, {
+    texture: Material.Texture.Common({ src: 'images/rug.png' }),
+    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
+    alphaTest: 0.5,
+    roughness: 1,
+    metallic: 0,
+    castShadows: false
+  })
 }
 
 function boardPlane(parent: Entity, z: number): void {
@@ -110,12 +152,12 @@ function makeDisc(parent: Entity): Entity {
     scale: Vector3.create(DISC_R, DISC_T, DISC_R)
   })
   MeshRenderer.setCylinder(e, 0.5, 0.5)
-  Material.setPbrMaterial(e, { albedoColor: PALETTE.yellow, roughness: 0.4, metallic: 0.1 })
+  Material.setPbrMaterial(e, { albedoColor: PALETTE.yellow, roughness: 0.35, metallic: 0.1 })
   VisibilityComponent.create(e, { visible: false })
   return e
 }
 
-function makePad(parent: Entity, seat: Seat, color: Color4): Entity {
+function makePad(parent: Entity, seat: Seat, color: Color4): { pad: Entity; cam: Entity } {
   const e = engine.addEntity()
   const z = seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET
   Transform.create(e, {
@@ -126,15 +168,65 @@ function makePad(parent: Entity, seat: Seat, color: Color4): Entity {
   MeshRenderer.setCylinder(e, 0.5, 0.5)
   MeshCollider.setCylinder(e, 0.5, 0.5, ColliderLayer.CL_POINTER)
   Material.setPbrMaterial(e, { albedoColor: color, roughness: 0.9, metallic: 0 })
-  return e
+  // Camera area entity: gets a first-person CameraModeArea only while the
+  // *local* player holds this seat (see updateTableVisual), so bystanders who
+  // step on a pad keep their own camera.
+  const cam = engine.addEntity()
+  Transform.create(cam, { parent, position: Vector3.create(0, 1.2, z) })
+  return { pad: e, cam }
+}
+
+/** Little three-box robot with glowing eyes; returns the clickable body. */
+function makeBotFigure(parent: Entity, at: Vector3): Entity {
+  const body = engine.addEntity()
+  Transform.create(body, {
+    parent,
+    position: Vector3.create(at.x, at.y + 0.11, at.z),
+    rotation: Quaternion.fromEulerDegrees(0, 25, 0),
+    scale: Vector3.create(0.16, 0.2, 0.12)
+  })
+  MeshRenderer.setBox(body)
+  MeshCollider.setBox(body, ColliderLayer.CL_POINTER)
+  Material.setPbrMaterial(body, { albedoColor: PALETTE.frameDark, roughness: 0.4, metallic: 0.5 })
+  const head = engine.addEntity()
+  Transform.create(head, { parent: body, position: Vector3.create(0, 0.78, 0), scale: Vector3.create(0.85, 0.55, 0.9) })
+  MeshRenderer.setBox(head)
+  Material.setPbrMaterial(head, { albedoColor: PALETTE.frame, roughness: 0.4, metallic: 0.5 })
+  for (const x of [-0.25, 0.25]) {
+    const eye = engine.addEntity()
+    Transform.create(eye, { parent: head, position: Vector3.create(x, 0.05, -0.55), scale: Vector3.create(0.22, 0.3, 0.2) })
+    MeshRenderer.setSphere(eye)
+    Material.setPbrMaterial(eye, {
+      albedoColor: Color4.fromHexString('#9ff0ffff'),
+      emissiveColor: Color3.fromHexString('#7fe6ff'),
+      emissiveIntensity: 2,
+      roughness: 0.2,
+      metallic: 0
+    })
+  }
+  const antenna = engine.addEntity()
+  Transform.create(antenna, { parent: head, position: Vector3.create(0, 0.75, 0), scale: Vector3.create(0.08, 0.5, 0.08) })
+  MeshRenderer.setCylinder(antenna, 0.5, 0.5)
+  Material.setPbrMaterial(antenna, { albedoColor: PALETTE.frameDark, roughness: 0.4, metallic: 0.5 })
+  const tip = engine.addEntity()
+  Transform.create(tip, { parent: head, position: Vector3.create(0, 1.05, 0), scale: Vector3.create(0.22, 0.4, 0.22) })
+  MeshRenderer.setSphere(tip)
+  Material.setPbrMaterial(tip, {
+    albedoColor: PALETTE.red,
+    emissiveColor: Color3.fromHexString('#ff6a5e'),
+    emissiveIntensity: 1.2,
+    roughness: 0.3,
+    metallic: 0
+  })
+  return body
 }
 
 function makeSign(parent: Entity): Entity {
   const e = engine.addEntity()
-  Transform.create(e, { parent, position: Vector3.create(0, 2.25, 0) })
+  Transform.create(e, { parent, position: Vector3.create(0, BOARD_CENTER_Y + BOARD_H / 2 + 0.55, 0) })
   TextShape.create(e, {
     text: '',
-    fontSize: 2.2,
+    fontSize: 1.7,
     font: Font.F_SANS_SERIF,
     textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
     textColor: Color4.White(),
@@ -144,6 +236,7 @@ function makeSign(parent: Entity): Entity {
     height: 1
   })
   Billboard.create(e, { billboardMode: BillboardMode.BM_Y })
+  VisibilityComponent.create(e, { visible: true })
   return e
 }
 
@@ -170,21 +263,19 @@ function makeColumnCollider(t: Table, parent: Entity, col: number): void {
 export function buildTableVisual(t: Table): TableVisual {
   const root = t.root
 
-  // table top + legs
-  box(root, Vector3.create(0, TABLE_TOP_Y - 0.03, 0), Vector3.create(1.8, 0.06, 0.9), PALETTE.wood)
+  // table top (wood) + legs + apron
+  woodBox(root, Vector3.create(0, TABLE_TOP_Y - 0.03, 0), Vector3.create(1.8, 0.06, 0.9), Vector3.create(2, 1, 1))
+  box(root, Vector3.create(0, TABLE_TOP_Y - 0.1, 0), Vector3.create(1.6, 0.08, 0.7), PALETTE.woodDark)
   for (const [x, z] of [
-    [-0.8, -0.35],
-    [0.8, -0.35],
-    [-0.8, 0.35],
-    [0.8, 0.35]
+    [-0.78, -0.33],
+    [0.78, -0.33],
+    [-0.78, 0.33],
+    [0.78, 0.33]
   ]) {
-    box(root, Vector3.create(x, (TABLE_TOP_Y - 0.06) / 2, z), Vector3.create(0.08, TABLE_TOP_Y - 0.06, 0.08), PALETTE.woodDark)
+    box(root, Vector3.create(x, (TABLE_TOP_Y - 0.06) / 2, z), Vector3.create(0.09, TABLE_TOP_Y - 0.06, 0.09), PALETTE.woodDark)
   }
-  // rug under the table
-  const rug = engine.addEntity()
-  Transform.create(rug, { parent: root, position: Vector3.create(0, 0.005, 0), scale: Vector3.create(4.4, 0.01, 4.4) })
-  MeshRenderer.setCylinder(rug, 0.5, 0.5)
-  Material.setPbrMaterial(rug, { albedoColor: PALETTE.rug, roughness: 1, metallic: 0 })
+  // woven rug under the table
+  rugPlane(root, 4.6)
 
   // frame: two see-through planes, a rim and a foot
   boardPlane(root, -HALF_GAP)
@@ -194,8 +285,8 @@ export function buildTableVisual(t: Table): TableVisual {
   box(root, Vector3.create(0, BOARD_TOP + rimT / 2, 0), Vector3.create(BOARD_W + rimT * 2, rimT, rimD), PALETTE.frameDark)
   box(root, Vector3.create(-BOARD_W / 2 - rimT / 2, BOARD_CENTER_Y, 0), Vector3.create(rimT, BOARD_H + rimT * 2, rimD), PALETTE.frameDark)
   box(root, Vector3.create(BOARD_W / 2 + rimT / 2, BOARD_CENTER_Y, 0), Vector3.create(rimT, BOARD_H + rimT * 2, rimD), PALETTE.frameDark)
-  box(root, Vector3.create(0, TABLE_TOP_Y + 0.02, 0), Vector3.create(BOARD_W + 0.2, 0.06, 0.24), PALETTE.frameDark)
-  box(root, Vector3.create(0, (TABLE_TOP_Y + BOARD_CENTER_Y - BOARD_H / 2) / 2 + 0.02, 0), Vector3.create(BOARD_W + 0.05, 0.02, rimD), PALETTE.frameDark)
+  box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD_W + 0.2, 0.06, 0.26), PALETTE.frameDark)
+  box(root, Vector3.create(0, BOARD_CENTER_Y - BOARD_H / 2 - 0.01, 0), Vector3.create(BOARD_W + 0.05, 0.02, rimD), PALETTE.frameDark)
 
   // discs (pooled, one per cell)
   const discs: Entity[] = []
@@ -205,8 +296,8 @@ export function buildTableVisual(t: Table): TableVisual {
   for (let c = 0; c < COLS; c++) makeColumnCollider(t, root, c)
 
   // seat pads
-  const padA = makePad(root, SEAT_A, PALETTE.padYellow)
-  const padB = makePad(root, SEAT_B, PALETTE.padRed)
+  const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.padYellow)
+  const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.padRed)
   pointerEventsSystem.onPointerDown(
     { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here (Yellow)', maxDistance: 8 } },
     () => {
@@ -220,6 +311,16 @@ export function buildTableVisual(t: Table): TableVisual {
     }
   )
 
+  // a tiny robot on the table corner: tap it to challenge the house bot
+  const bot = makeBotFigure(root, Vector3.create(0.72, TABLE_TOP_Y, -0.28))
+  pointerEventsSystem.onPointerDown(
+    { entity: bot, opts: { button: InputAction.IA_POINTER, hoverText: 'Play the house bot', maxDistance: 8 } },
+    () => {
+      if (mySeatAt(t)) inviteBot(t)
+      else sitWithBot(t)
+    }
+  )
+
   const sign = makeSign(root)
 
   const vis: TableVisual = {
@@ -228,7 +329,9 @@ export function buildTableVisual(t: Table): TableVisual {
     sign,
     padA,
     padB,
-    rendered: { round: -1, cells: new Array<number>(CELL_COUNT).fill(0), winKey: '', signText: '' }
+    camA,
+    camB,
+    rendered: { round: -1, cells: new Array<number>(CELL_COUNT).fill(0), winKey: '', signText: '', signVisible: true }
   }
   visuals.push(vis)
   return vis
@@ -243,10 +346,11 @@ function discColor(v: number): Color4 {
 function setDisc(e: Entity, v: number, glow: boolean): void {
   Material.setPbrMaterial(e, {
     albedoColor: discColor(v),
-    roughness: 0.4,
+    roughness: 0.35,
     metallic: 0.1,
-    emissiveColor: glow ? (v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED) : Color3.Black(),
-    emissiveIntensity: glow ? 2.5 : 0
+    // a touch of self-illumination keeps discs vivid in shade; winners glow
+    emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
+    emissiveIntensity: glow ? 2.5 : 0.25
   })
 }
 
@@ -269,14 +373,31 @@ function signTextFor(t: Table): string {
   return `${title}\n${waiting} is waiting for a rival\nOne seat free`
 }
 
+function setFirstPersonArea(cam: Entity, on: boolean): void {
+  const has = CameraModeArea.getOrNull(cam) !== null
+  if (on && !has) CameraModeArea.create(cam, { area: Vector3.create(1.8, 2.6, 1.8), mode: CameraType.CT_FIRST_PERSON })
+  else if (!on && has) CameraModeArea.deleteFrom(cam)
+}
+
 export function updateTableVisual(vis: TableVisual): void {
   const b = boardOf(vis.table)
 
-  // sign
+  // first person only for the local player's own seat
+  const mine = mySeatAt(vis.table)
+  setFirstPersonArea(vis.camA, mine === SEAT_A)
+  setFirstPersonArea(vis.camB, mine === SEAT_B)
+
+  // sign (hidden for the local player while they are at this table: the UI
+  // card / controller carries the same info and the sign would loom overhead)
   const text = signTextFor(vis.table)
   if (text !== vis.rendered.signText) {
     vis.rendered.signText = text
     TextShape.getMutable(vis.sign).text = text
+  }
+  const signVisible = local.nearTableId !== vis.table.def.id
+  if (signVisible !== vis.rendered.signVisible) {
+    vis.rendered.signVisible = signVisible
+    VisibilityComponent.getMutable(vis.sign).visible = signVisible
   }
 
   // fresh round: hide everything

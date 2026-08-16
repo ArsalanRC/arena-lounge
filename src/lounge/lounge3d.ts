@@ -12,6 +12,7 @@ import {
   MeshRenderer,
   TextAlignMode,
   TextShape,
+  TextureWrapMode,
   Transform,
   engine
 } from '@dcl/sdk/ecs'
@@ -41,6 +42,19 @@ function cylinder(pos: Vector3, scale: Vector3, color: Color4, collide = false):
   return e
 }
 
+function texturedBox(pos: Vector3, scale: Vector3, src: string, tiling: [number, number], collide = false, rotY = 0): Entity {
+  const e = engine.addEntity()
+  Transform.create(e, { position: pos, scale, rotation: Quaternion.fromEulerDegrees(0, rotY, 0) })
+  MeshRenderer.setBox(e)
+  if (collide) MeshCollider.setBox(e)
+  Material.setPbrMaterial(e, {
+    texture: Material.Texture.Common({ src, wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: tiling[0], y: tiling[1] } }),
+    roughness: 0.85,
+    metallic: 0
+  })
+  return e
+}
+
 function planter(x: number, z: number): void {
   cylinder(Vector3.create(x, 0.3, z), Vector3.create(0.9, 0.6, 0.9), PALETTE.pot, true)
   const leaves = engine.addEntity()
@@ -66,17 +80,34 @@ function lamp(x: number, z: number): void {
 export function buildLounge(): void {
   const half = SCENE_SIZE / 2
 
-  // floor: one big slab plus a lighter inner "parquet" square
+  // floor: collider slab + tiled parquet on top
   solid(Vector3.create(half, -0.05, half), Vector3.create(SCENE_SIZE, 0.1, SCENE_SIZE), PALETTE.floor, { collide: true })
-  solid(Vector3.create(half, 0.003, half + 3), Vector3.create(22, 0.006, 20), PALETTE.floorTrim)
+  const parquet = engine.addEntity()
+  Transform.create(parquet, {
+    position: Vector3.create(half, 0.002, half),
+    rotation: Quaternion.fromEulerDegrees(90, 0, 0),
+    scale: Vector3.create(SCENE_SIZE, SCENE_SIZE, 1)
+  })
+  MeshRenderer.setPlane(parquet)
+  Material.setPbrMaterial(parquet, {
+    texture: Material.Texture.Common({ src: 'images/floor.png', wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: 10, y: 10 } }),
+    roughness: 0.75,
+    metallic: 0,
+    castShadows: false
+  })
 
-  // low boundary wall so nobody walks off the edge on a phone
+  // low wooden boundary so nobody walks off the edge on a phone
   const wallH = 0.9
   const wallT = 0.3
-  solid(Vector3.create(half, wallH / 2, wallT / 2), Vector3.create(SCENE_SIZE, wallH, wallT), PALETTE.woodDark, { collide: true })
-  solid(Vector3.create(half, wallH / 2, SCENE_SIZE - wallT / 2), Vector3.create(SCENE_SIZE, wallH, wallT), PALETTE.woodDark, { collide: true })
-  solid(Vector3.create(wallT / 2, wallH / 2, half), Vector3.create(wallT, wallH, SCENE_SIZE), PALETTE.woodDark, { collide: true })
-  solid(Vector3.create(SCENE_SIZE - wallT / 2, wallH / 2, half), Vector3.create(wallT, wallH, SCENE_SIZE), PALETTE.woodDark, { collide: true })
+  texturedBox(Vector3.create(half, wallH / 2, wallT / 2), Vector3.create(SCENE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true)
+  texturedBox(Vector3.create(half, wallH / 2, SCENE_SIZE - wallT / 2), Vector3.create(SCENE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true)
+  texturedBox(Vector3.create(wallT / 2, wallH / 2, half), Vector3.create(SCENE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true, 90)
+  texturedBox(Vector3.create(SCENE_SIZE - wallT / 2, wallH / 2, half), Vector3.create(SCENE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true, 90)
+  // cap rail on top of the wall
+  solid(Vector3.create(half, wallH + 0.03, wallT / 2), Vector3.create(SCENE_SIZE, 0.06, wallT + 0.1), PALETTE.woodDark)
+  solid(Vector3.create(half, wallH + 0.03, SCENE_SIZE - wallT / 2), Vector3.create(SCENE_SIZE, 0.06, wallT + 0.1), PALETTE.woodDark)
+  solid(Vector3.create(wallT / 2, wallH + 0.03, half), Vector3.create(wallT + 0.1, 0.06, SCENE_SIZE), PALETTE.woodDark)
+  solid(Vector3.create(SCENE_SIZE - wallT / 2, wallH + 0.03, half), Vector3.create(wallT + 0.1, 0.06, SCENE_SIZE), PALETTE.woodDark)
 
   // planters + lamps around the play area
   planter(3, 3)
@@ -94,11 +125,11 @@ export function buildLounge(): void {
   Transform.create(sign, { position: Vector3.create(SPAWN.x, 3.2, SPAWN.z + 3.5) })
   TextShape.create(sign, {
     text: 'ARENA LOUNGE\nPick a table, take a seat, play a friend',
-    fontSize: 3.2,
+    fontSize: 3,
     font: Font.F_SANS_SERIF,
     textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
-    textColor: PALETTE.cream,
-    outlineWidth: 0.12,
+    textColor: Color4.White(),
+    outlineWidth: 0.25,
     outlineColor: Color3.Black(),
     width: 12,
     height: 2

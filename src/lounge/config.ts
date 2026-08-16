@@ -46,7 +46,7 @@ export const AUTO_STAND_AFTER_MS = 8_000
 export const NEAR_TABLE_DISTANCE = 4.5 // metres: shows the table UI / seat buttons
 
 /** Distance from a table centre to each seat pad centre (local Z). */
-export const SEAT_PAD_OFFSET = 1.45
+export const SEAT_PAD_OFFSET = 1.8
 
 // ---------------------------------------------------------------- palette
 export const PALETTE = {
@@ -79,6 +79,8 @@ export const UI = {
   muted: Color4.fromHexString('#c9bfb2ff'),
   accent: Color4.fromHexString('#2f8fa3ff'),
   accentSoft: Color4.fromHexString('#256f80ff'),
+  /** Tint applied to the pill sprite when showing a toast. */
+  accentTint: Color4.fromHexString('#7fd0e0ff'),
   danger: Color4.fromHexString('#a33a33ff'),
   yellow: Color4.fromHexString('#f5c518ff'),
   red: Color4.fromHexString('#e2453dff'),
