@@ -14,7 +14,7 @@
  * Concurrent identical writes converge; concurrent conflicting writes are
  * only possible on seat claims, and the loser simply sees the seat taken.
  */
-import { engine, Entity, Transform, timers } from '@dcl/sdk/ecs'
+import { engine, Entity, Transform, timers, TouchScreenControls } from '@dcl/sdk/ecs'
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
@@ -557,6 +557,26 @@ function heartbeatSystem(dt: number): void {
   m.beat = Date.now()
 }
 
+/**
+ * Phone HUD: while seated, the native on-screen buttons (jump, the pointer
+ * "hand", E/F) sit exactly where the controller bar's action column is, so
+ * they are hidden for the duration of the seat and restored on standing up.
+ * A no-op on desktop.
+ */
+let touchHidden = false
+function touchControlsSystem(): void {
+  const seated = findMySeat() !== null
+  if (seated === touchHidden) return
+  touchHidden = seated
+  if (seated) {
+    TouchScreenControls.hideAll()
+    TouchScreenControls.hideCrosshair()
+  } else {
+    TouchScreenControls.showAll()
+    TouchScreenControls.showCrosshair()
+  }
+}
+
 let janitorTimer = 0
 function janitorSystem(dt: number): void {
   janitorTimer += dt
@@ -677,6 +697,7 @@ export function startTableSystems(): void {
   engine.addSystem(proximitySystem)
   engine.addSystem(heartbeatSystem)
   engine.addSystem(janitorSystem)
+  engine.addSystem(touchControlsSystem)
   engine.addSystem(botSystem)
   engine.addSystem(autoActionSystem)
 }
