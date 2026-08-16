@@ -157,3 +157,47 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 12:05 seat camera fixed for rotated tables (aim at floor height; client measures from the feet)
 - 2026-08-16 11:55 Dot Lines plugin (engine ported with 26 tests): two-tap connect-the-dots input, mirrored UI for the far seat, upright double-sided board on Table 3
 - 2026-08-16 11:50 tables made game-agnostic: TableBoard carries gameId + engine state JSON; games plug in via src/lounge/games/types.ts (rules, bot, 3D view, controls); Connect Four is the first plugin (behaviour unchanged)
+
+## 10. The house: draft plan (for Arsalan to approve or change)
+
+Goal (Arsalan, 16 Aug): a building where each floor is a game (or several),
+an elevator between floors, many games over time, instructions in many
+languages, later leaderboards and tournaments.
+
+Constraints that shape it: judges play on phones (walking and stairs cost
+patience; the T&C prefer simple + polished), the 4-parcel scene has an
+800-entity soft cap (we are at 590 with 4 tables), and every extra floor
+means more geometry the phone has to load.
+
+Proposal: **Arena Lounge House, three floors, elevator = teleport.**
+
+- **Ground floor "Lounge"** = what exists today, unchanged: walk in, sit,
+  play in ten seconds. Four tables (Connect Four x2, Dot Lines, Reversi),
+  info kiosk, welcome sign. Judges never *need* to leave this floor.
+- **Elevator** near the spawn: a small cabin; stepping in shows a floor
+  panel in the UI (Lounge / Floor 2 / Rooftop) and tapping a floor calls
+  `movePlayerTo` onto that floor's landing (no stairs, no waiting). Also
+  reachable from the "?" panel as a "Where to?" row.
+- **Floor 2 "Game room"** at y = 6 m: four more tables with the next games
+  (candidates from Game Arena engines that suit touch: Checkers, Match Pairs,
+  Tic Tac Toe as a 30-second warm-up, Backgammon later). Same table code,
+  just a different `y` and floor id in TABLES.
+- **Rooftop "Terrace"** at y = 12 m: leaderboard wall + tournament board
+  (needs the Multiplayer Server for persistence, see roadmap 6), lounge
+  seating, view over the World.
+- Structure = simple concrete/wood slabs on columns with a railing, built
+  from primitives like everything else; each floor is a 24 x 24 m slab
+  inside the 32 x 32 parcel footprint, leaving the ground floor's outer ring
+  open so the lounge still reads as a lounge from outside.
+
+Budgets: each table costs 100 to 150 entities today; with the collider
+collapse (one collider per board instead of one per cell) that drops to
+about 60 to 90, so eight tables + structure fits under 800. Triangles are
+not the problem (37% used).
+
+Order of work once approved: (1) collider collapse + entity audit,
+(2) elevator + floor slabs with the ground floor untouched, (3) Floor 2
+games one at a time, (4) rooftop after the leaderboard decision.
+
+Open questions for Arsalan: keep the name "Arena Lounge"? Which four games
+on Floor 2? Prizes for tournaments need a look at the DCL rules first.
