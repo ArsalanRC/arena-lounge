@@ -76,11 +76,12 @@ export interface LoungeStrings {
   elevatorHint: string
   youAreHere: (floor: string) => string
   close: string
-  floors: [string, string, string]
+  floors: [string, string, string, string]
   elevator: string
   welcome: string
   comingSoon: string
   gameRoom: string
+  skyRoom: string
   rooftop: string
   rooftopNote: string
   /** Seat colour names shown on buttons and chips. */
@@ -111,6 +112,17 @@ export interface LoungeStrings {
     ladderUp: (n: number) => string
     reached100: (side: string) => string
     blue: string
+    shipsLeft: (mine: number, enemy: number) => string
+    hit: string
+    miss: string
+    sunk: string
+    fleetSunk: (side: string) => string
+    tapWater: string
+    enemyWaters: string
+    yourFleet: string
+    totals: (a: number, b: number) => string
+    holdOrScore: (left: number) => string
+    royaleWinner: (side: string, total: number) => string
     pairs: string
     noMatch: string
     findTwin: string
@@ -155,7 +167,9 @@ const EN: LoungeStrings = {
     backgammon: 'Tap "Roll the dice", then a checker and a marked point (or Off to bear off). Each die is one move.',
     ludo: 'Tap "Roll the die", then one of the piece buttons. A six leaves the yard and rolls again; land on a rival to send it home.',
     supertictactoe: 'Tap a square in the highlighted board. The square you pick sends your rival to the board with that position; win three boards in a row.',
-    snakesladders: 'Tap "Roll the die": your piece moves ahead. Ladders climb, snakes slide down, a six rolls again, exactly 100 wins.'
+    snakesladders: 'Tap "Roll the die": your piece moves ahead. Ladders climb, snakes slide down, a six rolls again, exactly 100 wins.',
+    seastrike: 'Fleets are placed at random. Tap a square of the enemy waters to fire; sink all five ships to win.',
+    diceroyale: 'Roll up to three times, tap dice to hold them, then score one of 13 categories. Both players fill their own sheet; the higher total wins.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -207,11 +221,12 @@ const EN: LoungeStrings = {
   elevatorHint: 'Tap a floor. Step off the pad to stay.',
   youAreHere: (floor) => `${floor} · you are here`,
   close: 'Close',
-  floors: ['Lounge', 'Game room', 'Rooftop'],
+  floors: ['Lounge', 'Game room', 'Sky room', 'Rooftop'],
   elevator: 'ELEVATOR',
   welcome: 'Pick a table, take a seat, play a friend',
   comingSoon: 'coming soon',
   gameRoom: 'GAME ROOM',
+  skyRoom: 'SKY ROOM',
   rooftop: 'ROOFTOP',
   rooftopNote: 'Leaderboard and tournaments: coming after the buildathon',
   seat: { Yellow: 'Yellow', Red: 'Red', Black: 'Black', White: 'White', Green: 'Green', Blue: 'Blue', X: 'X', O: 'O' },
@@ -240,6 +255,17 @@ const EN: LoungeStrings = {
     ladderUp: (n) => `Ladder! Up to ${n}`,
     reached100: (side) => `${side} reached 100`,
     blue: 'Blue',
+    shipsLeft: (mine, enemy) => `Ships ${mine} : ${enemy}`,
+    hit: 'Hit!',
+    miss: 'Miss',
+    sunk: 'Sunk!',
+    fleetSunk: (side) => `${side} sank the whole fleet`,
+    tapWater: 'Tap enemy waters to fire',
+    enemyWaters: 'Enemy waters',
+    yourFleet: 'Your fleet',
+    totals: (a, b) => `Score ${a} : ${b}`,
+    holdOrScore: (left) => (left > 0 ? `Hold dice, roll (${left} left) or score` : 'Pick a category'),
+    royaleWinner: (side, total) => `${side} wins with ${total}`,
     pairs: 'Pairs',
     noMatch: 'No match, flipping back…',
     findTwin: 'Find its twin',
@@ -284,7 +310,9 @@ const DE: LoungeStrings = {
     backgammon: 'Tippe auf "Würfeln", dann auf einen Stein und ein markiertes Feld (oder Raus zum Herauswürfeln). Jeder Würfel ist ein Zug.',
     ludo: 'Tippe auf "Würfeln" und dann auf einen der Figuren-Buttons. Mit einer Sechs kommst du raus und würfelst noch einmal; wer auf einem Gegner landet, schickt ihn zurück.',
     supertictactoe: 'Tippe auf ein Feld im markierten Brett. Dein Feld schickt den Gegner in das Brett mit derselben Position; wer drei Bretter in einer Reihe gewinnt, gewinnt.',
-    snakesladders: 'Tippe auf "Würfeln": deine Figur zieht vor. Leitern führen hoch, Schlangen runter, eine Sechs würfelt noch einmal, genau 100 gewinnt.'
+    snakesladders: 'Tippe auf "Würfeln": deine Figur zieht vor. Leitern führen hoch, Schlangen runter, eine Sechs würfelt noch einmal, genau 100 gewinnt.',
+    seastrike: 'Die Flotten werden zufällig aufgestellt. Tippe auf ein Feld im gegnerischen Meer, um zu feuern; wer alle fünf Schiffe versenkt, gewinnt.',
+    diceroyale: 'Würfle bis zu dreimal, tippe Würfel zum Halten und trage dann eine von 13 Kategorien ein. Jeder füllt seinen eigenen Zettel; die höhere Summe gewinnt.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -336,11 +364,12 @@ const DE: LoungeStrings = {
   elevatorHint: 'Tippe auf ein Stockwerk. Geh von der Platte, um zu bleiben.',
   youAreHere: (floor) => `${floor} · du bist hier`,
   close: 'Schließen',
-  floors: ['Lounge', 'Spielzimmer', 'Dachterrasse'],
+  floors: ['Lounge', 'Spielzimmer', 'Himmelszimmer', 'Dachterrasse'],
   elevator: 'AUFZUG',
   welcome: 'Such dir einen Tisch, setz dich, spiel eine Runde',
   comingSoon: 'kommt bald',
   gameRoom: 'SPIELZIMMER',
+  skyRoom: 'HIMMELSZIMMER',
   rooftop: 'DACHTERRASSE',
   rooftopNote: 'Bestenliste und Turniere: kommen nach dem Buildathon',
   seat: { Yellow: 'Gelb', Red: 'Rot', Black: 'Schwarz', White: 'Weiß', Green: 'Grün', Blue: 'Blau', X: 'X', O: 'O' },
@@ -369,6 +398,17 @@ const DE: LoungeStrings = {
     ladderUp: (n) => `Leiter! Hoch auf ${n}`,
     reached100: (side) => `${side} hat die 100 erreicht`,
     blue: 'Blau',
+    shipsLeft: (mine, enemy) => `Schiffe ${mine} : ${enemy}`,
+    hit: 'Treffer!',
+    miss: 'Wasser',
+    sunk: 'Versenkt!',
+    fleetSunk: (side) => `${side} hat die ganze Flotte versenkt`,
+    tapWater: 'Tippe auf das gegnerische Meer, um zu feuern',
+    enemyWaters: 'Gegnerisches Meer',
+    yourFleet: 'Deine Flotte',
+    totals: (a, b) => `Punkte ${a} : ${b}`,
+    holdOrScore: (left) => (left > 0 ? `Halten, würfeln (${left} übrig) oder eintragen` : 'Wähle eine Kategorie'),
+    royaleWinner: (side, total) => `${side} gewinnt mit ${total}`,
     pairs: 'Paare',
     noMatch: 'Kein Paar, wird umgedreht…',
     findTwin: 'Finde das Gegenstück',
@@ -413,7 +453,9 @@ const ES: LoungeStrings = {
     backgammon: 'Toca "Tirar los dados", luego una ficha y un punto marcado (o Fuera para sacarla). Cada dado es un movimiento.',
     ludo: 'Toca "Tirar el dado" y luego uno de los botones de ficha. Con un seis sales del patio y vuelves a tirar; si caes sobre un rival, lo mandas a casa.',
     supertictactoe: 'Toca una casilla del tablero marcado. Tu casilla manda al rival al tablero de esa posición; gana quien hace tres tableros en raya.',
-    snakesladders: 'Toca "Tirar el dado": tu ficha avanza. Las escaleras suben, las serpientes bajan, un seis vuelve a tirar, gana quien llega justo a 100.'
+    snakesladders: 'Toca "Tirar el dado": tu ficha avanza. Las escaleras suben, las serpientes bajan, un seis vuelve a tirar, gana quien llega justo a 100.',
+    seastrike: 'Las flotas se colocan al azar. Toca una casilla de las aguas enemigas para disparar; hunde los cinco barcos para ganar.',
+    diceroyale: 'Tira hasta tres veces, toca dados para guardarlos y anota una de 13 categorías. Cada uno llena su propia hoja; gana el total más alto.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',
@@ -465,11 +507,12 @@ const ES: LoungeStrings = {
   elevatorHint: 'Toca una planta. Bájate de la plataforma para quedarte.',
   youAreHere: (floor) => `${floor} · estás aquí`,
   close: 'Cerrar',
-  floors: ['Salón', 'Sala de juegos', 'Azotea'],
+  floors: ['Salón', 'Sala de juegos', 'Sala del cielo', 'Azotea'],
   elevator: 'ASCENSOR',
   welcome: 'Elige una mesa, siéntate, juega con alguien',
   comingSoon: 'muy pronto',
   gameRoom: 'SALA DE JUEGOS',
+  skyRoom: 'SALA DEL CIELO',
   rooftop: 'AZOTEA',
   rooftopNote: 'Clasificación y torneos: después del buildathon',
   seat: { Yellow: 'Amarillo', Red: 'Rojo', Black: 'Negras', White: 'Blancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
@@ -498,6 +541,17 @@ const ES: LoungeStrings = {
     ladderUp: (n) => `¡Escalera! Subes a ${n}`,
     reached100: (side) => `${side} llegó a 100`,
     blue: 'Azul',
+    shipsLeft: (mine, enemy) => `Barcos ${mine} : ${enemy}`,
+    hit: '¡Tocado!',
+    miss: 'Agua',
+    sunk: '¡Hundido!',
+    fleetSunk: (side) => `${side} hundió toda la flota`,
+    tapWater: 'Toca las aguas enemigas para disparar',
+    enemyWaters: 'Aguas enemigas',
+    yourFleet: 'Tu flota',
+    totals: (a, b) => `Puntos ${a} : ${b}`,
+    holdOrScore: (left) => (left > 0 ? `Guarda dados, tira (${left}) o anota` : 'Elige una categoría'),
+    royaleWinner: (side, total) => `${side} gana con ${total}`,
     pairs: 'Parejas',
     noMatch: 'No coinciden, se dan la vuelta…',
     findTwin: 'Encuentra su pareja',
@@ -542,7 +596,9 @@ const PT: LoungeStrings = {
     backgammon: 'Toque em "Lançar os dados", depois numa peça e num ponto marcado (ou Fora para retirar). Cada dado é um movimento.',
     ludo: 'Toque em "Lançar o dado" e depois num dos botões de peça. Um seis tira a peça da base e joga de novo; caia sobre um rival para mandá-lo de volta.',
     supertictactoe: 'Toque numa casa do tabuleiro marcado. A sua casa manda o rival para o tabuleiro dessa posição; vence quem faz três tabuleiros em linha.',
-    snakesladders: 'Toque em "Lançar o dado": a sua peça avança. Escadas sobem, cobras descem, um seis joga de novo, vence quem chega exatamente a 100.'
+    snakesladders: 'Toque em "Lançar o dado": a sua peça avança. Escadas sobem, cobras descem, um seis joga de novo, vence quem chega exatamente a 100.',
+    seastrike: 'As frotas são posicionadas ao acaso. Toque numa casa das águas inimigas para atirar; afunde os cinco navios para vencer.',
+    diceroyale: 'Jogue até três vezes, toque nos dados para segurá-los e marque uma de 13 categorias. Cada um preenche a sua folha; o total maior vence.'
   },
   timer: 'Você tem 60 segundos por jogada. Levante-se quando quiser.',
   language: 'Idioma',
@@ -594,11 +650,12 @@ const PT: LoungeStrings = {
   elevatorHint: 'Toque num andar. Saia da plataforma para ficar.',
   youAreHere: (floor) => `${floor} · você está aqui`,
   close: 'Fechar',
-  floors: ['Salão', 'Sala de jogos', 'Terraço'],
+  floors: ['Salão', 'Sala de jogos', 'Sala do céu', 'Terraço'],
   elevator: 'ELEVADOR',
   welcome: 'Escolha uma mesa, sente-se, jogue com alguém',
   comingSoon: 'em breve',
   gameRoom: 'SALA DE JOGOS',
+  skyRoom: 'SALA DO CÉU',
   rooftop: 'TERRAÇO',
   rooftopNote: 'Ranking e torneios: depois do buildathon',
   seat: { Yellow: 'Amarelo', Red: 'Vermelho', Black: 'Pretas', White: 'Brancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
@@ -627,6 +684,17 @@ const PT: LoungeStrings = {
     ladderUp: (n) => `Escada! Sobe para ${n}`,
     reached100: (side) => `${side} chegou aos 100`,
     blue: 'Azul',
+    shipsLeft: (mine, enemy) => `Navios ${mine} : ${enemy}`,
+    hit: 'Acertou!',
+    miss: 'Água',
+    sunk: 'Afundou!',
+    fleetSunk: (side) => `${side} afundou a frota inteira`,
+    tapWater: 'Toque nas águas inimigas para atirar',
+    enemyWaters: 'Águas inimigas',
+    yourFleet: 'Sua frota',
+    totals: (a, b) => `Pontos ${a} : ${b}`,
+    holdOrScore: (left) => (left > 0 ? `Segure dados, jogue (${left}) ou marque` : 'Escolha uma categoria'),
+    royaleWinner: (side, total) => `${side} vence com ${total}`,
     pairs: 'Pares',
     noMatch: 'Não combinam, virando de volta…',
     findTwin: 'Ache o par',
@@ -671,7 +739,9 @@ const FR: LoungeStrings = {
     backgammon: 'Touche « Lancer les dés », puis un pion et un point marqué (ou Sortie pour le sortir). Chaque dé est un coup.',
     ludo: 'Touche « Lancer le dé », puis un des boutons de pion. Un six fait sortir un pion et tu relances ; tomber sur un adversaire le renvoie à sa base.',
     supertictactoe: 'Touche une case de la grille en surbrillance. Ta case envoie l\'adversaire dans la grille de même position ; gagne trois grilles alignées.',
-    snakesladders: 'Touche « Lancer le dé » : ton pion avance. Les échelles montent, les serpents descendent, un six rejoue, arriver pile sur 100 gagne.'
+    snakesladders: 'Touche « Lancer le dé » : ton pion avance. Les échelles montent, les serpents descendent, un six rejoue, arriver pile sur 100 gagne.',
+    seastrike: 'Les flottes sont placées au hasard. Touche une case des eaux ennemies pour tirer ; coule les cinq navires pour gagner.',
+    diceroyale: 'Lance jusqu\'à trois fois, touche des dés pour les garder, puis marque une des 13 catégories. Chacun remplit sa feuille ; le total le plus haut gagne.'
   },
   timer: 'Tu as 60 secondes par coup. Lève-toi quand tu veux.',
   language: 'Langue',
@@ -723,11 +793,12 @@ const FR: LoungeStrings = {
   elevatorHint: 'Touche un étage. Descends de la plaque pour rester.',
   youAreHere: (floor) => `${floor} · tu es ici`,
   close: 'Fermer',
-  floors: ['Salon', 'Salle de jeux', 'Toit-terrasse'],
+  floors: ['Salon', 'Salle de jeux', 'Salle du ciel', 'Toit-terrasse'],
   elevator: 'ASCENSEUR',
   welcome: 'Choisis une table, assieds-toi, joue avec quelqu\'un',
   comingSoon: 'bientôt',
   gameRoom: 'SALLE DE JEUX',
+  skyRoom: 'SALLE DU CIEL',
   rooftop: 'TOIT-TERRASSE',
   rooftopNote: 'Classement et tournois : après le buildathon',
   seat: { Yellow: 'les jaunes', Red: 'les rouges', Black: 'les noirs', White: 'les blancs', Green: 'les verts', Blue: 'les bleus', X: 'X', O: 'O' },
@@ -756,6 +827,17 @@ const FR: LoungeStrings = {
     ladderUp: (n) => `Échelle ! Montée en ${n}`,
     reached100: (side) => `${side} ont atteint 100`,
     blue: 'les bleus',
+    shipsLeft: (mine, enemy) => `Navires ${mine} : ${enemy}`,
+    hit: 'Touché !',
+    miss: 'À l\'eau',
+    sunk: 'Coulé !',
+    fleetSunk: (side) => `${side} ont coulé toute la flotte`,
+    tapWater: 'Touche les eaux ennemies pour tirer',
+    enemyWaters: 'Eaux ennemies',
+    yourFleet: 'Ta flotte',
+    totals: (a, b) => `Score ${a} : ${b}`,
+    holdOrScore: (left) => (left > 0 ? `Garde des dés, relance (${left}) ou marque` : 'Choisis une catégorie'),
+    royaleWinner: (side, total) => `${side} gagnent avec ${total}`,
     pairs: 'Paires',
     noMatch: 'Pas de paire, retournement…',
     findTwin: 'Trouve sa jumelle',

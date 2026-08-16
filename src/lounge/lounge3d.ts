@@ -209,7 +209,7 @@ function directoryBoard(x: number, z: number): void {
         .map((zn) => localeInfo(uiLang.code).games[zn.gameId]?.name ?? GAME_NAMES[zn.gameId])
         .join(' · ')
     const f = L().floors
-    return `${f[0].toUpperCase()}\n${names(0)}\n\n${f[1].toUpperCase()} ▲\n${names(1)}\n\n${f[2].toUpperCase()} ▲▲`
+    return `${f[0].toUpperCase()}\n${names(0)}\n\n${f[1].toUpperCase()} ▲\n${names(1)}\n\n${f[2].toUpperCase()} ▲▲\n${names(2)}\n\n${f[3].toUpperCase()} ▲▲▲`
   }
   const lbl = engine.addEntity()
   // text shapes read from their -Z side: turn the label the other way round than the plate
@@ -384,19 +384,37 @@ function buildTower(): void {
   }
   liveLabel(Vector3.create(PLAZA.x, y1 + 3.2, PLAZA.z + 5.2), () => L().gameRoom, 2.6, Color4.White(), 8)
 
-  // rooftop terrace (floor 2): benches looking down the oculus, lamps, a sign
+  // sky room (floor 2): two game corners (N, S), sofas at E and W looking over the oculus, planters, lamps
   const y2 = FLOORS[2].y
-  const roofCentre = Vector3.create(PLAZA.x, y2, PLAZA.z)
+  for (const deg of [45, 120, 225]) column(deg, 9.5, 16, 24, 0.5)
+  for (const deg of [90, 270]) {
+    const t = (deg * Math.PI) / 180
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 6.2, y2, PLAZA.z + Math.cos(t) * 6.2)
+    prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
+  }
+  for (const deg of [60, 120, 240, 300]) {
+    const t = (deg * Math.PI) / 180
+    planter(PLAZA.x + Math.sin(t) * 5.0, PLAZA.z + Math.cos(t) * 5.0, y2)
+  }
+  for (const deg of [70, 250]) {
+    const t = (deg * Math.PI) / 180
+    lamp(PLAZA.x + Math.sin(t) * 8.6, PLAZA.z + Math.cos(t) * 8.6, y2)
+  }
+  liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
+
+  // rooftop terrace (floor 3): benches looking down the oculus, planters, a sign under the crown
+  const y3 = FLOORS[3].y
+  const roofCentre = Vector3.create(PLAZA.x, y3, PLAZA.z)
   for (const deg of [30, 100, 170, 260, 330]) {
     const t = (deg * Math.PI) / 180
-    bench(Vector3.create(PLAZA.x + Math.sin(t) * 6.4, y2, PLAZA.z + Math.cos(t) * 6.4), roofCentre)
+    bench(Vector3.create(PLAZA.x + Math.sin(t) * 6.0, y3, PLAZA.z + Math.cos(t) * 6.0), roofCentre)
   }
   for (const deg of [60, 130, 210, 280]) {
     const t = (deg * Math.PI) / 180
-    lamp(PLAZA.x + Math.sin(t) * 9.2, PLAZA.z + Math.cos(t) * 9.2, y2)
+    lamp(PLAZA.x + Math.sin(t) * 8.4, PLAZA.z + Math.cos(t) * 8.4, y3)
   }
-  planter(PLAZA.x - 8.6, PLAZA.z + 3, y2)
-  planter(PLAZA.x + 8.6, PLAZA.z + 3, y2)
-  liveLabel(Vector3.create(PLAZA.x, y2 + 3.4, PLAZA.z + 7.5), () => L().rooftop, 2.6, Color4.White(), 8)
-  liveLabel(Vector3.create(PLAZA.x, y2 + 2.2, PLAZA.z + 7.5), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
+  planter(PLAZA.x - 8.0, PLAZA.z + 3, y3)
+  planter(PLAZA.x + 8.0, PLAZA.z + 3, y3)
+  liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z + 7.0), () => L().rooftop, 2.6, Color4.White(), 8)
+  liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
 }

@@ -35,7 +35,8 @@ export interface FloorDef {
 export const FLOORS: FloorDef[] = [
   { id: 0, name: 'Lounge', y: 0 },
   { id: 1, name: 'Game room', y: 8 },
-  { id: 2, name: 'Rooftop', y: 16 }
+  { id: 2, name: 'Sky room', y: 16 },
+  { id: 3, name: 'Rooftop', y: 24 }
 ]
 
 /**
@@ -63,7 +64,9 @@ export const LIGHTS: Array<{ x: number; y: number; z: number; color: Color3; int
   { x: 29.5, y: 4.2, z: 16, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
   { x: 24, y: 13.5, z: 32, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
   { x: 24, y: 13.5, z: 19, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
-  { x: 24, y: 20.5, z: 25.5, color: Color3.create(1, 0.82, 0.55), intensity: 3000, range: 16 }
+  { x: 24, y: 21, z: 30, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
+  { x: 24, y: 21, z: 21, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
+  { x: 24, y: 28.5, z: 25.5, color: Color3.create(1, 0.82, 0.55), intensity: 3000, range: 16 }
 ]
 
 export interface TableDef {
@@ -122,11 +125,13 @@ export const ZONES: ZoneDef[] = [
   { id: 8, gameId: 'crocsnap', position: ring(180, 9, 1), rug: Color4.fromHexString('#4f9d6bff'), banner: Color4.fromHexString('#2c5e3fff'), tables: 1, floor: 1 },
   { id: 9, gameId: 'ludo', position: ring(270, 9, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 },
   { id: 10, gameId: 'supertictactoe', position: ring(45, 9, 1), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 1 },
-  { id: 11, gameId: 'snakesladders', position: ring(225, 9, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 1, floor: 1 }
+  { id: 11, gameId: 'snakesladders', position: ring(225, 9, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 1, floor: 1 },
+  { id: 12, gameId: 'seastrike', position: ring(0, 7.4, 2), rug: Color4.fromHexString('#4f7fb0ff'), banner: Color4.fromHexString('#1f4e7fff'), tables: 1, floor: 2 },
+  { id: 13, gameId: 'diceroyale', position: ring(180, 7.4, 2), rug: Color4.fromHexString('#9b6fd0ff'), banner: Color4.fromHexString('#5a3a8aff'), tables: 1, floor: 2 }
 ]
 
 /** Games that have a plugin today; zones for other games stay empty until then. */
-export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap', 'backgammon', 'ludo', 'supertictactoe', 'snakesladders']
+export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap', 'backgammon', 'ludo', 'supertictactoe', 'snakesladders', 'seastrike', 'diceroyale']
 
 /** Yaw (degrees) so that a table's front (-Z) points at `target`. */
 export function yawToward(from: Vector3, target: Vector3): number {

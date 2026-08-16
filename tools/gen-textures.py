@@ -13,6 +13,7 @@
   images/rug-ring.png      256  ring mask, emissive on rugs (tinted per corner)
 UI (all alpha):
   images/ui/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
+  images/ui/die-1..6.png    128  die faces with pips (Dice Royale)
   images/ui/disc-yellow.png / disc-red.png  128  shaded discs
   images/ui/hole.png        128  recessed empty cell
   images/ui/ring.png        128  white ring (win / last-move highlight)
@@ -447,6 +448,27 @@ def gen_snakes_board(path='images/snakes-board.png'):
         return (*colour, 1.0)
     write_png(path, S, S, px)
 
+# ------------------------------------------------------------------ die faces
+def gen_die_faces():
+    """images/ui/die-1.png .. die-6.png: rounded cream die faces with dark pips (Dice Royale)."""
+    S = 128
+    pips = {1: [(0.5, 0.5)], 2: [(0.28, 0.28), (0.72, 0.72)], 3: [(0.28, 0.28), (0.5, 0.5), (0.72, 0.72)],
+            4: [(0.28, 0.28), (0.72, 0.28), (0.28, 0.72), (0.72, 0.72)],
+            5: [(0.28, 0.28), (0.72, 0.28), (0.5, 0.5), (0.28, 0.72), (0.72, 0.72)],
+            6: [(0.28, 0.25), (0.72, 0.25), (0.28, 0.5), (0.72, 0.5), (0.28, 0.75), (0.72, 0.75)]}
+    face, edge, pip = hex_rgb('#f7f1e6'), hex_rgb('#c9b79a'), hex_rgb('#2b2320')
+    for n in range(1, 7):
+        def px(x, y, n=n):
+            cov = rounded_rect_cov(x, y, S, S, 22, 3)
+            if cov <= 0:
+                return (0, 0, 0, 0)
+            u, v = (x + 0.5) / S, (y + 0.5) / S
+            col = mix(face, edge, smoothstep(0.7, 1.0, max(abs(u - 0.5), abs(v - 0.5)) * 2) * 0.5)
+            for (cx, cy) in pips[n]:
+                col = mix(col, pip, circle_cov(x, y, cx * S, cy * S, 0.09 * S))
+            return (*col, cov)
+        write_png(f'images/ui/die-{n}.png', S, S, px)
+
 # ------------------------------------------------------------------ rug ring (emissive mask)
 def gen_rug_ring(path='images/rug-ring.png'):
     """White ring on black: used as the emissive texture of every rug, tinted
@@ -727,5 +749,6 @@ if __name__ == '__main__':
     gen_ludo_board()
     gen_rug_ring()
     gen_snakes_board()
+    gen_die_faces()
     gen_ui_disc('images/ui/disc-blue.png', '#3a7bd5', '#1f4b8f', '#8fc0ff')
     gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')
