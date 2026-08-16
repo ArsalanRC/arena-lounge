@@ -119,48 +119,35 @@ function label(pos: Vector3, text: string, fontSize: number, color = Color4.Whit
 
 // ---------------------------------------------------------------- furniture
 
-/** Low-poly leaf ball (models/canopy.glb, 320 triangles; a primitive sphere costs ~770). */
-function canopy(pos: Vector3, scale: Vector3): Entity {
+/**
+ * Prop instance: one entity with a shared GLB (models/*.glb from
+ * tools/gen-models.py). Every prop used to be two to six primitives with a
+ * material each; as instances they share mesh and materials, which is what
+ * keeps the phone's material count in budget.
+ */
+function prop(src: string, pos: Vector3, rotY = 0, scale = 1, collide = false): Entity {
   const e = engine.addEntity()
-  Transform.create(e, { position: pos, scale })
-  GltfContainer.create(e, { src: 'models/canopy.glb' })
+  Transform.create(e, { position: pos, rotation: Quaternion.fromEulerDegrees(0, rotY, 0), scale: Vector3.create(scale, scale, scale) })
+  GltfContainer.create(e, { src, visibleMeshesCollisionMask: collide ? ColliderLayer.CL_PHYSICS : ColliderLayer.CL_NONE, invisibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
   return e
 }
 
 function planter(x: number, z: number, y = 0): void {
-  cylinder(Vector3.create(x, y + 0.3, z), Vector3.create(0.9, 0.6, 0.9), PALETTE.pot, true)
-  canopy(Vector3.create(x, y + 1.05, z), Vector3.create(1.2, 1.0, 1.2))
+  prop('models/planter.glb', Vector3.create(x, y, z), 0, 1, true)
 }
 
-/** Garden tree: trunk + two leaf balls. */
+/** Garden tree (trunk + two leaf balls), `size` scales the whole tree. */
 function tree(x: number, z: number, size = 1): void {
-  cylinder(Vector3.create(x, 1.6 * size, z), Vector3.create(0.36 * size, 3.2 * size, 0.36 * size), PALETTE.woodDark, true)
-  for (const [dx, dy, dz, r] of [[0, 3.6, 0, 2.6], [0.6, 4.4, -0.4, 1.7]]) {
-    canopy(Vector3.create(x + dx * size, dy * size, z + dz * size), Vector3.create(r * size, r * 0.85 * size, r * size))
-  }
-}
-
-/** Glowing cube lantern (a sphere would cost 770 triangles). */
-function lantern(pos: Vector3, size: number): void {
-  const e = engine.addEntity()
-  Transform.create(e, { position: pos, rotation: Quaternion.fromEulerDegrees(0, 45, 0), scale: Vector3.create(size, size, size) })
-  MeshRenderer.setBox(e)
-  Material.setPbrMaterial(e, { albedoColor: PALETTE.lamp, emissiveColor: Color3.fromHexString('#ffc773'), emissiveIntensity: 3, roughness: 0.3, metallic: 0 })
+  prop('models/tree.glb', Vector3.create(x, 0, z), (x * 37 + z * 11) % 360, size, true)
 }
 
 function lamp(x: number, z: number, y = 0): void {
-  cylinder(Vector3.create(x, y + 1.4, z), Vector3.create(0.12, 2.8, 0.12), PALETTE.woodDark, true)
-  lantern(Vector3.create(x, y + 2.95, z), 0.4)
+  prop('models/lamp.glb', Vector3.create(x, y, z), 45)
 }
 
-/** A bench facing `toward`, made of a seat plank and two legs. */
+/** A bench facing `toward` (models/bench.glb). */
 function bench(pos: Vector3, toward: Vector3): void {
-  const yaw = yawToward(pos, toward)
-  const root = engine.addEntity()
-  Transform.create(root, { position: pos, rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  solid(Vector3.create(0, 0.42, 0), Vector3.create(1.8, 0.08, 0.5), PALETTE.wood, { parent: root, collide: true })
-  solid(Vector3.create(-0.7, 0.2, 0), Vector3.create(0.12, 0.4, 0.44), PALETTE.woodDark, { parent: root })
-  solid(Vector3.create(0.7, 0.2, 0), Vector3.create(0.12, 0.4, 0.44), PALETTE.woodDark, { parent: root })
+  prop('models/bench.glb', pos, yawToward(pos, toward), 1, true)
 }
 
 /** Banner pole with a coloured cloth and the game name, marking a corner. */
@@ -192,53 +179,22 @@ function zoneBanner(z: ZoneDef): void {
  * ring and an ELEVATOR sign facing the plaza.
  */
 function elevatorShaft(pad: Vector3): void {
-  const top = FLOORS[FLOORS.length - 1].y + 4.2
-  const half = 1.25
-  const yaw = yawToward(pad, PLAZA) // -Z of the shaft frame points at the plaza
-  const root = engine.addEntity()
-  Transform.create(root, { position: Vector3.create(pad.x, 0, pad.z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  for (const [x, z] of [[-half, -half], [half, -half], [-half, half], [half, half]]) {
-    solid(Vector3.create(x, top / 2, z), Vector3.create(0.14, top, 0.14), PALETTE.column, { parent: root })
-  }
-  const glass = Color4.create(0.7, 0.9, 1, 0.22)
-  const pane = (pos: Vector3, scale: Vector3) => {
-    const e = engine.addEntity()
-    Transform.create(e, { parent: root, position: pos, scale })
-    MeshRenderer.setBox(e)
-    Material.setPbrMaterial(e, { albedoColor: glass, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_BLEND, roughness: 0.1, metallic: 0.2, castShadows: false })
-  }
-  // glass on the back and the two sides; the plaza side stays open
-  pane(Vector3.create(0, top / 2, half), Vector3.create(half * 2, top, 0.04))
-  pane(Vector3.create(-half, top / 2, 0), Vector3.create(0.04, top, half * 2))
-  pane(Vector3.create(half, top / 2, 0), Vector3.create(0.04, top, half * 2))
-  solid(Vector3.create(0, top + 0.1, 0), Vector3.create(half * 2 + 0.3, 0.2, half * 2 + 0.3), PALETTE.column, { parent: root })
+  // models/shaft.glb: posts, glass on three sides (open towards -Z = the plaza), roof, pads + light rings on every floor
+  prop('models/shaft.glb', Vector3.create(pad.x, 0, pad.z), yawToward(pad, PLAZA))
   for (const f of FLOORS) {
-    const y = f.y
-    const disc = engine.addEntity()
-    Transform.create(disc, { parent: root, position: Vector3.create(0, y + 0.02, 0), scale: Vector3.create(2.2, 0.04, 2.2) })
-    MeshRenderer.setCylinder(disc, 0.5, 0.5)
-    Material.setPbrMaterial(disc, { albedoColor: Color4.fromHexString('#7fd0e0ff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 1.2, roughness: 0.4, metallic: 0.1 })
-    // light ring at door height and the sign above the opening, both facing the plaza
-    const ring = engine.addEntity()
-    Transform.create(ring, { parent: root, position: Vector3.create(0, y + 2.6, -half), scale: Vector3.create(half * 2 + 0.2, 0.08, 0.08) })
-    MeshRenderer.setBox(ring)
-    Material.setPbrMaterial(ring, { albedoColor: Color4.fromHexString('#9ff0ffff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 2, roughness: 0.3, metallic: 0 })
-    liveLabel(Vector3.create(pad.x, y + 3.05, pad.z), () => L().elevator, 2.0, Color4.White(), 6)
-    liveLabel(Vector3.create(pad.x, y + 2.35, pad.z), () => L().floors.join(' · '), 0.9, PALETTE.cream, 6)
+    liveLabel(Vector3.create(pad.x, f.y + 3.05, pad.z), () => L().elevator, 2.0, Color4.White(), 6)
+    liveLabel(Vector3.create(pad.x, f.y + 2.35, pad.z), () => L().floors.join(' · '), 0.9, PALETTE.cream, 6)
   }
 }
 
 /** A post with a glowing "?" cube: tap to open How to play. */
 function infoKiosk(x: number, z: number): void {
-  cylinder(Vector3.create(x, 0.6, z), Vector3.create(0.14, 1.2, 0.14), PALETTE.woodDark, true)
-  const cube = engine.addEntity()
-  Transform.create(cube, { position: Vector3.create(x, 1.45, z), rotation: Quaternion.fromEulerDegrees(0, 45, 0), scale: Vector3.create(0.42, 0.42, 0.42) })
-  MeshRenderer.setBox(cube)
-  MeshCollider.setBox(cube, ColliderLayer.CL_POINTER)
-  Material.setPbrMaterial(cube, { albedoColor: PALETTE.frame, emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 0.8, roughness: 0.3, metallic: 0.2 })
+  const e = engine.addEntity()
+  Transform.create(e, { position: Vector3.create(x, 0, z), rotation: Quaternion.fromEulerDegrees(0, 45, 0) })
+  GltfContainer.create(e, { src: 'models/kiosk.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
   label(Vector3.create(x, 1.45, z), '?', 4, Color4.White(), 2)
   liveLabel(Vector3.create(x, 2.05, z), () => L().howToPlay, 1.4, Color4.White(), 4)
-  pointerEventsSystem.onPointerDown({ entity: cube, opts: { button: InputAction.IA_POINTER, hoverText: 'How to play', maxDistance: 10 } }, () => {
+  pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'How to play', maxDistance: 10 } }, () => {
     local.helpOpen = true
   })
 }
@@ -299,11 +255,7 @@ export function buildLounge(): void {
   // the plaza: a big warm rug, a tree in the middle as the landmark, four
   // benches facing in, lamps at the corners
   rug(PLAZA, 9.5, Color4.fromHexString('#e3c9a3ff'), 0.008)
-  cylinder(Vector3.create(PLAZA.x, 0.35, PLAZA.z), Vector3.create(1.6, 0.7, 1.6), PALETTE.pot, true)
-  cylinder(Vector3.create(PLAZA.x, 2.0, PLAZA.z), Vector3.create(0.32, 3.4, 0.32), PALETTE.woodDark, true)
-  for (const [dx, dy, dz, r] of [[0, 3.9, 0, 3.0], [-1.1, 3.3, 0.6, 2.0], [1.0, 3.5, -0.7, 2.1], [0.4, 4.6, 0.9, 1.7]]) {
-    canopy(Vector3.create(PLAZA.x + dx, dy, PLAZA.z + dz), Vector3.create(r, r * 0.8, r))
-  }
+  prop('models/plazatree.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
   for (const [x, z] of [[PLAZA.x - 3.6, PLAZA.z + 2.6], [PLAZA.x + 3.6, PLAZA.z + 2.6], [PLAZA.x - 3.6, PLAZA.z - 2.6], [PLAZA.x + 3.6, PLAZA.z - 2.6]]) {
     bench(Vector3.create(x, 0, z), PLAZA)
   }
@@ -335,10 +287,7 @@ export function buildLounge(): void {
 
   // entrance: a wooden gateway over the path with the welcome sign, kiosk beside it
   const gz = SPAWN.z + 3.4
-  cylinder(Vector3.create(SPAWN.x - 3.2, 1.7, gz), Vector3.create(0.22, 3.4, 0.22), PALETTE.woodDark, true)
-  cylinder(Vector3.create(SPAWN.x + 3.2, 1.7, gz), Vector3.create(0.22, 3.4, 0.22), PALETTE.woodDark, true)
-  solid(Vector3.create(SPAWN.x, 3.5, gz), Vector3.create(6.9, 0.22, 0.3), PALETTE.woodDark)
-  for (const x of [SPAWN.x - 3.2, SPAWN.x + 3.2]) lantern(Vector3.create(x, 3.75, gz), 0.34)
+  prop('models/gateway.glb', Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
   label(Vector3.create(SPAWN.x, 4.35, gz), 'ARENA LOUNGE', 3.4, Color4.White(), 10)
   liveLabel(Vector3.create(SPAWN.x, 2.95, gz), () => L().welcome, 1.5, PALETTE.cream, 10)
   infoKiosk(SPAWN.x - 4.6, SPAWN.z + 1.6)

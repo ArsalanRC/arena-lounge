@@ -9,7 +9,7 @@ import { Color4, Vector3 } from '@dcl/sdk/math'
 import { SYMBOL_POOL, type MatchPairsGameState } from '../../engine/matchpairs'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface PairsAction {
   flip?: number
@@ -52,31 +52,35 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
   box(root, Vector3.create(0, CENTER_Y - BOARD / 2 - 0.03 - rim / 2, 0), Vector3.create(BOARD + 0.06, rim, depth), PALETTE.woodDark)
   box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD + 0.2, 0.06, 0.26), PALETTE.woodDark)
 
-  // card bodies + symbol overlays
+  // card bodies (always there: face-down cards are the board) + symbol overlays built while a round runs
   const bodies: Entity[] = []
-  const symbols: Entity[] = []
   for (let i = 0; i < ROWS * COLS; i++) {
-    const at = cellLocal(i)
     const body = engine.addEntity()
-    Transform.create(body, { parent: root, position: at, scale: Vector3.create(CELL * 0.86, CELL * 0.86, HALF_T * 2 + 0.006) })
+    Transform.create(body, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.86, CELL * 0.86, HALF_T * 2 + 0.006) })
     MeshRenderer.setBox(body)
     Material.setPbrMaterial(body, { albedoColor: CARD_BACK, roughness: 0.6, metallic: 0.05 })
     bodies.push(body)
-    const sym = engine.addEntity()
-    Transform.create(sym, { parent: root, position: at, scale: Vector3.create(CELL * 0.6, CELL * 0.6, HALF_T * 2 + 0.014) })
-    MeshRenderer.setBox(sym)
-    Material.setPbrMaterial(sym, {
-      texture: Material.Texture.Common({ src: SHAPE_SPRITES[0] }),
-      albedoColor: SYMBOL_TINTS[0],
-      transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
-      alphaTest: 0.5,
-      roughness: 0.5,
-      metallic: 0,
-      castShadows: false
-    })
-    VisibilityComponent.create(sym, { visible: false })
-    symbols.push(sym)
   }
+  const symbolPool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < ROWS * COLS; i++) {
+      const sym = engine.addEntity()
+      Transform.create(sym, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.6, CELL * 0.6, HALF_T * 2 + 0.014) })
+      MeshRenderer.setBox(sym)
+      Material.setPbrMaterial(sym, {
+        texture: Material.Texture.Common({ src: SHAPE_SPRITES[0] }),
+        albedoColor: SYMBOL_TINTS[0],
+        transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
+        alphaTest: 0.5,
+        roughness: 0.5,
+        metallic: 0,
+        castShadows: false
+      })
+      VisibilityComponent.create(sym, { visible: false })
+      out.push(sym)
+    }
+    return out
+  })
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Flip a card', (local) => {
     const c = clampInt((local.x + BOARD / 2) / CELL, 0, COLS - 1)
     const r = clampInt((CENTER_Y + BOARD / 2 - local.y) / CELL, 0, ROWS - 1)
@@ -93,6 +97,8 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
     shownSym[i] = sym
     const bodyColor = mode === 2 ? OWNER_TINTS[0] : mode === 3 ? OWNER_TINTS[1] : mode === 1 ? PALETTE.cream : CARD_BACK
     Material.setPbrMaterial(bodies[i], { albedoColor: bodyColor, roughness: 0.6, metallic: 0.05 })
+    if (mode === 0 && !symbolPool.live) return
+    const symbols = symbolPool.get()
     VisibilityComponent.getMutable(symbols[i]).visible = mode !== 0
     if (mode !== 0)
       Material.setPbrMaterial(symbols[i], {
@@ -109,6 +115,9 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
   return {
     reset() {
       for (let i = 0; i < ROWS * COLS; i++) setCard(i, 0, -1)
+    },
+    idle() {
+      symbolPool.release()
     },
     update(raw) {
       const s = raw as MatchPairsGameState

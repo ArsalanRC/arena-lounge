@@ -9,9 +9,14 @@
                      invisible `_collider` meshes for slabs and railings (the
                      DCL client uses those for physics and hides them).
                      Origin = plaza centre at ground level.
-  models/canopy.glb  a unit-diameter low-poly icosphere in the plant green,
-                     used for every tree crown and planter (the primitive
-                     sphere costs ~770 triangles, this one 320).
+  models/canopy.glb  a unit-diameter low-poly icosphere in the plant green
+                     (the primitive sphere costs ~770 triangles, this one 320).
+  props              tree, plazatree, planter, lamp, bench, table (with the
+                     seat pads + their pointer collider), robot (with pointer
+                     collider), kiosk, gateway, shaft (elevator): one GLB per
+                     prop type, placed as GltfContainer instances so the client
+                     shares meshes + materials across instances (mobile counts
+                     every primitive's material; this is the diet).
 
 Run: python3 tools/gen-models.py
 """
@@ -247,3 +252,143 @@ write_glb('models/tower.glb', [("ribs", ribs, 0), ("floors", floors, 1), ("rings
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])
+
+# ------------------------------------------------------------------ props (instanced furniture)
+# Every prop below used to be several primitives, each with its own material
+# instance; as one GLB per prop type the client shares the mesh + materials
+# across instances, which is what keeps the mobile material count in budget.
+
+def box_mesh(mesh, c, size):
+    """Axis-aligned box centred at c with full size (sx, sy, sz)."""
+    hx, hy, hz = size[0] / 2, size[1] / 2, size[2] / 2
+    x0, x1 = c[0] - hx, c[0] + hx
+    y0, y1 = c[1] - hy, c[1] + hy
+    z0, z1 = c[2] - hz, c[2] + hz
+    mesh.quad((x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1))   # top
+    mesh.quad((x0, y0, z1), (x1, y0, z1), (x1, y0, z0), (x0, y0, z0))   # bottom
+    mesh.quad((x0, y0, z1), (x0, y1, z1), (x1, y1, z1), (x1, y0, z1))   # +z
+    mesh.quad((x1, y0, z0), (x1, y1, z0), (x0, y1, z0), (x0, y0, z0))   # -z
+    mesh.quad((x1, y0, z1), (x1, y1, z1), (x1, y1, z0), (x1, y0, z0))   # +x
+    mesh.quad((x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1))   # -x
+
+def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None):
+    """Vertical n-gon prism (cylinder stand-in), optional taper to r_top."""
+    rt = r if r_top is None else r_top
+    for i in range(n):
+        a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
+        b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
+        t0 = (cx + rt * math.cos(a0), y1, cz + rt * math.sin(a0)); t1 = (cx + rt * math.cos(a1), y1, cz + rt * math.sin(a1))
+        mesh.quad(b0, t0, t1, b1)
+        # caps as fans (quad with a repeated vertex is fine for flat shading)
+        mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz))
+        mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz))
+
+def sphere_at(mesh, c, radius, subdiv=1):
+    tmp = Mesh()
+    icosphere(tmp, subdiv, radius)
+    base = len(mesh.pos)
+    mesh.pos += [add(p, c) for p in tmp.pos]
+    mesh.nor += tmp.nor
+    mesh.idx += [i + base for i in tmp.idx]
+
+WOOD = {"name": "wood", "pbrMetallicRoughness": {"baseColorFactor": [0.36, 0.25, 0.17, 1], "metallicFactor": 0.0, "roughnessFactor": 0.85}}
+WOOD_DARK = {"name": "woodDark", "pbrMetallicRoughness": {"baseColorFactor": [0.23, 0.16, 0.12, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}}
+PLANT = {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}}
+POT = {"name": "pot", "pbrMetallicRoughness": {"baseColorFactor": [0.55, 0.35, 0.24, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}}
+LAMP = {"name": "lamp", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.85, 0.63, 1], "metallicFactor": 0.0, "roughnessFactor": 0.3}, "emissiveFactor": [1.0, 0.78, 0.45]}
+PAD = {"name": "pad", "pbrMetallicRoughness": {"baseColorFactor": [0.72, 0.60, 0.44, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}}
+FRAME = {"name": "frame", "pbrMetallicRoughness": {"baseColorFactor": [0.12, 0.31, 0.37, 1], "metallicFactor": 0.5, "roughnessFactor": 0.4}}
+FRAME_DARK = {"name": "frameDark", "pbrMetallicRoughness": {"baseColorFactor": [0.09, 0.23, 0.28, 1], "metallicFactor": 0.5, "roughnessFactor": 0.4}}
+EYE = {"name": "eye", "pbrMetallicRoughness": {"baseColorFactor": [0.62, 0.94, 1.0, 1], "metallicFactor": 0.0, "roughnessFactor": 0.2}, "emissiveFactor": [0.5, 0.9, 1.0]}
+TIP = {"name": "tip", "pbrMetallicRoughness": {"baseColorFactor": [0.89, 0.27, 0.24, 1], "metallicFactor": 0.0, "roughnessFactor": 0.3}, "emissiveFactor": [1.0, 0.42, 0.37]}
+GLASS = {"name": "glass", "pbrMetallicRoughness": {"baseColorFactor": [0.7, 0.9, 1.0, 0.22], "metallicFactor": 0.2, "roughnessFactor": 0.1}, "alphaMode": "BLEND", "doubleSided": True}
+COLUMN = {"name": "column", "pbrMetallicRoughness": {"baseColorFactor": [0.42, 0.29, 0.20, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}}
+GLOW_CYAN = {"name": "glowCyan", "pbrMetallicRoughness": {"baseColorFactor": [0.5, 0.82, 0.88, 1], "metallicFactor": 0.1, "roughnessFactor": 0.4}, "emissiveFactor": [0.25, 0.76, 0.85]}
+COLLIDER = {"name": "collider", "pbrMetallicRoughness": {"baseColorFactor": [1, 0, 1, 1]}}
+
+# tree: trunk + two leaf balls (size 1 = the garden tree; scale the entity)
+tree_trunk, tree_leaves = Mesh(), Mesh()
+prism(tree_trunk, 0, 0, 0.18, 0, 3.2, 8)
+sphere_at(tree_leaves, (0, 3.6, 0), 1.3, 2)
+sphere_at(tree_leaves, (0.6, 4.4, -0.4), 0.85, 2)
+write_glb('models/tree.glb', [("trunk", tree_trunk, 0), ("leaves", tree_leaves, 1)], [WOOD_DARK, PLANT])
+
+# plaza tree: pot + trunk + four leaf balls
+pt_pot, pt_trunk, pt_leaves = Mesh(), Mesh(), Mesh()
+prism(pt_pot, 0, 0, 0.8, 0, 0.7, 16)
+prism(pt_trunk, 0, 0, 0.16, 0.7, 3.4, 8)
+for (dx, dy, dz, r) in [(0, 3.9, 0, 1.5), (-1.1, 3.3, 0.6, 1.0), (1.0, 3.5, -0.7, 1.05), (0.4, 4.6, 0.9, 0.85)]:
+    sphere_at(pt_leaves, (dx, dy, dz), r, 2)
+write_glb('models/plazatree.glb', [("pot", pt_pot, 0), ("trunk", pt_trunk, 1), ("leaves", pt_leaves, 2)], [POT, WOOD_DARK, PLANT])
+
+# planter: pot + leaf ball
+pl_pot, pl_leaves = Mesh(), Mesh()
+prism(pl_pot, 0, 0, 0.45, 0, 0.6, 12)
+sphere_at(pl_leaves, (0, 1.05, 0), 0.6, 2)
+write_glb('models/planter.glb', [("pot", pl_pot, 0), ("leaves", pl_leaves, 1)], [POT, PLANT])
+
+# lamp: post + glowing lantern cube (rotated 45 deg)
+lp_post, lp_light = Mesh(), Mesh()
+prism(lp_post, 0, 0, 0.06, 0, 2.8, 8)
+box_mesh(lp_light, (0, 2.95, 0), (0.4, 0.4, 0.4))
+write_glb('models/lamp.glb', [("post", lp_post, 0), ("light", lp_light, 1)], [WOOD_DARK, LAMP])
+
+# bench: seat plank + two legs, facing -z
+bn_seat, bn_legs = Mesh(), Mesh()
+box_mesh(bn_seat, (0, 0.42, 0), (1.8, 0.08, 0.5))
+box_mesh(bn_legs, (-0.7, 0.2, 0), (0.12, 0.4, 0.44))
+box_mesh(bn_legs, (0.7, 0.2, 0), (0.12, 0.4, 0.44))
+write_glb('models/bench.glb', [("seat", bn_seat, 0), ("legs", bn_legs, 1)], [WOOD, WOOD_DARK])
+
+# table: top + apron + four legs + two seat pads (their pointer collider is a separate mesh)
+TABLE_TOP = 1.02
+tb_top, tb_dark, tb_pads, tb_coll = Mesh(), Mesh(), Mesh(), Mesh()
+box_mesh(tb_top, (0, TABLE_TOP - 0.03, 0), (1.8, 0.06, 0.9))
+box_mesh(tb_dark, (0, TABLE_TOP - 0.1, 0), (1.6, 0.08, 0.7))
+for (x, z) in [(-0.78, -0.33), (0.78, -0.33), (-0.78, 0.33), (0.78, 0.33)]:
+    box_mesh(tb_dark, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+for z in (-1.8, 1.8):
+    prism(tb_pads, 0, z, 0.5, 0, 0.03, 16)
+    prism(tb_coll, 0, z, 0.5, 0, 0.03, 12)
+write_glb('models/table.glb', [("top", tb_top, 0), ("frame", tb_dark, 1), ("pads", tb_pads, 2), ("pads_collider", tb_coll, 3)], [WOOD, WOOD_DARK, PAD, COLLIDER])
+
+# robot token: body + head + eyes + antenna + tip; pointer collider around it
+rb_dark, rb_eyes, rb_tip, rb_coll = Mesh(), Mesh(), Mesh(), Mesh()
+box_mesh(rb_dark, (0, 0.11, 0), (0.16, 0.2, 0.12))                       # body
+box_mesh(rb_dark, (0, 0.11 + 0.156, 0), (0.136, 0.11, 0.108))            # head (same material: one body fewer per table)
+for x in (-0.034, 0.034):
+    box_mesh(rb_eyes, (x, 0.11 + 0.156 + 0.006, -0.06), (0.03, 0.031, 0.015))
+prism(rb_dark, 0, 0, 0.005, 0.11 + 0.156 + 0.055, 0.11 + 0.156 + 0.11, 6)
+box_mesh(rb_tip, (0, 0.11 + 0.156 + 0.115, 0), (0.033, 0.039, 0.026))
+box_mesh(rb_coll, (0, 0.2, 0), (0.28, 0.4, 0.28))
+write_glb('models/robot.glb', [("dark", rb_dark, 0), ("eyes", rb_eyes, 1), ("tip", rb_tip, 2), ("robot_collider", rb_coll, 3)], [FRAME, EYE, TIP, COLLIDER])
+
+# kiosk: post + glowing cube; pointer collider on the cube
+ks_post, ks_cube, ks_coll = Mesh(), Mesh(), Mesh()
+prism(ks_post, 0, 0, 0.07, 0, 1.2, 8)
+box_mesh(ks_cube, (0, 1.45, 0), (0.42, 0.42, 0.42))
+box_mesh(ks_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
+write_glb('models/kiosk.glb', [("post", ks_post, 0), ("cube", ks_cube, 1), ("kiosk_collider", ks_coll, 2)], [WOOD_DARK, GLOW_CYAN, COLLIDER])
+
+# gateway: two posts + beam + two lanterns (spans x -3.2..3.2 at z 0)
+gw_wood, gw_light = Mesh(), Mesh()
+for x in (-3.2, 3.2):
+    prism(gw_wood, x, 0, 0.11, 0, 3.4, 10)
+    box_mesh(gw_light, (x, 3.75, 0), (0.34, 0.34, 0.34))
+box_mesh(gw_wood, (0, 3.5, 0), (6.9, 0.22, 0.3))
+write_glb('models/gateway.glb', [("wood", gw_wood, 0), ("lights", gw_light, 1)], [WOOD_DARK, LAMP])
+
+# elevator shaft: posts, glass on three sides (open towards -z), roof, pads + light rings on every floor
+SHAFT_TOP = 16 + 4.2
+sh_posts, sh_glass, sh_pads, sh_rings, sh_coll = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
+half = 1.25
+for (x, z) in [(-half, -half), (half, -half), (-half, half), (half, half)]:
+    box_mesh(sh_posts, (x, SHAFT_TOP / 2, z), (0.14, SHAFT_TOP, 0.14))
+box_mesh(sh_posts, (0, SHAFT_TOP + 0.1, 0), (half * 2 + 0.3, 0.2, half * 2 + 0.3))
+for (c, size) in [((0, SHAFT_TOP / 2, half), (half * 2, SHAFT_TOP, 0.04)), ((-half, SHAFT_TOP / 2, 0), (0.04, SHAFT_TOP, half * 2)), ((half, SHAFT_TOP / 2, 0), (0.04, SHAFT_TOP, half * 2))]:
+    box_mesh(sh_glass, c, size)
+    box_mesh(sh_coll, c, size)
+for y in (0, 8, 16):
+    prism(sh_pads, 0, 0, 1.1, y + 0.005, y + 0.04, 24)
+    box_mesh(sh_rings, (0, y + 2.6, -half), (half * 2 + 0.2, 0.08, 0.08))
+write_glb('models/shaft.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [COLUMN, GLASS, GLOW_CYAN, GLOW_CYAN, COLLIDER])

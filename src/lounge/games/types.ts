@@ -48,6 +48,12 @@ export interface View3DHandle {
   update(state: unknown, info: { lastAction: unknown; animate: boolean; round: number; winner: number }): void
   /** Called on a fresh round (or when the table resets) before update(). */
   reset(): void
+  /**
+   * Called when the table has no game running (nobody seated, or waiting for
+   * the second player): a good moment to release pooled piece entities, see
+   * views/shared.ts LazyPool. update() must rebuild what it needs.
+   */
+  idle?(): void
 }
 
 export interface TableGame<S = unknown, A = unknown> {
