@@ -13,8 +13,10 @@ Two options. Pick one.
 | **Decentraland NAME** (recommended) | 100 MANA (~$6.50 at Aug 2026 prices) + Ethereum gas | 100 MB per NAME | https://decentraland.org/marketplace/names/claim |
 | ENS domain | ~$5/year + Ethereum gas | 36 MB fixed | https://app.ens.domains |
 
-Our scene is ~1 MB, so either works. The NAME gives the nicer URL
+Our scene is ~4 MB, so either works. The NAME gives the nicer URL
 (`arenalounge.dcl.eth`) and shows up in Decentraland Places automatically.
+`arenalounge` was still unclaimed on 16 Aug 2026 (marketplace subgraph);
+`arena`, `lounge`, `thelounge` and `gamearena` are taken.
 
 Steps for the NAME:
 
@@ -40,11 +42,11 @@ pnpm build
 pnpm deploy -- --target-content https://worlds-content-server.decentraland.org
 ```
 
-`deploy` rebuilds the bundle in production mode itself (about 0.7 MB
-minified; the dev bundle in `bin/` is 7 MB with sourcemaps, so never judge
-size from that). `pnpm build:prod` produces the same bundle for a size check.
-`.dclignore` keeps tools, docs and the spec out of the upload; the GLBs in
-`models/` (tower 0.65 MB, canopy 25 KB) and the PNGs in `images/` go up.
+`deploy` rebuilds the bundle in production mode itself (0.9 MB minified,
+0.25 MB gzipped; the dev bundle in `bin/` is 8.6 MB with sourcemaps, so never
+judge size from that). `pnpm build:prod` produces the same bundle for a size
+check. `.dclignore` keeps tools, docs and the spec out of the upload; the 16
+generated GLBs in `models/` (1.8 MB) and the PNGs in `images/` (0.9 MB) go up.
 
 A browser tab opens; connect the wallet that owns the name and click
 **Sign and Deploy** (a signature, no gas). Uploading + asset conversion takes a
