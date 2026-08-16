@@ -4,6 +4,7 @@
 3D:
   images/croc-face.png     256  green croc head for Croc Snap (alpha disc)
   images/backgammon-board.png 512x410 two rows of points + bar (Backgammon)
+  images/ludo-board.png    510  15x15 Ludo board (yards, cross track, home)
   images/board-face.png    512  frame face with see-through holes + bevel
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
@@ -395,6 +396,75 @@ def gen_backgammon_board(path='images/backgammon-board.png'):
         return (*col, 1.0)
     write_png(path, W, H, px)
 
+# ------------------------------------------------------------------ ludo board
+def _ludo_track():
+    """Parse TRACK_COORDINATES from the engine so the texture matches the rules."""
+    import re
+    src = open('src/engine/ludo/constants.ts').read()
+    body = src[src.index('export const TRACK_COORDINATES'):]
+    body = body[:body.index('];')]
+    return [(int(a), int(b)) for a, b in re.findall(r'\[\s*(\d+)\s*,\s*(\d+)\s*\]', body)]
+
+def gen_ludo_board(path='images/ludo-board.png'):
+    """15x15 Ludo board: four yards, the cross-shaped track with coloured start
+    cells and grey safe cells, coloured home columns, the four-triangle home
+    in the centre. Same layout as Game Arena (blue TL, green TR, red BL,
+    yellow BR); the lounge seats red and green."""
+    S = 510
+    N = 15
+    cell = S / N
+    cream, line = hex_rgb('#f2e8d5'), hex_rgb('#8c7b62')
+    cols = {'red': hex_rgb('#e2453d'), 'blue': hex_rgb('#3a7bd5'), 'green': hex_rgb('#3fa35a'), 'yellow': hex_rgb('#f5c518')}
+    track = _ludo_track()
+    starts = {track[0]: 'red', track[13]: 'blue', track[26]: 'green', track[39]: 'yellow'}
+    safe = set(track[i] for i in (0, 8, 13, 21, 26, 34, 39, 47))
+    yards = {'blue': (0, 0), 'green': (0, 9), 'red': (9, 0), 'yellow': (9, 9)}   # top-left cell of each 6x6 yard
+    yard_pieces = {'red': [(11, 2), (11, 3), (12, 2), (12, 3)], 'blue': [(2, 2), (2, 3), (3, 2), (3, 3)],
+                   'green': [(2, 11), (2, 12), (3, 11), (3, 12)], 'yellow': [(11, 11), (11, 12), (12, 11), (12, 12)]}
+    home_cols = {'red': [(r, 7) for r in range(8, 14)], 'blue': [(7, c) for c in range(1, 7)],
+                 'green': [(r, 7) for r in range(1, 7)], 'yellow': [(7, c) for c in range(8, 14)]}
+    home_cells = {c: set(v) for c, v in home_cols.items()}
+    def px(x, y):
+        u, v = x + 0.5, y + 0.5
+        col_i, row_i = int(u // cell), int(v // cell)
+        fx, fy = u / cell - col_i, v / cell - row_i     # position inside the cell
+        colour = cream
+        # yards
+        for name, (r0, c0) in yards.items():
+            if r0 <= row_i < r0 + 6 and c0 <= col_i < c0 + 6:
+                colour = cols[name]
+                if r0 + 1 <= row_i < r0 + 5 and c0 + 1 <= col_i < c0 + 5:
+                    colour = mix(cream, cols[name], 0.12)
+                    for (pr, pc) in yard_pieces[name]:
+                        d = math.hypot(u - (pc + 0.5) * cell, v - (pr + 0.5) * cell)
+                        ring = math.exp(-((d - 0.34 * cell) ** 2) / (0.004 * cell * cell))
+                        colour = mix(colour, cols[name], min(1.0, ring))
+        # centre home: four triangles pointing at the middle
+        if 6 <= row_i <= 8 and 6 <= col_i <= 8:
+            cx, cy = u - 7.5 * cell, v - 7.5 * cell
+            if abs(cx) > abs(cy):
+                colour = cols['yellow'] if cx > 0 else cols['blue']
+            else:
+                colour = cols['red'] if cy > 0 else cols['green']
+        # home columns
+        for name, cells in home_cells.items():
+            if (row_i, col_i) in cells:
+                colour = mix(cols[name], cream, 0.15)
+        # track cells: start colour, safe grey dot
+        if (row_i, col_i) in starts and (row_i, col_i) not in home_cells['red'] | home_cells['blue'] | home_cells['green'] | home_cells['yellow']:
+            colour = mix(cols[starts[(row_i, col_i)]], cream, 0.25)
+        if (row_i, col_i) in safe:
+            d = math.hypot(fx - 0.5, fy - 0.5)
+            colour = mix(colour, hex_rgb('#5f5648'), 0.7 * (1 - smoothstep(0.16, 0.24, d)))
+        # grid lines on the cross (track + home columns) and yard borders
+        on_cross = (6 <= row_i <= 8) or (6 <= col_i <= 8)
+        if on_cross and (fx < 0.05 or fy < 0.05 or fx > 0.95 or fy > 0.95):
+            colour = mix(colour, line, 0.7)
+        if u < 3 or v < 3 or u > S - 3 or v > S - 3:
+            colour = hex_rgb('#3a2a1e')
+        return (*colour, 1.0)
+    write_png(path, S, S, px)
+
 # ------------------------------------------------------------------ croc face
 def gen_croc_face(path='images/croc-face.png'):
     """Round green croc head seen from the front (Croc Snap): eyes, nostrils, a
@@ -550,3 +620,5 @@ if __name__ == '__main__':
     gen_chess_pieces()
     gen_croc_face()
     gen_backgammon_board()
+    gen_ludo_board()
+    gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')
