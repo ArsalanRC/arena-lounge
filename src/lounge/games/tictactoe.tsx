@@ -8,6 +8,7 @@ import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getValidMoves, selectBotMove, type Mark, type TTTBoard, type TTTGameState } from '../../engine/tictactoe'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { TTT_COLORS, createTicTacToeView, type TTTAction } from '../views/tictactoe3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -97,7 +98,7 @@ function Controls(props: { state: TTTGameState; ctx: GameContext; phone: boolean
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       {mine !== null && (
-        <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `You play ${mine}${props.ctx.myTurn ? '   ·   Tap an empty square' : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+        <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${L().g.youPlay(mine)}${props.ctx.myTurn ? '   ·   ' + L().g.tapEmpty : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       )}
       <Board state={props.state} ctx={props.ctx} phone={props.phone} />
     </UiEntity>

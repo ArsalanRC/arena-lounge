@@ -12,6 +12,7 @@ import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { TEETH_COUNT, applyMove, createInitialState, getValidMoves, selectBotMove, type CrocSnapGameState } from '../../engine/crocsnap'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { CROC_COLORS, createCrocSnapView, toothAngle, type CrocAction } from '../views/crocsnap3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -110,10 +111,11 @@ function Ring(props: { state: CrocSnapGameState; ctx: GameContext; phone: boolea
 function Controls(props: { state: CrocSnapGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
   const open = s.teeth.filter((t) => !t.pressed).length
-  const hint = s.status === 'finished' ? 'SNAP! The trigger tooth' : props.ctx.myTurn ? 'Press a tooth' : ''
+  const g = L().g
+  const hint = s.status === 'finished' ? g.snap : props.ctx.myTurn ? g.pressTooth : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
-      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${open} teeth left${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${g.teethLeft(open)}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Ring state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )

@@ -28,6 +28,7 @@ import {
 } from '../../engine/chess'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { CHESS_SEAT_SPRITES, chessSelection, chessSprite, createChessView, setChessSelection, type ChessAction } from '../views/chess3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -218,11 +219,12 @@ function material(board: ChessBoard, color: 'white' | 'black'): number {
 }
 
 function resultLine(s: ChessGameState): string {
-  if (s.gameResult === 'white_wins') return 'Checkmate, White wins'
-  if (s.gameResult === 'black_wins') return 'Checkmate, Black wins'
+  const g = L().g
+  if (s.gameResult === 'white_wins') return g.mate(g.white)
+  if (s.gameResult === 'black_wins') return g.mate(g.black)
   if (s.gameResult === 'draw') {
     const r = s.drawReason
-    return r === 'stalemate' ? 'Stalemate' : r === 'insufficient_material' ? 'Draw, not enough material' : r === 'fifty_move' ? 'Draw, fifty-move rule' : r === 'threefold_repetition' ? 'Draw by repetition' : 'Draw'
+    return r === 'stalemate' ? g.stalemate : r === 'insufficient_material' ? g.drawMaterial : r === 'fifty_move' ? g.drawFifty : r === 'threefold_repetition' ? g.drawRepetition : L().drawShort
   }
   return ''
 }
@@ -231,10 +233,11 @@ function Controls(props: { state: ChessGameState; ctx: GameContext; phone: boole
   const s = props.state
   const sel = chessSelection.get(props.ctx.root)
   const finished = s.status === 'finished'
-  const hint = finished ? resultLine(s) : props.ctx.myTurn ? (sel !== undefined ? 'Tap a marked square' : s.check ? 'Check! Save your king' : 'Tap a piece') : s.check ? 'Check!' : ''
+  const g = L().g
+  const hint = finished ? resultLine(s) : props.ctx.myTurn ? (sel !== undefined ? g.tapMarked : s.check ? g.checkSave : g.tapPiece) : s.check ? g.check : ''
   const w = material(s.board, 'white')
   const b = material(s.board, 'black')
-  const lead = w === b ? 'Material even' : w > b ? `White +${w - b}` : `Black +${b - w}`
+  const lead = w === b ? g.materialEven : w > b ? g.up(g.white, w - b) : g.up(g.black, b - w)
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${lead}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: s.check && !finished ? UI.yellow : UI.muted, textAlign: 'middle-center' }} />

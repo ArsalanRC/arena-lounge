@@ -12,6 +12,7 @@ import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getBotMove, getLegalMoves, type DotLinesGameState } from '../../engine/dotlines'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { createDotLinesView, dotSelection, tapDot, type DotAction } from '../views/dotlines3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -186,10 +187,10 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boole
 
 function Controls(props: { state: DotLinesGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
-  const hint = props.ctx.myTurn ? 'Tap a dot, then a neighbour' : ''
+  const hint = props.ctx.myTurn ? L().g.tapDot : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
-      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Boxes  ${s.scores[0]} : ${s.scores[1]}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${L().g.boxes}  ${s.scores[0]} : ${s.scores[1]}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )

@@ -27,6 +27,7 @@ import {
 } from '../../engine/ludo'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { LUDO_COLORS, LUDO_SPRITES, createLudoView, type LudoAction } from '../views/ludo3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -162,11 +163,12 @@ function MiniBoard(props: { state: LudoGameState; cell: number }) {
 }
 
 function moveLabel(m: ValidMove): string {
-  const who = `Piece ${m.pieceIndex + 1}`
-  if (m.isExitYard) return `${who} · out`
-  if (m.to === HOME_POSITION) return `${who} · home!`
-  if (m.isCapture) return `${who} · capture!`
-  return `${who} · +${m.to - m.from}`
+  const g = L().g
+  const n = m.pieceIndex + 1
+  if (m.isExitYard) return g.pieceOut(n)
+  if (m.to === HOME_POSITION) return g.pieceHome(n)
+  if (m.isCapture) return g.pieceCapture(n)
+  return g.piecePlus(n, m.to - m.from)
 }
 
 function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolean }) {
@@ -176,17 +178,16 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
   const cell = props.phone ? 26 : 22
   const canRoll = ctx.myTurn && !s.hasRolled && !finished
   const canMove = ctx.myTurn && s.turnPhase === 'move'
-  const die = s.hasRolled && s.currentDiceValue ? `Rolled ${s.currentDiceValue}` : ''
+  const g = L().g
+  const die = s.hasRolled && s.currentDiceValue ? g.rolled(s.currentDiceValue) : ''
   const hint = finished
-    ? s.finishOrder[0] === 'A'
-      ? 'Red brought all four home'
-      : 'Green brought all four home'
+    ? g.broughtHome(s.finishOrder[0] === 'A' ? g.red : g.green)
     : ctx.myTurn
       ? canRoll
-        ? 'Tap Roll'
+        ? g.tapRoll
         : canMove
-          ? 'Pick a piece'
-          : 'No move, passing…'
+          ? g.pickPiece
+          : g.noMove
       : ''
   const buttons: ReactEcs.JSX.Element[] = []
   if (canRoll) {
@@ -195,7 +196,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
         key="roll"
         uiTransform={{ width: 200, height: 56, margin: 4, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
         uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
-        uiText={{ value: 'Roll the die', fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
+        uiText={{ value: g.rollDie, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
         onMouseDown={() => ctx.act({ roll: d6() } as LudoAction)}
       />
     )

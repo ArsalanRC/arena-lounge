@@ -20,6 +20,7 @@ import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
 import { movePlayerTo } from '~system/RestrictedActions'
 import { botSettings } from './games/botSettings'
+import { t as L } from './i18n'
 import {
   AFK_MS,
   AUTO_STAND_AFTER_MS,
@@ -85,8 +86,6 @@ export const local = {
   dismissedTableId: -1,
   /** Mobile controller: show the full board instead of the compact controls. */
   showMiniBoard: false,
-  /** UI language code (see i18n); 'en' until the player picks another. */
-  lang: 'en',
   /** Whether the "How to play" panel is open, which game tab it shows, and whether the language grid is expanded. */
   helpOpen: false,
   helpGame: '',
@@ -260,12 +259,12 @@ export function maybeStart(t: Table): void {
 /** Take a seat. Stands up from any other seat first. */
 export function sit(t: Table, seat: Seat, snap = true): boolean {
   if (!canWrite()) {
-    toast('Connecting to the lounge, one moment…')
+    toast(L().connectingWait)
     return false
   }
   const s = seatOf(t, seat)
   if (!seatIsOpen(s) && !seatHeldByMe(s)) {
-    toast('That seat is taken')
+    toast(L().seatTaken)
     return false
   }
   const cur = findMySeat()
@@ -321,7 +320,7 @@ export function inviteBot(t: Table): void {
 /** One-tap solo start: take the free seat (A first) and seat the bot opposite. */
 export function sitWithBot(t: Table): void {
   if (!canWrite()) {
-    toast('Connecting to the lounge, one moment…')
+    toast(L().connectingWait)
     return
   }
   let mine = mySeatAt(t)
@@ -330,7 +329,7 @@ export function sitWithBot(t: Table): void {
     const b = TableSeatB.get(t.root)
     const free: 0 | Seat = a.addr === '' ? SEAT_A : b.addr === '' ? SEAT_B : 0
     if (!free) {
-      toast('That table is full')
+      toast(L().tableFull)
       return
     }
     if (!sit(t, free)) return
@@ -563,8 +562,8 @@ function janitorSystem(dt: number): void {
       if (winner === SEAT_A) m.winsA = board.winsA + 1
       else m.winsB = board.winsB + 1
       m.updatedAt = now
-      if (loser === mySeatAt(t)) toast('Time ran out, your opponent takes the round')
-      else toast('Your opponent ran out of time. Round is yours!')
+      if (loser === mySeatAt(t)) toast(L().timeoutLost)
+      else toast(L().timeoutWon)
     }
   }
   // idle at a table while it is on you to act (or nothing is running): free the seat
@@ -574,7 +573,7 @@ function janitorSystem(dt: number): void {
     const ballInMyCourt = bd.status !== Status.Playing || bd.turn === mineNow.seat
     if (ballInMyCourt) {
       stand(mineNow.table)
-      toast('You were idle for a while, so your seat is free again')
+      toast(L().idleStood)
     }
   }
   // auto-stand when the local player wanders off
@@ -585,7 +584,7 @@ function janitorSystem(dt: number): void {
       if (!local.farSince) local.farSince = now
       else if (now - local.farSince > AUTO_STAND_AFTER_MS) {
         stand(mine.table)
-        toast('You left the table, your seat is free again')
+        toast(L().leftStood)
       }
     } else {
       local.farSince = 0

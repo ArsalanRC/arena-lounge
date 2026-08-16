@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 17:35 (Europe/Berlin), Ludo (game room complete)
+Last update: 2026-08-16 18:10 (Europe/Berlin), chrome i18n
 
 ## 1. What this is
 
@@ -150,7 +150,16 @@ version works as well", 16 Aug 11:30):
   material) in the status line; wire payload ~300 bytes with the position
   hashes pruned to the last irreversible move.
 - How to play: "?" buttons + info kiosk at spawn open a panel with the rules
-  overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
+  overview in 19 languages (from game-platform). The whole lounge chrome
+  (hint, toasts, table card, controller, elevator panel, table signs, banner
+  names, kiosk, gateway, floor labels, per-game hint lines, seat colour names)
+  is written natively in EN / DE / ES / PT / FR (src/lounge/i18n/index.ts,
+  `t()`); the other 14 picker languages fall back to English for the chrome
+  and keep their localised rules. Game names on signs and banners come from
+  the catalog. 3D labels re-render on a language change (relabelSystem).
+  Textures: the explorer counts 44 runtime textures vs a soft cap of 33 for
+  9 parcels; the 12 chess sprites could become one atlas (plane + UI uvs) if
+  that ever matters.
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
 
 ### 4b. Next up (in order)
@@ -179,8 +188,9 @@ version works as well", 16 Aug 11:30):
 6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
    (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
    PNG in the GLB), lighting accents, more garden.
-7. Claude: lounge chrome strings in DE/ES/PT/FR (help panel tips exist in
-   EN/DE/ES); native review of imported overviews.
+7. Claude: (done 18:10) lounge chrome in EN/DE/ES/PT/FR. Still open: native
+   review of the imported rule overviews in the other languages, and a
+   picker entry outside the help panel if testers ask for it.
 8. Claude: README + submission text refresh (seven games, tower, floors),
    phone screenshots into README and the landing page.
 9. Later: Multiplayer Server for a persistent leaderboard on the rooftop,
@@ -295,6 +305,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 18:10 lounge chrome i18n: every lounge string (hint, toasts, table card, controller, elevator panel, table signs, banners, kiosk, gateway, floor labels, per-game hints, seat colours) through `t()` in EN/DE/ES/PT/FR written natively; `uiLang` shared by UI, toasts and 3D labels; relabelSystem for TextShapes; game names on signs from the catalog; house bot name localised per viewer
 - 2026-08-16 17:35 Ludo plugin (engine ported, 69 tests): red vs green duel, board texture from the engine's constants, eight sliding pieces, roll/piece/skip actions with client-chosen die, pending skip, mini board + move buttons; catalog rows in 19 languages + tips EN/DE/ES; game room west corner live, all four game-room corners built
 - 2026-08-16 17:00 Backgammon plugin (engine ported, 23 tests): upright board texture, 30-disc pool with bar + off trays, dice readout, roll/move/pass actions with client-chosen dice, pending pass, 24-point touch board with Roll button; catalog rows in 19 languages + tips EN/DE/ES; game room east corner live
 - 2026-08-16 16:15 two elevator shafts (glass, posts, light rings, ELEVATOR signs on every floor), rides land just outside the shaft the player used; README + docs/SUBMISSION.md refreshed (PR 23); landing page + portfolio card updated (portfolio PR 27, screenshots tower-overview + arrival)

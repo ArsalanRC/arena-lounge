@@ -23,6 +23,7 @@ import {
 } from '../../engine/matchpairs'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { COLS, OWNER_TINTS, ROWS, createMatchPairsView, symbolIndex, symbolSprite, symbolTint, type PairsAction } from '../views/matchpairs3d'
 import { botSettings } from './botSettings'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
@@ -145,10 +146,11 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; phone: boo
 
 function Controls(props: { state: MatchPairsGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
-  const hint = props.ctx.myTurn ? (s.flippedIndices.length === 2 ? 'No match, flipping back…' : s.flippedIndices.length === 1 ? 'Find its twin' : 'Flip a card') : ''
+  const g = L().g
+  const hint = props.ctx.myTurn ? (s.flippedIndices.length === 2 ? g.noMatch : s.flippedIndices.length === 1 ? g.findTwin : g.flipCard) : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
-      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Pairs  ${s.scores.A ?? 0} : ${s.scores.B ?? 0}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${g.pairs}  ${s.scores.A ?? 0} : ${s.scores.B ?? 0}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )

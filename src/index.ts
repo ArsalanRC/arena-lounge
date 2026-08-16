@@ -6,7 +6,7 @@
  * ready before that), so all setup is funnelled through here.
  */
 import { engine } from '@dcl/sdk/ecs'
-import { buildLounge } from './lounge/lounge3d'
+import { buildLounge, relabelSystem } from './lounge/lounge3d'
 import { buildTableVisual, tableVisualsSystem } from './lounge/table3d'
 import { setupPersonalSfx } from './lounge/sfx'
 import { createTables, startTableSystems, tables } from './lounge/tables'
@@ -19,5 +19,6 @@ export function main(): void {
   for (const t of tables) buildTableVisual(t)
   startTableSystems()
   engine.addSystem(tableVisualsSystem)
+  engine.addSystem(relabelSystem)
   setupUi()
 }
