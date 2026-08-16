@@ -29,7 +29,8 @@ const EN: LoungeStrings = {
     matchpairs: 'Tap two cards. A pair stays open and gives you another turn.',
     checkers: 'Tap one of your pieces, then a highlighted square. Jumps are mandatory.',
     chess: 'Tap one of your pieces, then a highlighted square. Pawns that reach the last rank become queens.',
-    crocsnap: 'Tap any open tooth. One of them is the trigger: press it and you lose the round.'
+    crocsnap: 'Tap any open tooth. One of them is the trigger: press it and you lose the round.',
+    backgammon: 'Tap "Roll the dice", then a checker and a marked point (or Off to bear off). Each die is one move.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -47,7 +48,8 @@ const DE: LoungeStrings = {
     matchpairs: 'Tippe auf zwei Karten. Ein Paar bleibt offen, und du bist noch einmal dran.',
     checkers: 'Tippe auf einen deiner Steine und dann auf ein markiertes Feld. Schlagen ist Pflicht.',
     chess: 'Tippe auf eine deiner Figuren und dann auf ein markiertes Feld. Ein Bauer auf der letzten Reihe wird zur Dame.',
-    crocsnap: 'Tippe auf einen freien Zahn. Einer davon ist der Auslöser: Wer ihn drückt, verliert die Runde.'
+    crocsnap: 'Tippe auf einen freien Zahn. Einer davon ist der Auslöser: Wer ihn drückt, verliert die Runde.',
+    backgammon: 'Tippe auf "Roll the dice", dann auf einen Stein und ein markiertes Feld (oder Off zum Herauswürfeln). Jeder Würfel ist ein Zug.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -65,7 +67,8 @@ const ES: LoungeStrings = {
     matchpairs: 'Toca dos cartas. Una pareja se queda abierta y vuelves a jugar.',
     checkers: 'Toca una de tus fichas y luego una casilla marcada. Capturar es obligatorio.',
     chess: 'Toca una de tus piezas y luego una casilla marcada. Un peón que llega a la última fila se convierte en dama.',
-    crocsnap: 'Toca cualquier diente libre. Uno de ellos es el gatillo: si lo pulsas, pierdes la ronda.'
+    crocsnap: 'Toca cualquier diente libre. Uno de ellos es el gatillo: si lo pulsas, pierdes la ronda.',
+    backgammon: 'Toca "Roll the dice", luego una ficha y un punto marcado (u Off para sacarla). Cada dado es un movimiento.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',

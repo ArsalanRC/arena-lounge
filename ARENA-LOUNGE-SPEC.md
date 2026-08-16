@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 16:15 (Europe/Berlin), two elevator shafts
+Last update: 2026-08-16 17:00 (Europe/Berlin), Backgammon
 
 ## 1. What this is
 
@@ -115,7 +115,15 @@ version works as well", 16 Aug 11:30):
   textures 25 of 33. Deployed bundle ~0.7 MB minified (`deploy` builds with
   --production; the dev bin/index.js is 7 MB with sourcemaps) + tower.glb
   0.65 MB + canopy.glb 25 KB + 16 PNGs.
-- Tests: 285 vitest tests over the eight pure engines. `pnpm build` strict type-check green.
+- Tests: 308 vitest tests over the nine pure engines. `pnpm build` strict type-check green.
+- Backgammon (Table 9 east corner of the game room, seat A white): engine
+  from game-platform (23 tests, standard rules incl. bar, hits, higher-roll
+  bearing off, doubles); actions roll (dice chosen by the acting client, in
+  the action) / move / pass, `pending` passes a rolled turn with no legal
+  move; upright board texture (images/backgammon-board.png) with a 30-disc
+  pool stacked on points and bar, off trays with counts, dice readout;
+  controls: 24 point buttons + bar + off + "Roll the dice"; UI mirrors for
+  seat B. Table numbering: Croc Snap is now Table 10 (south).
 - Croc Snap (Table 9, game room south corner): pure-luck party round, 12
   teeth + 1 hidden trigger (the index travels in the synced state, never
   shown), engine from game-platform (37 tests), upright croc face disc
@@ -152,10 +160,12 @@ version works as well", 16 Aug 11:30):
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
    bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
    finger-sized boards for all six games, verified in the desktop emulation.
-5. Claude: (Chess 15:20, Croc Snap 15:45 done.) Backgammon and Ludo
-   (2-player) for the last two game-room corners, or remove the "coming soon"
-   corners before the submission. Never ship a "coming soon" banner to the
-   judges.
+5. Claude: (Chess 15:20, Croc Snap 15:45, Backgammon 17:00 done.) Ludo
+   (2-player) for the last game-room corner (west), or remove that corner
+   before the submission. Never ship a "coming soon" banner to the judges.
+   Then, in the order Arsalan confirms: Super Tic Tac Toe, Snakes & Ladders,
+   Sea Strike, Dice Royale duel (needs more corners: widen the game room ring
+   or add corners between the elevators).
 6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
    (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
    PNG in the GLB), lighting accents, more garden.
@@ -275,6 +285,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 17:00 Backgammon plugin (engine ported, 23 tests): upright board texture, 30-disc pool with bar + off trays, dice readout, roll/move/pass actions with client-chosen dice, pending pass, 24-point touch board with Roll button; catalog rows in 19 languages + tips EN/DE/ES; game room east corner live
 - 2026-08-16 16:15 two elevator shafts (glass, posts, light rings, ELEVATOR signs on every floor), rides land just outside the shaft the player used; README + docs/SUBMISSION.md refreshed (PR 23); landing page + portfolio card updated (portfolio PR 27, screenshots tower-overview + arrival)
 - 2026-08-16 15:45 Croc Snap plugin (engine ported, 37 tests): upright croc face with 12 tooth boxes, SNAP! label, ring-of-teeth UI, catalog rows in 19 languages + tips EN/DE/ES; game room south corner live (Table 9)
 - 2026-08-16 15:20 Chess plugin (engine ported with 47 tests + 2 budget tests): iterative-deepening bot with a 350 ms budget, 12 generated piece sprites, 32-piece sliding pool with castling + en passant + promotion handling, check/result status, chess rows in the how-to-play catalog (19 languages) and lounge tips EN/DE/ES; game room Chess corner live (Table 8)

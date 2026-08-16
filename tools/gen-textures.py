@@ -3,6 +3,7 @@
 
 3D:
   images/croc-face.png     256  green croc head for Croc Snap (alpha disc)
+  images/backgammon-board.png 512x410 two rows of points + bar (Backgammon)
   images/board-face.png    512  frame face with see-through holes + bevel
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
@@ -354,6 +355,46 @@ def gen_ui_plain():
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
 
+# ------------------------------------------------------------------ backgammon board
+def gen_backgammon_board(path='images/backgammon-board.png'):
+    """Two rows of twelve triangular points with a bar in the middle, on a
+    felt-brown field; drawn from white's perspective (point 12..23 across the
+    top, 11..0 across the bottom). The plane is 1.0 x 0.8 m in the scene."""
+    W, H = 512, 410
+    felt, edge = hex_rgb('#5a3e2b'), hex_rgb('#3a2a1e')
+    light, dark, barc = hex_rgb('#e8d9bd'), hex_rgb('#8f2f2a'), hex_rgb('#2b1e14')
+    bar_w = 0.08 * W
+    pt_w = (W - bar_w) / 12
+    pt_h = 0.44 * H
+    def px(x, y):
+        u = x + 0.5; v = y + 0.5
+        col = felt
+        n = fbm(x / 40, y / 40, 2) - 0.5
+        col = mix(col, edge, 0.12 * n)
+        # bar
+        if abs(u - W / 2) < bar_w / 2:
+            col = barc
+        else:
+            xx = u if u < W / 2 else u - bar_w
+            i = int(xx // pt_w)          # 0..11 column index
+            cx = (i + 0.5) * pt_w + (0 if u < W / 2 else bar_w)
+            top = v < H / 2
+            tip = pt_h if top else H - pt_h
+            base = 0 if top else H
+            # triangle: width shrinks linearly from base to tip
+            f = (v - base) / (tip - base) if tip != base else 1
+            if 0 <= f <= 1:
+                halfw = (1 - f) * pt_w * 0.47
+                d = abs(u - cx) - halfw
+                cov = 1 - smoothstep(-0.8, 0.8, d)
+                # alternate colours; the top row starts with the opposite colour
+                colour = light if (i % 2 == 0) != top else dark
+                col = mix(col, colour, cov)
+        if u < 4 or v < 4 or u > W - 4 or v > H - 4:
+            col = edge
+        return (*col, 1.0)
+    write_png(path, W, H, px)
+
 # ------------------------------------------------------------------ croc face
 def gen_croc_face(path='images/croc-face.png'):
     """Round green croc head seen from the front (Croc Snap): eyes, nostrils, a
@@ -508,3 +549,4 @@ if __name__ == '__main__':
     gen_ui_plain()
     gen_chess_pieces()
     gen_croc_face()
+    gen_backgammon_board()

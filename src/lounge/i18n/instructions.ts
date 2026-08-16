@@ -50,6 +50,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Croc Snap",
         "overview": "Croc Snap is a suspenseful party game for 2–4 players. A crocodile has 12 teeth, one of them triggers the snap! Take turns pressing teeth and hope you don't get bitten."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Backgammon is an ancient 2-player strategy game. Each side starts with 15 checkers arranged around a 24-point loop and races them toward their home board. Roll two dice, move any two checkers, and bear them off once all 15 are in your home quadrant. First to bear off all 15 wins."
       }
     }
   },
@@ -89,6 +93,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Cocodrilo Snap",
         "overview": "Croc Snap es un juego de fiesta lleno de suspense para 2–4 jugadores. Un cocodrilo tiene 12 dientes, ¡uno de ellos dispara el mordisco! Pulsa dientes por turnos y reza por no ser mordido."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "El backgammon es un juego de estrategia milenario para 2 jugadores. Cada lado empieza con 15 fichas distribuidas en un circuito de 24 puntas y las lleva hacia su tablero interior. Tira dos dados, mueve dos fichas y sácalas cuando las 15 estén en tu cuadrante. El primero en sacar las 15 gana."
       }
     }
   },
@@ -128,6 +136,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Croco Snap",
         "overview": "Croc Snap é um jogo de festa de suspense para 2–4 jogadores. Um crocodilo tem 12 dentes, um deles aciona a mordida! Reveze-se pressionando dentes e torça para não ser mordido."
+      },
+      "backgammon": {
+        "name": "Gamão",
+        "overview": "Backgammon é um antigo jogo de estratégia para 2 jogadores. Cada lado começa com 15 peças dispostas em um circuito de 24 pontos e as direciona para seu quadrante interno. Role dois dados, mova peças e retire-as quando todas as 15 estiverem no quadrante. O primeiro a retirar todas as 15 vence."
       }
     }
   },
@@ -167,6 +179,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Kroko Schnapp",
         "overview": "Croc Snap ist ein spannendes Partyspiel für 2–4 Spieler. Ein Krokodil hat 12 Zähne, einer davon löst den Biss aus! Drückt abwechselnd Zähne und hofft, nicht gebissen zu werden."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Backgammon ist ein uraltes 2-Spieler-Strategiespiel. Jede Seite startet mit 15 Steinen auf einem 24-Punkte-Rundkurs und rennt zum eigenen Heimfeld. Würfle zwei Würfel, bewege Steine und trage sie ab, sobald alle 15 im Heimfeld sind. Wer zuerst alle 15 abträgt, gewinnt."
       }
     }
   },
@@ -206,6 +222,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Croco Snap",
         "overview": "Croc Snap est un jeu de fête à suspense pour 2–4 joueurs. Un crocodile a 12 dents, l'une déclenche la morsure ! Appuyez sur les dents à tour de rôle et priez pour ne pas être mordu."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Le backgammon est un jeu de stratégie ancien pour 2 joueurs. Chaque camp commence avec 15 pions disposés autour d'un circuit de 24 flèches et les fait avancer vers son jan intérieur. Lancez deux dés, déplacez deux pions et sortez-les quand les 15 sont dans votre cadran. Le premier à sortir les 15 gagne."
       }
     }
   },
@@ -245,6 +265,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Cocco Snap",
         "overview": "Croc Snap è un party game di suspense per 2–4 giocatori. Un coccodrillo ha 12 denti, uno di essi fa scattare il morso! A turno premete i denti e sperate di non essere morsi."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Il Backgammon è un antico gioco di strategia per 2 giocatori. Ogni lato inizia con 15 pedine disposte su un circuito di 24 punte e le dirige verso il proprio quadrante interno. Lancia due dadi, muovi le pedine e toglile quando tutte le 15 sono nel quadrante. Il primo a toglierle tutte vince."
       }
     }
   },
@@ -284,6 +308,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Krokodyl u dentysty",
         "overview": "Croc Snap to pełna napięcia gra imprezowa dla 2–4 graczy. Krokodyl ma 12 zębów, jeden uruchamia ugryzienie! Naciskaj zęby i miej nadzieję."
+      },
+      "backgammon": {
+        "name": "Tryktrak",
+        "overview": "Tryktrak to starożytna gra strategiczna dla 2 graczy. Każda strona ma 15 kamieni na 24-punktowej pętli. Rzucaj dwiema kostkami, przesuwaj kamienie i zdejmij je. Pierwszy, kto zdejmie 15, wygrywa."
       }
     }
   },
@@ -323,6 +351,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Timsah Dişçisi",
         "overview": "Croc Snap 2–4 oyunculu gerilim dolu parti oyunudur. 12 dişten biri ısırığı tetikler! Dişlere bas ve ısırılmamayı um."
+      },
+      "backgammon": {
+        "name": "Tavla",
+        "overview": "Tavla 2 oyunculu eski bir strateji oyunudur. Her taraf 24 noktalı döngüde 15 pulla başlar. İki zar at, pulları ilerlet ve eve getir. İlk 15'ini kıran kazanır."
       }
     }
   },
@@ -362,6 +394,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Крокодил-дантист",
         "overview": "Croc Snap, напряжённая вечеринковая игра для 2–4 игроков. У крокодила 12 зубов, один из них активирует укус! Нажимайте зубы и надейтесь, что вас не укусят."
+      },
+      "backgammon": {
+        "name": "Нарды",
+        "overview": "Нарды, древняя стратегическая игра для 2 игроков. Каждая сторона начинает с 15 шашками на 24-точечном кольце. Бросайте два кубика, перемещайте шашки и выводите их. Первый, кто выведет все 15, побеждает."
       }
     }
   },
@@ -401,6 +437,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "鳄鱼咬咬",
         "overview": "鳄鱼咬咬是2–4人惊险派对游戏。鳄鱼有12颗牙齿，其中1颗会触发咬合！轮流按牙齿，祈祷不被咬到吧。"
+      },
+      "backgammon": {
+        "name": "西洋双陆棋",
+        "overview": "西洋双陆棋是古老的2人策略游戏。每方在24点环路上各有15枚棋子，向自己的内场推进。掷两颗骰子移动棋子，当全部15枚都进入内场后开始撤子。先撤完所有棋子的一方获胜。"
       }
     }
   },
@@ -440,6 +480,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "クロックスナップ",
         "overview": "クロックスナップは2〜4人向けのスリル満点パーティーゲーム。ワニの12本の歯のうち1本がトリガー! 順番に歯を押して、噛まれないことを祈りましょう。"
+      },
+      "backgammon": {
+        "name": "バックギャモン",
+        "overview": "バックギャモンは2人用の古代戦略ゲーム。各プレイヤーは24ポイントのループに15個のチェッカーを配置し、ホームボードを目指します。サイコロ2個を振ってチェッカーを動かし、全15個をホームに入れてからベアオフ。先にベアオフ完了した方が勝ちです。"
       }
     }
   },
@@ -479,6 +523,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "क्रोक स्नैप",
         "overview": "Croc Snap 2–4 खिलाड़ियों का रोमांचक पार्टी गेम है। 12 दांतों में से एक काटने को ट्रिगर करता है!"
+      },
+      "backgammon": {
+        "name": "बैकगैमन",
+        "overview": "बैकगैमन 2 खिलाड़ियों का प्राचीन रणनीति खेल। 15 चेकर्स होम बोर्ड में पहुंचाएं।"
       }
     }
   },
@@ -518,6 +566,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Gigit Buaya",
         "overview": "Croc Snap adalah permainan pesta penuh ketegangan untuk 2–4 pemain. Seekor buaya memiliki 12 gigi, salah satunya memicu gigitan! Bergiliran menekan gigi dan berharap tidak digigit."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Backgammon adalah permainan strategi kuno untuk 2 pemain. Setiap sisi memulai dengan 15 bidak yang diatur di lingkaran 24 titik dan berlomba menuju papan rumah. Lempar dua dadu, gerakkan dua bidak, dan keluarkan setelah semua 15 berada di kuadran rumahmu. Yang pertama mengeluarkan semua 15 menang."
       }
     }
   },
@@ -557,6 +609,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Cá Sấu Cắn",
         "overview": "Croc Snap là trò chơi tiệc hồi hộp cho 2–4 người. Cá sấu có 12 răng, một trong số đó kích hoạt cắn! Luân phiên nhấn răng và hy vọng không bị cắn."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Backgammon là trò chiến thuật cổ đại cho 2 người. Mỗi bên có 15 quân sắp trên vòng 24 điểm và đua về sân nhà. Tung hai xúc xắc, di chuyển hai quân, và đưa ra ngoài khi cả 15 ở sân nhà. Người đầu tiên đưa hết 15 quân ra thắng."
       }
     }
   },
@@ -596,6 +652,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Kagat ng Buwaya",
         "overview": "Ang Croc Snap ay isang nakaka-kaba na party game para sa 2–4 manlalaro. May 12 ngipin ang buwaya, isa sa mga ito ang trigger ng snap! Mag-turn na pindutin ang ngipin at sana hindi ka makagat."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Ang Backgammon ay isang sinaunang 2-player strategy game. Ang bawat panig ay nagsisimula ng 15 checkers sa 24-point loop at nagre-race papuntang home board. Mag-roll ng dalawang dice, igalaw ang dalawang checkers, at i-bear off kapag lahat ng 15 ay nasa home quadrant mo na. Unang maka-bear off ng lahat ng 15 ang panalo."
       }
     }
   },
@@ -635,6 +695,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "ক্রোক স্ন্যাপ",
         "overview": "ক্রক স্ন্যাপ ২–৪ খেলোয়াড়ের রোমাঞ্চকর পার্টি গেম। ১২ দাঁতে একটি কামড়!"
+      },
+      "backgammon": {
+        "name": "ব্যাকগ্যামন",
+        "overview": "ব্যাকগ্যামন ২ খেলোয়াড়ের প্রাচীন কৌশল খেলা।"
       }
     }
   },
@@ -674,6 +738,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "क्रोक स्नॅप",
         "overview": "क्रोक स्नॅप 2–4 खेळाडूंचा रोमांचक पार्टी गेम."
+      },
+      "backgammon": {
+        "name": "बॅकगॅमन",
+        "overview": "बॅकगॅमन 2 खेळाडूंचा प्राचीन रणनीती खेळ."
       }
     }
   },
@@ -713,6 +781,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "குரோக் ஸ்னாப்",
         "overview": "க்ராக் ஸ்னாப் 2–4 வீரர்களுக்கான பரபரப்பு விளையாட்டு."
+      },
+      "backgammon": {
+        "name": "பேக்கேமன்",
+        "overview": "பேக்கம்மன் 2 வீரர்களுக்கான பண்டைய உத்தி."
       }
     }
   },
@@ -752,6 +824,10 @@ export const LOCALES: LocaleInfo[] = [
       "crocsnap": {
         "name": "Croco Bite",
         "overview": "Croc Snap na suspense party game for 2–4 people. Crocodile get 12 teeth, one of dem go trigger di snap! Take turns to press teeth and hope say e no go bite you."
+      },
+      "backgammon": {
+        "name": "Backgammon",
+        "overview": "Backgammon na ancient 2-player strategy game. Each side start with 15 checkers around 24-point loop and race dem towards home board. Roll two dice, move two checkers, bear dem off once all 15 dey your home quadrant. First person to bear off all 15 win."
       }
     }
   }
