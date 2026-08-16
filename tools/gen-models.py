@@ -25,14 +25,14 @@ import json, math, struct
 # ------------------------------------------------------------------ parameters
 RIBS = 12           # per direction (12 clockwise + 12 counter-clockwise)
 H = 24.0            # tower height
-R_BASE = 15.4       # rib radius at the ground (landings just inside the fence)
+R_BASE = 15.2       # rib radius at the ground: feet stay 0.15 m inside the fence square (tower centred at the lounge centre)
 R_TOP = 10.5        # rib radius at the crown
 TWIST = math.radians(110)   # total twist over H (each direction)
 SEGS = 24           # rib segments
 RIB_W, RIB_D = 0.42, 0.26   # rib cross-section (tangential x radial)
 FLOORS = [          # (y, inner radius, outer radius, thickness)
-    (8.0, 5.5, 12.4, 0.45),     # game room
-    (16.0, 3.0, 10.9, 0.45),    # sky room
+    (8.0, 5.0, 13.1, 0.45),     # game room (widened 16 Aug: walkways on both sides of the tables)
+    (16.0, 2.6, 11.6, 0.45),    # sky room
     (24.0, 3.0, 10.1, 0.45),    # rooftop terrace, inside the crown ring
 ]
 RAIL_H = 1.1        # railing height above the slab top
@@ -336,10 +336,13 @@ write_glb('models/lamp.glb', [("post", lp_post, 0), ("light", lp_light, 1)], [WO
 
 # bench: seat plank + two legs, facing -z
 bn_seat, bn_legs = Mesh(), Mesh()
-box_mesh(bn_seat, (0, 0.42, 0), (1.8, 0.08, 0.5))
-box_mesh(bn_legs, (-0.7, 0.2, 0), (0.12, 0.4, 0.44))
-box_mesh(bn_legs, (0.7, 0.2, 0), (0.12, 0.4, 0.44))
-write_glb('models/bench.glb', [("seat", bn_seat, 0), ("legs", bn_legs, 1)], [WOOD, WOOD_DARK])
+box_mesh(bn_seat, (0, 0.43, 0), (1.8, 0.1, 0.52))
+box_mesh(bn_legs, (-0.68, 0.19, 0), (0.18, 0.4, 0.46))
+box_mesh(bn_legs, (0.68, 0.19, 0), (0.18, 0.4, 0.46))
+box_mesh(bn_legs, (0, 0.12, 0), (1.5, 0.08, 0.1))   # stretcher between the legs, so the bench reads as one solid piece
+# the seat gets a touch of emissive so benches read at night instead of vanishing into the dark slabs
+BENCH_SEAT = {"name": "benchSeat", "pbrMetallicRoughness": {"baseColorFactor": [0.72, 0.52, 0.34, 1], "metallicFactor": 0.0, "roughnessFactor": 0.8}, "emissiveFactor": [0.16, 0.10, 0.06]}
+write_glb('models/bench.glb', [("seat", bn_seat, 0), ("legs", bn_legs, 1)], [BENCH_SEAT, WOOD_DARK])
 
 # table: top + apron + four legs + two seat pads (their pointer collider is a separate mesh)
 TABLE_TOP = 1.02
@@ -606,13 +609,13 @@ for deg in [160, 200, 259, 304, 0, 56, 101]:
     collar(deg, 11.4, 0.55)
     collar(deg, 11.4, 7.3)
 for deg in [112, 158, 202, 338]:
-    collar(deg, 9.9, 8.55)
-    collar(deg, 9.9, 15.3)
+    collar(deg, 10.4, 8.55)
+    collar(deg, 10.4, 15.3)
 def string(p0, p1, y, n=10, sag=0.7):
     for i in range(1, n):
         t = i / n
         box_mesh(lights, (p0[0] + (p1[0] - p0[0]) * t, y - sag * math.sin(math.pi * t), p0[1] + (p1[1] - p0[1]) * t), (0.12, 0.12, 0.12))
-gr = [(9.9 * math.sin(math.radians(d)), 9.9 * math.cos(math.radians(d))) for d in [112, 158, 202, 338]]
+gr = [(10.4 * math.sin(math.radians(d)), 10.4 * math.cos(math.radians(d))) for d in [112, 158, 202, 338]]
 string(gr[0], gr[1], 14.6); string(gr[1], gr[2], 14.6); string(gr[3], gr[0], 14.6, 14, 1.0); string(gr[2], gr[3], 14.6, 14, 1.0)
 for i in range(32):
     a = 2 * math.pi * i / 32
