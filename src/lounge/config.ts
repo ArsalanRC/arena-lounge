@@ -29,11 +29,12 @@ export interface TableDef {
   rotationY: number
 }
 
-/** Three tables in a shallow arc north of the spawn point. */
+/** Four tables in a shallow arc north of the spawn point (flagship game in the middle). */
 export const TABLES: TableDef[] = [
-  { id: 0, gameId: 'connectfour', label: 'Table 1', position: Vector3.create(9.5, 0, 19), rotationY: 35 },
-  { id: 1, gameId: 'connectfour', label: 'Table 2', position: Vector3.create(16, 0, 21.5), rotationY: 0 },
-  { id: 2, gameId: 'dotlines', label: 'Table 3', position: Vector3.create(22.5, 0, 19), rotationY: -35 }
+  { id: 0, gameId: 'dotlines', label: 'Table 1', position: Vector3.create(7.6, 0, 20.4), rotationY: 48 },
+  { id: 1, gameId: 'connectfour', label: 'Table 2', position: Vector3.create(13.1, 0, 18.2), rotationY: 16 },
+  { id: 2, gameId: 'connectfour', label: 'Table 3', position: Vector3.create(18.9, 0, 18.2), rotationY: -16 },
+  { id: 3, gameId: 'reversi', label: 'Table 4', position: Vector3.create(24.4, 0, 20.4), rotationY: -48 }
 ]
 
 /** Base network sync id for table entities (table i uses SYNC_TABLE_BASE + i). */

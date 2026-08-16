@@ -23,7 +23,8 @@ const EN: LoungeStrings = {
   howToSit: 'Walk up to a table and tap "Sit as Yellow" or "Sit as Red". Alone? Tap "Play the house bot".',
   move: {
     connectfour: 'Tap a column to drop your disc.',
-    dotlines: 'Tap a dot, then a neighbouring dot, to draw the line between them. Closing a box gives you another turn.'
+    dotlines: 'Tap a dot, then a neighbouring dot, to draw the line between them. Closing a box gives you another turn.',
+    reversi: 'Tap a marked square to place a disc; every enemy disc you flank flips to your colour.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -35,7 +36,8 @@ const DE: LoungeStrings = {
   howToSit: 'Geh zu einem Tisch und tippe auf "Sit as Yellow" oder "Sit as Red". Allein? Tippe auf "Play the house bot".',
   move: {
     connectfour: 'Tippe auf eine Spalte, um deinen Stein fallen zu lassen.',
-    dotlines: 'Tippe auf einen Punkt und dann auf einen Nachbarpunkt, um die Linie dazwischen zu zeichnen. Wer ein Kästchen schließt, ist noch einmal dran.'
+    dotlines: 'Tippe auf einen Punkt und dann auf einen Nachbarpunkt, um die Linie dazwischen zu zeichnen. Wer ein Kästchen schließt, ist noch einmal dran.',
+    reversi: 'Tippe auf ein markiertes Feld, um einen Stein zu setzen. Jeder eingeschlossene gegnerische Stein wechselt die Farbe.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -47,7 +49,8 @@ const ES: LoungeStrings = {
   howToSit: 'Acércate a una mesa y toca "Sit as Yellow" o "Sit as Red". ¿Solo? Toca "Play the house bot".',
   move: {
     connectfour: 'Toca una columna para soltar tu ficha.',
-    dotlines: 'Toca un punto y luego un punto vecino para dibujar la línea entre ellos. Si cierras una caja, vuelves a jugar.'
+    dotlines: 'Toca un punto y luego un punto vecino para dibujar la línea entre ellos. Si cierras una caja, vuelves a jugar.',
+    reversi: 'Toca una casilla marcada para colocar una ficha; cada ficha rival que encierres cambia a tu color.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',

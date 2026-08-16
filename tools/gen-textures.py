@@ -197,6 +197,29 @@ def gen_ui_disc(path, base_hex, dark_hex, light_hex):
         return (*col, cov)
     write_png(path, S, S, px)
 
+def gen_reversi_board():
+    W = H = 512
+    N = 8
+    felt, line, edge = hex_rgb('#2f6b46'), hex_rgb('#1d452c'), hex_rgb('#163521')
+    cell = W / N
+    def px(x, y):
+        # felt with subtle noise
+        n = fbm(x / 40, y / 40, 3) - 0.5
+        col = mix(felt, line, 0.35 + 0.5 * n)
+        # grid lines every cell (2px) and a thicker border
+        gx = min(x % cell, cell - x % cell); gy = min(y % cell, cell - y % cell)
+        if gx < 1.2 or gy < 1.2:
+            col = line
+        if x < 3 or y < 3 or x >= W - 3 or y >= H - 3:
+            col = edge
+        # the four traditional star points
+        for sx in (2, 6):
+            for sy in (2, 6):
+                if math.hypot(x - sx * cell, y - sy * cell) < 4:
+                    col = edge
+        return (*col, 1.0)
+    write_png('images/reversi-board.png', W, H, px)
+
 def gen_ui_hole():
     S = 128
     base, dark = hex_rgb('#123240'), hex_rgb('#071a22')
@@ -271,6 +294,9 @@ if __name__ == '__main__':
     gen_rug()
     gen_ui_disc('images/ui/disc-yellow.png', '#f5c518', '#b8890a', '#ffe680')
     gen_ui_disc('images/ui/disc-red.png', '#e2453d', '#961f1a', '#ff8a7a')
+    gen_ui_disc('images/ui/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')
+    gen_ui_disc('images/ui/disc-light.png', '#f2e8d5', '#b9ab92', '#ffffff')
+    gen_reversi_board()
     gen_ui_hole()
     gen_ui_ring()
     gen_ui_panel('images/ui/panel.png', 256, 256, 26, '#17130f', 0.88, '#5a4a3c', 0.9)

@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 12:20 (Europe/Berlin)
+Last update: 2026-08-16 12:40 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -45,7 +45,7 @@ Done and tested in the desktop Explorer through the explorer MCP harness, plus
 one manual test by Arsalan on desktop and one on the phone ("the mobile
 version works as well", 16 Aug 11:30):
 
-- 2x2 parcel World scene, spawn south, three bar-height tables in an arc,
+- 2x2 parcel World scene, spawn south, four bar-height tables in an arc,
   parquet floor, wooden boundary wall, planters, lamps, welcome sign.
 - Connect Four per table: see-through frame (alpha-tested planes), 42 pooled
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
@@ -148,6 +148,7 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 12:40 Reversi plugin (engine ported, 31 tests): tap-a-square UI with legal hints, felt board, front+back disc sprites; per-game seat colours; four tables in an arc (Dot Lines, Connect Four x2, Reversi)
 - 2026-08-16 12:20 How-to-play panel with language picker (19 languages: rule overviews reused from game-platform, lounge sentences EN/DE/ES natively, others fall back to EN); info kiosk at spawn; ar/fa/ur/te left out until the client font shapes them
 - 2026-08-16 12:05 seat camera fixed for rotated tables (aim at floor height; client measures from the feet)
 - 2026-08-16 11:55 Dot Lines plugin (engine ported with 26 tests): two-tap connect-the-dots input, mirrored UI for the far seat, upright double-sided board on Table 3
