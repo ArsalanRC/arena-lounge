@@ -221,6 +221,28 @@ def gen_reversi_board():
         return (*col, 1.0)
     write_png('images/reversi-board.png', W, H, px)
 
+def gen_mark_x(path='images/ui/mark-x.png', rgb=(1, 1, 1)):
+    S = 128
+    def px(x, y):
+        # two diagonal bars, anti-aliased, with rounded ends via distance-to-segment
+        def seg(ax, ay, bx, by, w):
+            vx, vy = bx - ax, by - ay
+            t = max(0, min(1, ((x + .5 - ax) * vx + (y + .5 - ay) * vy) / (vx * vx + vy * vy)))
+            d = math.hypot(x + .5 - (ax + vx * t), y + .5 - (ay + vy * t))
+            return 1 - smoothstep(w - .8, w + .8, d)
+        a = max(seg(28, 28, 100, 100, 11), seg(100, 28, 28, 100, 11))
+        return (*rgb, a)
+    write_png(path, S, S, px)
+
+def gen_mark_o(path='images/ui/mark-o.png', rgb=(1, 1, 1)):
+    S = 128
+    def px(x, y):
+        d = math.hypot(x + .5 - S / 2, y + .5 - S / 2)
+        outer = 1 - smoothstep(48 - .8, 48 + .8, d)
+        inner = smoothstep(30 - .8, 30 + .8, d)
+        return (*rgb, outer * inner)
+    write_png(path, S, S, px)
+
 def gen_ui_hole():
     S = 128
     base, dark = hex_rgb('#123240'), hex_rgb('#071a22')
@@ -298,6 +320,10 @@ if __name__ == '__main__':
     gen_ui_disc('images/ui/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')
     gen_ui_disc('images/ui/disc-light.png', '#f2e8d5', '#b9ab92', '#ffffff')
     gen_reversi_board()
+    gen_mark_x()
+    gen_mark_o()
+    gen_mark_x('images/ui/mark-x-yellow.png', hex_rgb('#f5c518'))
+    gen_mark_o('images/ui/mark-o-red.png', hex_rgb('#e2453d'))
     gen_ui_hole()
     gen_ui_ring()
     gen_ui_panel('images/ui/panel.png', 256, 256, 26, '#17130f', 0.88, '#5a4a3c', 0.9)

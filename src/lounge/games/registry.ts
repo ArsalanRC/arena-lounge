@@ -3,11 +3,13 @@ import type { GameId, TableGame } from './types'
 import { connectFourGame } from './connectfour'
 import { dotLinesGame } from './dotlines'
 import { reversiGame } from './reversi'
+import { ticTacToeGame } from './tictactoe'
 
 const GAMES: Partial<Record<GameId, TableGame>> = {
   connectfour: connectFourGame as TableGame,
   dotlines: dotLinesGame as TableGame,
-  reversi: reversiGame as TableGame
+  reversi: reversiGame as TableGame,
+  tictactoe: ticTacToeGame as TableGame
 }
 
 export function getGame(id: string): TableGame {
