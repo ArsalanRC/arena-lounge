@@ -75,8 +75,12 @@ export interface TableGame<S = unknown, A = unknown> {
    */
   pending?(state: S): { delayMs: number; action: A } | null
 
-  /** Build the game's 3D presentation parented to the table root. */
-  createView3D(root: Entity, onAction: (action: A) => void): View3DHandle
+  /**
+   * Build the game's 3D presentation parented to the table root. `getState`
+   * returns the current decoded state (null while waiting) so 3D taps can
+   * resolve multi-step input such as select-then-move.
+   */
+  createView3D(root: Entity, onAction: (action: A) => void, getState: () => S | null): View3DHandle
   /** Seated controller / spectator board. */
   Controls: (props: { state: S; ctx: GameContext; compact: boolean }) => ReactEcs.JSX.Element
 }

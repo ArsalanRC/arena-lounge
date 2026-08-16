@@ -1,9 +1,9 @@
 # Arena Lounge
 
 A cosy game lounge for Decentraland, built for phones first. Walk in, pick a
-table, take a seat, and play Connect Four, Dot Lines or Reversi against a
-friend or the house bot. Every table is shared: whoever is in the World sees
-the same moves.
+corner, take a seat, and play Connect Four, Dot Lines, Reversi, Tic Tac Toe,
+Match Pairs or Checkers against a friend or the house bot. Every table is
+shared: whoever is in the World sees the same moves.
 
 Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks.io/hackathon/2353/detail).
 
@@ -91,8 +91,8 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 ## Roadmap
 
 - [ ] Persistent leaderboard and streaks (Multiplayer Server + Storage)
-- [x] More games from the same engine family: Dot Lines (Table 1), Reversi (Table 4)
-- [ ] Checkers, Ludo, Match Pairs
+- [x] Six games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers
+- [ ] Chess, Backgammon, Ludo (post-buildathon)
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena), lounge tips EN/DE/ES
 - [ ] Full lounge UI localisation
