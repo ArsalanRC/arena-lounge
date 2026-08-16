@@ -3,7 +3,7 @@
   "runtimeVersion": "7",
   "display": {
     "title": "Arena Lounge",
-    "description": "A game lounge built for phones under a twisted tower: walk up to a table, take a seat, play Connect Four, Checkers, Reversi and more against a friend or the house bot. Mobile-first social hangout for the Friendzone Buildathon.",
+    "description": "A game lounge built for phones under a twisted tower: walk up to a table, take a seat, play Four in a Row, Checkers, Reversi and more against a friend or the house bot. Mobile-first social hangout for the Friendzone Buildathon.",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"
   },
@@ -18,7 +18,7 @@
     "social",
     "multiplayer",
     "mobile",
-    "connect four",
+    "four in a row",
     "lounge"
   ],
   "scene": {

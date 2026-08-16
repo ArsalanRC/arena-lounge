@@ -7,7 +7,7 @@ before submitting.
 **Project name:** Arena Lounge
 
 **One-liner:** A game lounge built for phones under a twisted tower: walk in,
-take a seat, play Connect Four, Chess, Checkers, Reversi and more against a
+take a seat, play Four in a Row, Chess, Checkers, Reversi and more against a
 friend or the house bot, at tables everyone in the World shares.
 
 **World:** `arenalounge.dcl.eth`
@@ -16,7 +16,7 @@ friend or the house bot, at tables everyone in the World shares.
 ## Short description
 
 Arena Lounge is a social hangout in Decentraland built around shared game
-tables. On the ground floor, six corners around a plaza host Connect Four,
+tables. On the ground floor, six corners around a plaza host Four in a Row,
 Dot Lines, Reversi, Tic Tac Toe, Match Pairs and Checkers; elevator pads take
 you up the tower to the game room (Chess, Croc Snap) and the rooftop terrace.
 Anyone can walk up, take a seat and play; a house bot fills the empty seat so

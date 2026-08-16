@@ -20,7 +20,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Connect Four",
+        "name": "Four in a Row",
         "overview": "Take turns dropping discs into a 7-column board. Your disc falls to the lowest empty cell in the chosen column. First to align four of your discs, horizontally, vertically, or diagonally, wins. If the board fills with no winner, it's a draw."
       },
       "dotlines": {
@@ -67,7 +67,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Conecta cuatro",
+        "name": "Cuatro en raya",
         "overview": "Turnos para soltar discos en un tablero de 7 columnas. Tu disco cae a la celda más baja disponible de la columna elegida. El primero en alinear cuatro discos, horizontal, vertical o diagonalmente, gana. Si el tablero se llena sin ganador, es empate."
       },
       "dotlines": {
@@ -114,7 +114,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Lig 4",
+        "name": "Quatro em linha",
         "overview": "Reveze-se soltando discos em um tabuleiro de 7 colunas. Seu disco cai para a célula vazia mais baixa da coluna escolhida. O primeiro a alinhar quatro discos, horizontal, vertical ou diagonal, vence. Se o tabuleiro encher sem vencedor, é empate."
       },
       "dotlines": {
@@ -161,7 +161,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Vier gewinnt",
+        "name": "Vier in einer Reihe",
         "overview": "Werft abwechselnd Spielsteine in ein 7-Spalten-Brett. Dein Stein fällt auf die niedrigste freie Zelle in der gewählten Spalte. Wer zuerst vier Steine in einer Reihe hat, horizontal, vertikal oder diagonal, gewinnt. Ist das Brett voll ohne Gewinner, endet es unentschieden."
       },
       "dotlines": {
@@ -208,7 +208,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Puissance 4",
+        "name": "Quatre en ligne",
         "overview": "À tour de rôle, lâchez des disques dans un plateau de 7 colonnes. Votre disque tombe dans la case la plus basse disponible de la colonne choisie. Le premier à aligner quatre disques, horizontalement, verticalement ou en diagonale, gagne. Si le plateau se remplit sans vainqueur, c'est un match nul."
       },
       "dotlines": {
@@ -255,7 +255,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "Forza 4",
+        "name": "Quattro in fila",
         "overview": "A turno, lascia cadere dischi in un tabellone a 7 colonne. Il tuo disco cade nella cella vuota più bassa della colonna scelta. Il primo ad allineare quattro dischi, in orizzontale, verticale o diagonale, vince. Se il tabellone si riempie senza vincitore, è pareggio."
       },
       "dotlines": {
@@ -490,7 +490,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "コネクトフォー",
+        "name": "四目並べ",
         "overview": "7列のボードに交互にディスクを落とします。選んだ列の一番下の空きマスにディスクが落ちます。縦・横・斜めに4つ並べた方が勝ち。ボードが埋まって勝者がいなければ引き分け。"
       },
       "dotlines": {
@@ -537,7 +537,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "कनेक्ट फोर",
+        "name": "Four in a Row",
         "overview": "7-कॉलम बोर्ड में गोटी डालें। चार एक पंक्ति में पहले।"
       },
       "dotlines": {
@@ -725,7 +725,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "কানেক্ট ফোর",
+        "name": "Four in a Row",
         "overview": "৭-কলামে ডিস্ক ফেলুন। চার সারিতে প্রথম জয়।"
       },
       "dotlines": {
@@ -772,7 +772,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "कनेक्ट फोर",
+        "name": "Four in a Row",
         "overview": "7-कॉलम बोर्डमध्ये गोटी टाका."
       },
       "dotlines": {
@@ -819,7 +819,7 @@ export const LOCALES: LocaleInfo[] = [
     "rtl": false,
     "games": {
       "connectfour": {
-        "name": "கனெக்ட் ஃபோர்",
+        "name": "Four in a Row",
         "overview": "7-நெடுவரிசையில் வட்டு போடுங்கள்."
       },
       "dotlines": {

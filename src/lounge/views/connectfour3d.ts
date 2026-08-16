@@ -1,5 +1,5 @@
 /**
- * Connect Four on a table: upright frame made of two alpha-tested planes
+ * Four in a Row on a table: upright frame made of two alpha-tested planes
  * (holes are see-through, like the real toy), a rim, 42 pooled sprite-plane
  * discs with a drop tween, invisible per-column colliders for desktop clicks.
  *

@@ -1,7 +1,7 @@
 # CLAUDE.md — Arena Lounge (Decentraland SDK7 scene)
 
 Mobile-first social game lounge for the Decentraland Friendzone Mobile
-Buildathon 2026. Players walk up to a table, take a seat and play Connect Four,
+Buildathon 2026. Players walk up to a table, take a seat and play Four in a Row,
 Checkers, Reversi and more against a friend or the house bot, under a twisted
 tower with a game room and a rooftop terrace. Everything is CRDT-synced, no
 server.

@@ -23,6 +23,18 @@ def clean(text):
     # house style: no em-dashes
     return text.replace(' — ', ', ').replace('—', ', ').replace(' – ', ', ')
 
+# Game names that are third-party trademarks in the source catalog get a generic
+# name here (Hasbro owns "Connect Four" and its local brand names); the lounge
+# never shows a protected name.
+NAME_OVERRIDES = {
+    'connectfour': {
+        'en': 'Four in a Row', 'es': 'Cuatro en raya', 'pt': 'Quatro em linha', 'de': 'Vier in einer Reihe',
+        'fr': 'Quatre en ligne', 'it': 'Quattro in fila', 'ja': '四目並べ',
+        'hi': 'Four in a Row', 'bn': 'Four in a Row', 'mr': 'Four in a Row', 'ta': 'Four in a Row',
+    },
+}
+BRAND_WORDS = ['Connect Four', 'Connect 4', 'Vier gewinnt', 'Conecta cuatro', 'Conecta 4', 'Puissance 4', 'Forza 4', 'Lig 4', 'コネクトフォー']
+
 en = json.load(open(os.path.join(src, 'en.json')))
 out = []
 for code in order:
@@ -32,8 +44,11 @@ for code in order:
     d = json.load(open(path))
     games = {}
     for g in GAMES:
-        name = d.get('games', {}).get(g) or en['games'][g]
+        name = NAME_OVERRIDES.get(g, {}).get(code) or d.get('games', {}).get(g) or en['games'][g]
         overview = d.get('instructions', {}).get(g, {}).get('overview') or en['instructions'][g]['overview']
+        for brand in BRAND_WORDS:
+            if brand in overview:
+                overview = overview.replace(brand, NAME_OVERRIDES['connectfour'].get(code, 'Four in a Row'))
         games[g] = {'name': clean(name), 'overview': clean(overview)}
     out.append({'code': code, 'name': NATIVE.get(code, code), 'rtl': code in RTL, 'games': games})
 

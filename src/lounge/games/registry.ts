@@ -30,7 +30,7 @@ export function getGame(id: string): TableGame {
 
 /** Display name for a game id even before its plugin exists (zone banners). */
 export const GAME_NAMES: Record<GameId, string> = {
-  connectfour: 'Connect Four',
+  connectfour: 'Four in a Row',
   dotlines: 'Dot Lines',
   reversi: 'Reversi',
   tictactoe: 'Tic Tac Toe',

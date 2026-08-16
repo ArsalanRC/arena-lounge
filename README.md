@@ -1,7 +1,7 @@
 # Arena Lounge
 
 A game lounge for Decentraland, built for phones first. Walk in under the
-twisted tower, pick a corner, take a seat, and play Connect Four, Dot Lines,
+twisted tower, pick a corner, take a seat, and play Four in a Row, Dot Lines,
 Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon or
 Ludo against a friend or the house bot. Every table is shared: whoever is in the World sees
 the same moves. Elevator pads take you up to the game room and the rooftop
@@ -15,7 +15,7 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
     <td width="50%"><img src="docs/screenshots/lounge.jpg" alt="Arrival: the gateway, the plaza tree, the corners and the game room above" /></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/connect-four.jpg" alt="Seated at Connect Four in first person, controller docked right" /></td>
+    <td width="50%"><img src="docs/screenshots/connect-four.jpg" alt="Seated at Four in a Row in first person, controller docked right" /></td>
     <td width="50%"><img src="docs/screenshots/how-to-play.jpg" alt="How to play panel with the language picker" /></td>
   </tr>
 </table>
@@ -106,7 +106,7 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 
 ## Roadmap
 
-- [x] Ten games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo
+- [x] Ten games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo
 - [ ] More corners: Super Tic Tac Toe, Snakes & Ladders, Sea Strike
 - [x] The tower: game room and rooftop terrace, elevator pads
 - [x] Sound effects (drop, win chime, your-move ding)

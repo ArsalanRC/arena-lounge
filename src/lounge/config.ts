@@ -8,7 +8,7 @@
  * geometry is authored in *local* metres and placed with `position` +
  * `rotationY` here.
  *
- * Local table frame: the Connect Four board stands on the table facing -Z.
+ * Local table frame: the Four in a Row board stands on the table facing -Z.
  * Seat A (yellow) is on the -Z side, seat B (red) on the +Z side.
  */
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
