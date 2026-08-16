@@ -65,15 +65,20 @@ one manual test by Arsalan on desktop and one on the phone ("the mobile
 version works as well", 16 Aug 11:30):
 
 - 3x3 parcel World scene (48 m): garden ring with low-poly trees and a path,
-  the fenced 32 m parquet lounge in the middle (spawn south at 24,18), gateway
+  the fenced 32 m parquet lounge in the middle (spawn south at 24,16.5 since
+  20:55; the tower/plaza centre is the lounge centre 24,24 since then), gateway
   with the welcome sign, round plaza (tree, benches, lamps), six game corners
   around it (rug tint + banner pole each), tables derived from ZONES.
 - The tower (models/tower.glb from tools/gen-models.py, one entity): a diagrid
-  of 24 copper ribs on opposite helices (radius 15.4 at the ground, 10.5 at
-  the crown, 110 degrees of twist each way, 24 m tall), two annular slabs with
-  an oculus over the plaza tree (game room y=8, rooftop y=16) with railings,
-  posts and glowing rims, invisible `_collider` meshes for slabs + railings;
-  seven ground columns (two flank the entrance) and three game-room columns.
+  of 24 copper ribs on opposite helices (radius 15.2 at the ground so the feet
+  stay inside the fence square, 10.5 at the crown, 110 degrees of twist each
+  way, 24 m tall), annular slabs with an oculus over the plaza tree (game
+  room y=8 r 5.0..13.1, sky room y=16 r 2.6..11.6, rooftop y=24 r 3.0..10.1)
+  with railings, posts and glowing rims, invisible `_collider` meshes for
+  slabs + railings; seven ground columns (two flank the entrance) and four
+  game-room columns at r 10.4 (moved out of the walkway 20:55). Game room and
+  sky room tables sit at r 9.3 / 7.6 with 4.4 m rugs, no planters, so there
+  is a walkway inside and outside the ring (Arsalan: "too congested").
   Game room: four corners (Chess, Backgammon, Croc Snap, Ludo) with "coming
   soon" banners until their plugins exist (BUILT_GAMES). Rooftop: benches
   around the oculus, lamps, planters, "leaderboard later" sign.

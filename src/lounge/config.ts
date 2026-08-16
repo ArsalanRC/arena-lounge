@@ -22,7 +22,7 @@ export const LOUNGE_MIN = (SCENE_SIZE - LOUNGE_SIZE) / 2
 export const LOUNGE_MAX = LOUNGE_MIN + LOUNGE_SIZE
 
 /** Where new players appear (also mirrored in scene.json spawnPoints). */
-export const SPAWN = Vector3.create(24, 0, 18)
+export const SPAWN = Vector3.create(24, 0, 16.5)
 
 export interface FloorDef {
   id: number
@@ -44,7 +44,7 @@ export const FLOORS: FloorDef[] = [
  * (south-east of the plaza), one at the far side (north-west), both between
  * corners on every floor. Standing on a pad opens the floor panel.
  */
-export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 18.5), Vector3.create(16.6, 0, 30.5)]
+export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 17), Vector3.create(16.6, 0, 29)]
 /** Standing within this distance of a pad opens the floor panel. */
 export const ELEVATOR_RADIUS = 1.3
 
@@ -57,17 +57,6 @@ export const DUSK_TIME = 72000
  * they are spread out: plaza, portal, game room, rooftop. Everything else that
  * looks lit is emissive (string lights, collars, rims, rug rings).
  */
-export const LIGHTS: Array<{ x: number; y: number; z: number; color: Color3; intensity: number; range: number }> = [
-  { x: 24, y: 5.6, z: 25.5, color: Color3.create(1, 0.78, 0.5), intensity: 3200, range: 16 },
-  { x: 24, y: 6.5, z: 11.2, color: Color3.create(0.55, 0.9, 1), intensity: 2400, range: 12 },
-  { x: 18.5, y: 4.2, z: 16, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
-  { x: 29.5, y: 4.2, z: 16, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
-  { x: 24, y: 13.5, z: 32, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
-  { x: 24, y: 13.5, z: 19, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
-  { x: 24, y: 21, z: 30, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
-  { x: 24, y: 21, z: 21, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
-  { x: 24, y: 28.5, z: 25.5, color: Color3.create(1, 0.82, 0.55), intensity: 3000, range: 16 }
-]
 
 export interface TableDef {
   /** 0-based table index, also used to derive the network sync id. */
@@ -84,7 +73,21 @@ export interface TableDef {
 }
 
 /** Centre of the round plaza the corners face (and the tower axis); the kiosk and sign live south of it. */
-export const PLAZA = Vector3.create(24, 0, 25.5)
+export const PLAZA = Vector3.create(24, 0, 24)
+
+/** Point lights as offsets from the plaza centre (dx, dz) so the whole tower can move as one. */
+const LIGHT_SPEC: Array<{ dx: number; y: number; dz: number; color: Color3; intensity: number; range: number }> = [
+  { dx: 0, y: 5.6, dz: 0, color: Color3.create(1, 0.78, 0.5), intensity: 3200, range: 16 },
+  { dx: 0, y: 6.5, dz: -14.3, color: Color3.create(0.55, 0.9, 1), intensity: 2400, range: 12 },
+  { dx: -5.5, y: 4.2, dz: -9.5, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
+  { dx: 5.5, y: 4.2, dz: -9.5, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
+  { dx: 0, y: 13.5, dz: 6.5, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
+  { dx: 0, y: 13.5, dz: -6.5, color: Color3.create(1, 0.78, 0.5), intensity: 2600, range: 14 },
+  { dx: 0, y: 21, dz: 4.5, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
+  { dx: 0, y: 21, dz: -4.5, color: Color3.create(1, 0.78, 0.5), intensity: 2400, range: 13 },
+  { dx: 0, y: 28.5, dz: 0, color: Color3.create(1, 0.82, 0.55), intensity: 3000, range: 16 }
+]
+export const LIGHTS: Array<{ x: number; y: number; z: number; color: Color3; intensity: number; range: number }> = LIGHT_SPEC.map((l) => ({ x: PLAZA.x + l.dx, y: l.y, z: PLAZA.z + l.dz, color: l.color, intensity: l.intensity, range: l.range }))
 
 export interface ZoneDef {
   id: number
@@ -114,20 +117,20 @@ function ring(deg: number, r: number, f: number): Vector3 {
  * banner and get their rug + tables only once the plugin exists.
  */
 export const ZONES: ZoneDef[] = [
-  { id: 0, gameId: 'connectfour', position: Vector3.create(15.5, 0, 20), rug: Color4.fromHexString('#3f8fa3ff'), banner: Color4.fromHexString('#1f4e5fff'), tables: 2, floor: 0 },
-  { id: 1, gameId: 'dotlines', position: Vector3.create(13.5, 0, 27.5), rug: Color4.fromHexString('#d9c08aff'), banner: Color4.fromHexString('#a5843dff'), tables: 1, floor: 0 },
-  { id: 2, gameId: 'matchpairs', position: Vector3.create(18.5, 0, 34), rug: Color4.fromHexString('#a68bd6ff'), banner: Color4.fromHexString('#6b4fa3ff'), tables: 1, floor: 0 },
-  { id: 3, gameId: 'checkers', position: Vector3.create(29.5, 0, 34), rug: Color4.fromHexString('#c46b6bff'), banner: Color4.fromHexString('#7a2e2eff'), tables: 1, floor: 0 },
-  { id: 4, gameId: 'reversi', position: Vector3.create(34.5, 0, 27.5), rug: Color4.fromHexString('#6fae7cff'), banner: Color4.fromHexString('#2f6b46ff'), tables: 1, floor: 0 },
-  { id: 5, gameId: 'tictactoe', position: Vector3.create(32.5, 0, 20), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 0 },
-  { id: 6, gameId: 'chess', position: ring(0, 9, 1), rug: Color4.fromHexString('#8f5d8aff'), banner: Color4.fromHexString('#5a2f57ff'), tables: 1, floor: 1 },
-  { id: 7, gameId: 'backgammon', position: ring(90, 9, 1), rug: Color4.fromHexString('#a6743fff'), banner: Color4.fromHexString('#6b4423ff'), tables: 1, floor: 1 },
-  { id: 8, gameId: 'crocsnap', position: ring(180, 9, 1), rug: Color4.fromHexString('#4f9d6bff'), banner: Color4.fromHexString('#2c5e3fff'), tables: 1, floor: 1 },
-  { id: 9, gameId: 'ludo', position: ring(270, 9, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 },
-  { id: 10, gameId: 'supertictactoe', position: ring(45, 9, 1), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 1 },
-  { id: 11, gameId: 'snakesladders', position: ring(225, 9, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 1, floor: 1 },
-  { id: 12, gameId: 'seastrike', position: ring(0, 7.4, 2), rug: Color4.fromHexString('#4f7fb0ff'), banner: Color4.fromHexString('#1f4e7fff'), tables: 1, floor: 2 },
-  { id: 13, gameId: 'diceroyale', position: ring(180, 7.4, 2), rug: Color4.fromHexString('#9b6fd0ff'), banner: Color4.fromHexString('#5a3a8aff'), tables: 1, floor: 2 }
+  { id: 0, gameId: 'connectfour', position: Vector3.create(15.5, 0, 18.5), rug: Color4.fromHexString('#3f8fa3ff'), banner: Color4.fromHexString('#1f4e5fff'), tables: 2, floor: 0 },
+  { id: 1, gameId: 'dotlines', position: Vector3.create(13.5, 0, 26), rug: Color4.fromHexString('#d9c08aff'), banner: Color4.fromHexString('#a5843dff'), tables: 1, floor: 0 },
+  { id: 2, gameId: 'matchpairs', position: Vector3.create(18.5, 0, 32.5), rug: Color4.fromHexString('#a68bd6ff'), banner: Color4.fromHexString('#6b4fa3ff'), tables: 1, floor: 0 },
+  { id: 3, gameId: 'checkers', position: Vector3.create(29.5, 0, 32.5), rug: Color4.fromHexString('#c46b6bff'), banner: Color4.fromHexString('#7a2e2eff'), tables: 1, floor: 0 },
+  { id: 4, gameId: 'reversi', position: Vector3.create(34.5, 0, 26), rug: Color4.fromHexString('#6fae7cff'), banner: Color4.fromHexString('#2f6b46ff'), tables: 1, floor: 0 },
+  { id: 5, gameId: 'tictactoe', position: Vector3.create(32.5, 0, 18.5), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 0 },
+  { id: 6, gameId: 'chess', position: ring(0, 9.3, 1), rug: Color4.fromHexString('#8f5d8aff'), banner: Color4.fromHexString('#5a2f57ff'), tables: 1, floor: 1 },
+  { id: 7, gameId: 'backgammon', position: ring(90, 9.3, 1), rug: Color4.fromHexString('#a6743fff'), banner: Color4.fromHexString('#6b4423ff'), tables: 1, floor: 1 },
+  { id: 8, gameId: 'crocsnap', position: ring(180, 9.3, 1), rug: Color4.fromHexString('#4f9d6bff'), banner: Color4.fromHexString('#2c5e3fff'), tables: 1, floor: 1 },
+  { id: 9, gameId: 'ludo', position: ring(270, 9.3, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 },
+  { id: 10, gameId: 'supertictactoe', position: ring(45, 9.3, 1), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 1 },
+  { id: 11, gameId: 'snakesladders', position: ring(225, 9.3, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 1, floor: 1 },
+  { id: 12, gameId: 'seastrike', position: ring(0, 7.6, 2), rug: Color4.fromHexString('#4f7fb0ff'), banner: Color4.fromHexString('#1f4e7fff'), tables: 1, floor: 2 },
+  { id: 13, gameId: 'diceroyale', position: ring(180, 7.6, 2), rug: Color4.fromHexString('#9b6fd0ff'), banner: Color4.fromHexString('#5a3a8aff'), tables: 1, floor: 2 }
 ]
 
 /** Games that have a plugin today; zones for other games stay empty until then. */

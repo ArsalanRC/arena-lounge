@@ -296,7 +296,8 @@ export function buildLounge(): void {
 
   // corners on every floor: rug + banner (planters between ground-floor neighbours)
   for (const z of ZONES) {
-    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 8.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
+    // upper floors get tighter rugs: the annular slabs need a walkway inside and outside the tables
+    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 8.4 : z.floor > 0 ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
     zoneBanner(z)
   }
   const ground = ZONES.filter((z) => z.floor === 0)
@@ -364,16 +365,12 @@ function buildTower(): void {
   }
   // ground: between the corners, two flanking the entrance path; game room: between its corners
   for (const deg of [160, 200, 259, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
-  for (const deg of [112, 158, 202, 338]) column(deg, 9.9, 8, 16, 0.5) // between the game-room corners and clear of both elevators
+  for (const deg of [112, 158, 202, 338]) column(deg, 10.4, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
 
   for (const pad of ELEVATORS) elevatorShaft(pad)
 
-  // game room (floor 1): lamps between the corners, planters at the oculus edge
+  // game room (floor 1): the ring stays clear so people can walk around it (no planters here)
   const y1 = FLOORS[1].y
-  for (const deg of [22, 68, 112, 158, 202, 248, 292, 338]) {
-    const t = (deg * Math.PI) / 180
-    planter(PLAZA.x + Math.sin(t) * 6.4, PLAZA.z + Math.cos(t) * 6.4, y1)
-  }
   liveLabel(Vector3.create(PLAZA.x, y1 + 3.2, PLAZA.z + 5.2), () => L().gameRoom, 2.6, Color4.White(), 8)
 
   // sky room (floor 2): two game corners (N, S), sofas at E and W looking over the oculus, planters, lamps
@@ -383,10 +380,6 @@ function buildTower(): void {
     const t = (deg * Math.PI) / 180
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 6.2, y2, PLAZA.z + Math.cos(t) * 6.2)
     prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
-  }
-  for (const deg of [60, 120, 240, 300]) {
-    const t = (deg * Math.PI) / 180
-    planter(PLAZA.x + Math.sin(t) * 5.0, PLAZA.z + Math.cos(t) * 5.0, y2)
   }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
 
