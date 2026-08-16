@@ -19,8 +19,9 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
 import { movePlayerTo } from '~system/RestrictedActions'
-import { applyMove, getBotMove, isColumnPlayable } from '../engine/connectfour'
+import { applyMove, getBotMove, isColumnPlayable, type ConnectFourDifficulty } from '../engine/connectfour'
 import {
+  AFK_MS,
   AUTO_STAND_AFTER_MS,
   AUTO_STAND_DISTANCE,
   BOT_THINK_MS,
@@ -78,6 +79,10 @@ export const local = {
   dismissedTableId: -1,
   /** Mobile controller: show the mini board instead of the compact drop strip. */
   showMiniBoard: false,
+  /** Bot strength for games this client drives (local choice, no sync needed). */
+  botDifficulty: 'medium' as ConnectFourDifficulty,
+  /** Last time the local player did something at a table (sit / drop / rematch). */
+  lastActionAt: 0,
   /** Set when the CRDT room never connected; local play is still allowed. */
   offline: false,
   startedAt: 0,
@@ -227,6 +232,7 @@ export function sit(t: Table, seat: Seat, snap = true): boolean {
   writeSeat(t, seat, { addr: me.addr, name: me.name, bot: false, beat: Date.now() })
   local.hasEverSat = true
   local.farSince = 0
+  local.lastActionAt = Date.now()
   maybeStart(t)
   if (snap) snapToSeat(t, seat)
   return true
@@ -267,6 +273,7 @@ export function inviteBot(t: Table): void {
   const other = otherSeat(mine)
   if (!seatIsOpen(seatOf(t, other))) return
   writeSeat(t, other, { addr: BOT_ADDR, name: BOT_NAME, bot: true, beat: Date.now() })
+  local.lastActionAt = Date.now()
   maybeStart(t)
 }
 
@@ -302,6 +309,7 @@ export function dismissBot(t: Table): void {
 export function rematch(t: Table): void {
   if (!mySeatAt(t) || !canWrite()) return
   if (boardOf(t).status !== Status.Finished) return
+  local.lastActionAt = Date.now()
   maybeStart(t)
 }
 
@@ -312,6 +320,7 @@ export function drop(t: Table, col: number): boolean {
   if (board.status !== Status.Playing) return false
   const seat = mySeatAt(t)
   if (!seat || board.turn !== seat) return false
+  local.lastActionAt = Date.now()
   return applyDrop(t, col)
 }
 
@@ -486,6 +495,16 @@ function janitorSystem(dt: number): void {
       else toast('Your opponent ran out of time. Round is yours!')
     }
   }
+  // idle at a table while it is on you to act (or nothing is running): free the seat
+  const mineNow = findMySeat()
+  if (mineNow && local.lastActionAt && now - local.lastActionAt > AFK_MS) {
+    const bd = boardOf(mineNow.table)
+    const ballInMyCourt = bd.status !== Status.Playing || bd.turn === mineNow.seat
+    if (ballInMyCourt) {
+      stand(mineNow.table)
+      toast('You were idle for a while, so your seat is free again')
+    }
+  }
   // auto-stand when the local player wanders off
   const mine = findMySeat()
   const p = playerPosition()
@@ -519,7 +538,7 @@ function botSystem(): void {
       if (b2.status !== Status.Playing) return
       if (`${b2.round}:${b2.moveCount}` !== key) return
       if (!seatOf(t, b2.turn as Seat).bot) return
-      const move = getBotMove(toEngineState(b2), 'medium')
+      const move = getBotMove(toEngineState(b2), local.botDifficulty)
       if (move) applyDrop(t, move.column)
     }, BOT_THINK_MS)
   }

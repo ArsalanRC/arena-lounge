@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 11:35 (Europe/Berlin)
+Last update: 2026-08-16 11:40 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -142,3 +142,4 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:28 sound effects
 - 2026-08-16 11:33 DEPLOY.md, SUBMISSION.md
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
+- 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard

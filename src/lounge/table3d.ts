@@ -37,7 +37,7 @@ import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { COLS, ROWS } from '../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE, SEAT_PAD_OFFSET } from './config'
 import { CELL_COUNT, SEAT_A, SEAT_B, Status, Winner, cellCol, cellRow, type Seat } from './state'
-import { boardOf, drop, local, mySeatAt, seatOf, sit, sitWithBot, inviteBot, type Table } from './tables'
+import { boardOf, drop, local, mySeatAt, otherSeat, seatOf, sit, sitWithBot, inviteBot, toast, type Table } from './tables'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 
 // ---------------------------------------------------------------- geometry
@@ -80,6 +80,8 @@ export interface TableVisual {
     moveKey: string
     myTurnKey: string
     seated: boolean
+    /** Address in the opponent seat last frame (to notice them leaving). */
+    oppAddr: string
   }
 }
 
@@ -177,7 +179,7 @@ function applyDiscMaterial(e: Entity, v: number, glow: boolean): void {
     castShadows: false,
     // a touch of self-illumination keeps discs vivid in shade; winners glow
     emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
-    emissiveIntensity: glow ? 0.7 : 0.12
+    emissiveIntensity: glow ? 0.45 : 0.12
   })
 }
 
@@ -364,7 +366,8 @@ export function buildTableVisual(t: Table): TableVisual {
       signVisible: true,
       moveKey: '',
       myTurnKey: '',
-      seated: false
+      seated: false,
+      oppAddr: ''
     }
   }
   visuals.push(vis)
@@ -491,6 +494,12 @@ export function updateTableVisual(vis: TableVisual): void {
   if (turnKey !== vis.rendered.myTurnKey) {
     vis.rendered.myTurnKey = turnKey
     if (seated && b.status === Status.Playing && b.turn === mine) playPersonal('turn')
+  }
+  const oppAddr = seated ? seatOf(vis.table, otherSeat(mine as Seat)).addr : ''
+  if (oppAddr !== vis.rendered.oppAddr) {
+    const wasHuman = vis.rendered.oppAddr !== '' && vis.rendered.oppAddr !== 'bot'
+    if (seated && wasHuman && oppAddr === '') toast('Your opponent left the table')
+    vis.rendered.oppAddr = oppAddr
   }
 }
 

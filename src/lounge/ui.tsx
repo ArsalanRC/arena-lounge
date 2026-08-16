@@ -210,7 +210,12 @@ function TableCard() {
     >
       <Text value={t.def.label} size={28} />
       <Text value={line} size={20} color={UI.muted} margin={{ top: 4, bottom: 10 }} />
-      {bothTaken && <Text value="Both seats are taken. Watch, or try another table." size={18} color={UI.muted} />}
+      {bothTaken && <MiniBoard table={t} interactive={false} />}
+      {bothTaken && (
+        <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <Btn label="Not now" color={UI.panelSoft} textColor={UI.muted} onClick={() => (local.dismissedTableId = t.def.id)} width={135} />
+        </UiEntity>
+      )}
       {!bothTaken && (
         <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           {a.addr === '' && (
@@ -354,6 +359,21 @@ function Controller() {
       <Text value={status} size={22} color={statusColor} margin={{ top: 6, bottom: 6 }} />
 
       {showBoard ? <MiniBoard table={t} interactive={myTurn} /> : <DropStrip table={t} seat={seat} interactive={myTurn} />}
+
+      {opp.bot && b.status !== Status.Playing && (
+        <UiEntity uiTransform={{ width: '100%', height: 48, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', margin: { top: 6 } }}>
+          <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: 'Bot:', fontSize: 17, color: UI.muted }} />
+          {(['easy', 'medium', 'hard'] as const).map((d) => (
+            <UiEntity
+              key={d}
+              uiTransform={{ width: 86, height: 40, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+              uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: local.botDifficulty === d ? UI.accent : UI.panelSoft }}
+              uiText={{ value: d[0].toUpperCase() + d.slice(1), fontSize: 16, color: UI.text, textAlign: 'middle-center' }}
+              onMouseDown={() => (local.botDifficulty = d)}
+            />
+          ))}
+        </UiEntity>
+      )}
 
       <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', margin: { top: 8 } }}>
         {b.status === Status.Waiting && opp.addr === '' && <Btn label="Play the house bot" onClick={() => inviteBot(t)} />}
