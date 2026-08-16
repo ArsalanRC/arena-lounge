@@ -11,7 +11,7 @@ import { Vector3 } from '@dcl/sdk/math'
 import { COLS, ROWS, type ConnectFourGameState } from '../../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 const BOARD_W = 1.2
 const BOARD_H = 1.04
@@ -96,8 +96,12 @@ export function createConnectFourView(root: Entity, onAction: (a: C4Action) => v
   box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD_W + 0.2, 0.06, 0.26), PALETTE.frameDark)
   box(root, Vector3.create(0, C4_BOARD_CENTER_Y - BOARD_H / 2 - 0.01, 0), Vector3.create(BOARD_W + 0.05, 0.02, rimD), PALETTE.frameDark)
 
-  const discs: Entity[] = []
-  for (let i = 0; i < CELL_COUNT; i++) discs.push(makeDisc(root))
+  // discs exist only while a round runs (see LazyPool)
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < CELL_COUNT; i++) out.push(makeDisc(root))
+    return out
+  })
   // one click area for the whole frame; the hit x picks the column
   boardHitArea(root, Vector3.create(0, C4_BOARD_CENTER_Y, 0), Vector3.create(BOARD_W, BOARD_H, 0.16), 'Drop here', (local) => {
     onAction({ col: clampInt((local.x + BOARD_W / 2 - CELL_PITCH * 0.25) / CELL_PITCH, 0, COLS - 1) })
@@ -107,19 +111,27 @@ export function createConnectFourView(root: Entity, onAction: (a: C4Action) => v
   let renderedWinKey = ''
 
   const hideAll = () => {
-    for (let i = 0; i < CELL_COUNT; i++) {
-      if (rendered[i] !== 0) {
-        VisibilityComponent.getMutable(discs[i]).visible = false
-        Tween.deleteFrom(discs[i])
+    if (pool.live) {
+      const discs = pool.get()
+      for (let i = 0; i < CELL_COUNT; i++) {
+        if (rendered[i] !== 0) {
+          VisibilityComponent.getMutable(discs[i]).visible = false
+          Tween.deleteFrom(discs[i])
+        }
       }
-      rendered[i] = 0
     }
+    rendered.fill(0)
     renderedWinKey = ''
   }
 
   return {
     reset: hideAll,
+    idle() {
+      hideAll()
+      pool.release()
+    },
     update(raw, info) {
+      const discs = pool.get()
       const state = raw as ConnectFourGameState
       const last = info.lastAction as C4Action | null
       const lastRow = state.lastMove?.row ?? -1

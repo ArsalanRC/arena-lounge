@@ -11,7 +11,7 @@ import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
 import type { BackgammonColor, BackgammonGameState } from '../../engine/backgammon'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, box, toTableLocal } from './shared'
+import { LazyPool, TABLE_TOP_Y, box, toTableLocal } from './shared'
 
 /** Roll (dice chosen by the acting client), move a checker, or pass when stuck. */
 export type BgAction = { roll: [number, number] } | { from: number | 'bar'; to: number | 'off'; pips: number } | { pass: true }
@@ -104,16 +104,19 @@ export function createBackgammonView(root: Entity, onTap: (target: BgTarget) => 
   Transform.create(dice, { parent: root, position: Vector3.create(0, CENTER_Y + BOARD_H / 2 + 0.16, 0) })
   TextShape.create(dice, { text: '', fontSize: 1.0, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), outlineWidth: 0.15, outlineColor: Color3.Black(), width: 3, height: 0.5 })
 
-  // checker pool
-  const pool: Entity[] = []
-  for (let i = 0; i < 30; i++) {
-    const e = engine.addEntity()
-    Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.01) })
-    MeshRenderer.setBox(e)
-    discMaterial(e, 'white', false)
-    VisibilityComponent.create(e, { visible: false })
-    pool.push(e)
-  }
+  // checker pool, built while a round runs
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < 30; i++) {
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.01) })
+      MeshRenderer.setBox(e)
+      discMaterial(e, 'white', false)
+      VisibilityComponent.create(e, { visible: false })
+      out.push(e)
+    }
+    return out
+  })
 
   // taps: board (points + bar) and the trays (off)
   const hit = engine.addEntity()
@@ -148,10 +151,11 @@ export function createBackgammonView(root: Entity, onTap: (target: BgTarget) => 
   })
 
   const layout = (s: BackgammonGameState): void => {
+    const discs = pool.get()
     let n = 0
     placed.length = 0
     const put = (pos: Vector3, color: BackgammonColor, key: string): void => {
-      const e = pool[n++]
+      const e = discs[n++]
       if (!e) return
       Transform.getMutable(e).position = pos
       VisibilityComponent.getMutable(e).visible = true
@@ -165,7 +169,7 @@ export function createBackgammonView(root: Entity, onTap: (target: BgTarget) => 
       for (let k = 0; k < pt.count; k++) put(checkerLocal(p, k), pt.owner, `p:${p}:${pt.owner}`)
     }
     for (const c of ['white', 'black'] as BackgammonColor[]) for (let k = 0; k < s.bar[c]; k++) put(barLocal(c, k), c, `bar:0:${c}`)
-    for (let i = n; i < pool.length; i++) VisibilityComponent.getMutable(pool[i]).visible = false
+    for (let i = n; i < discs.length; i++) VisibilityComponent.getMutable(discs[i]).visible = false
     TextShape.getMutable(offWhite).text = s.off.white ? `${s.off.white}` : ''
     TextShape.getMutable(offBlack).text = s.off.black ? `${s.off.black}` : ''
     TextShape.getMutable(dice).text = s.dice ? `${s.dice[0]} · ${s.dice[1]}   (${s.remainingPips.join(' ')} left)` : ''
@@ -173,11 +177,15 @@ export function createBackgammonView(root: Entity, onTap: (target: BgTarget) => 
 
   return {
     reset() {
-      for (const e of pool) VisibilityComponent.getMutable(e).visible = false
+      if (pool.live) for (const e of pool.get()) VisibilityComponent.getMutable(e).visible = false
       TextShape.getMutable(offWhite).text = ''
       TextShape.getMutable(offBlack).text = ''
       TextShape.getMutable(dice).text = ''
       setBgSelection(root, null)
+    },
+    idle() {
+      placed.length = 0
+      pool.release()
     },
     update(raw) {
       layout(raw as BackgammonGameState)

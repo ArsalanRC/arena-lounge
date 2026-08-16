@@ -9,7 +9,7 @@ import { Vector3 } from '@dcl/sdk/math'
 import type { ReversiGameState } from '../../engine/reversi'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface ReversiAction {
   r: number
@@ -61,16 +61,19 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
   // one thin box per cell: the alpha-tested disc sprite shows on the front
   // and back faces (the felt planes are opaque, so nothing shows *through*
   // the board), and the sides are transparent. One entity instead of two.
-  const discs: Entity[] = []
-  for (let r = 0; r < N; r++)
-    for (let c = 0; c < N; c++) {
-      const e = engine.addEntity()
-      Transform.create(e, { parent: root, position: cellLocal(r, c), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.008) })
-      MeshRenderer.setBox(e)
-      discMaterial(e, 1, false)
-      VisibilityComponent.create(e, { visible: false })
-      discs.push(e)
-    }
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let r = 0; r < N; r++)
+      for (let c = 0; c < N; c++) {
+        const e = engine.addEntity()
+        Transform.create(e, { parent: root, position: cellLocal(r, c), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.008) })
+        MeshRenderer.setBox(e)
+        discMaterial(e, 1, false)
+        VisibilityComponent.create(e, { visible: false })
+        out.push(e)
+      }
+    return out
+  })
   // one click area for the whole board; the hit point picks the square
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Place disc', (local) => {
     const c = clampInt((local.x + BOARD / 2) / CELL, 0, N - 1)
@@ -82,7 +85,7 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
   let lastIdx = -1
 
   const setCell = (i: number, v: number, glow: boolean): void => {
-    const e = discs[i]
+    const e = pool.get()[i]
     if (v === 0) VisibilityComponent.getMutable(e).visible = false
     else {
       discMaterial(e, v, glow)
@@ -91,15 +94,17 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
   }
 
   const reset = (): void => {
-    for (let i = 0; i < N * N; i++) {
-      if (rendered[i] !== 0) setCell(i, 0, false)
-      rendered[i] = 0
-    }
+    if (pool.live) for (let i = 0; i < N * N; i++) if (rendered[i] !== 0) setCell(i, 0, false)
+    rendered.fill(0)
     lastIdx = -1
   }
 
   return {
     reset,
+    idle() {
+      reset()
+      pool.release()
+    },
     update(raw) {
       const s = raw as ReversiGameState
       const newLast = s.lastMove ? s.lastMove.r * N + s.lastMove.c : -1

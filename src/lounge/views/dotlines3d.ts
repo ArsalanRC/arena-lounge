@@ -9,7 +9,7 @@ import { Color4, Vector3 } from '@dcl/sdk/math'
 import type { DotLinesGameState } from '../../engine/dotlines'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface DotAction {
   o: 'h' | 'v'
@@ -116,46 +116,69 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
     })
   })
 
-  // lines: pooled, hidden until drawn
-  const hLines: Entity[][] = []
-  for (let r = 0; r <= ROWS; r++) {
-    hLines.push([])
-    for (let c = 0; c < COLS; c++) {
-      const a = dotLocal(r, c)
-      const e = engine.addEntity()
-      Transform.create(e, { parent: root, position: Vector3.create(a.x + PITCH / 2, a.y, 0), scale: Vector3.create(PITCH, 0.03, HALF_T * 2 + 0.02) })
-      MeshRenderer.setBox(e)
-      Material.setPbrMaterial(e, { albedoColor: LINE_COLORS[0], roughness: 0.5, metallic: 0 })
-      VisibilityComponent.create(e, { visible: false })
-      hLines[r].push(e)
-    }
+  // lines and box fills exist only while a round runs (LazyPool); dots stay, they are the board
+  interface Marks {
+    hLines: Entity[][]
+    vLines: Entity[][]
+    fills: Entity[][]
+    all: Entity[]
   }
-  const vLines: Entity[][] = []
-  for (let r = 0; r < ROWS; r++) {
-    vLines.push([])
-    for (let c = 0; c <= COLS; c++) {
-      const a = dotLocal(r, c)
-      const e = engine.addEntity()
-      Transform.create(e, { parent: root, position: Vector3.create(a.x, a.y - PITCH / 2, 0), scale: Vector3.create(0.03, PITCH, HALF_T * 2 + 0.02) })
-      MeshRenderer.setBox(e)
-      Material.setPbrMaterial(e, { albedoColor: LINE_COLORS[0], roughness: 0.5, metallic: 0 })
-      VisibilityComponent.create(e, { visible: false })
-      vLines[r].push(e)
+  const buildMarks = (): Marks => {
+    const all: Entity[] = []
+    const hLines: Entity[][] = []
+    for (let r = 0; r <= ROWS; r++) {
+      hLines.push([])
+      for (let c = 0; c < COLS; c++) {
+        const a = dotLocal(r, c)
+        const e = engine.addEntity()
+        Transform.create(e, { parent: root, position: Vector3.create(a.x + PITCH / 2, a.y, 0), scale: Vector3.create(PITCH, 0.03, HALF_T * 2 + 0.02) })
+        MeshRenderer.setBox(e)
+        Material.setPbrMaterial(e, { albedoColor: LINE_COLORS[0], roughness: 0.5, metallic: 0 })
+        VisibilityComponent.create(e, { visible: false })
+        hLines[r].push(e)
+        all.push(e)
+      }
     }
+    const vLines: Entity[][] = []
+    for (let r = 0; r < ROWS; r++) {
+      vLines.push([])
+      for (let c = 0; c <= COLS; c++) {
+        const a = dotLocal(r, c)
+        const e = engine.addEntity()
+        Transform.create(e, { parent: root, position: Vector3.create(a.x, a.y - PITCH / 2, 0), scale: Vector3.create(0.03, PITCH, HALF_T * 2 + 0.02) })
+        MeshRenderer.setBox(e)
+        Material.setPbrMaterial(e, { albedoColor: LINE_COLORS[0], roughness: 0.5, metallic: 0 })
+        VisibilityComponent.create(e, { visible: false })
+        vLines[r].push(e)
+        all.push(e)
+      }
+    }
+    const fills: Entity[][] = []
+    for (let r = 0; r < ROWS; r++) {
+      fills.push([])
+      for (let c = 0; c < COLS; c++) {
+        const a = dotLocal(r, c)
+        const e = fillBox(root, Vector3.create(a.x + PITCH / 2, a.y - PITCH / 2, 0))
+        fills[r].push(e)
+        all.push(e)
+      }
+    }
+    return { hLines, vLines, fills, all }
   }
-  // box fills
-  const fills: Entity[][] = []
-  for (let r = 0; r < ROWS; r++) {
-    fills.push([])
-    for (let c = 0; c < COLS; c++) {
-      const a = dotLocal(r, c)
-      fills[r].push(fillBox(root, Vector3.create(a.x + PITCH / 2, a.y - PITCH / 2, 0)))
-    }
+  const pool = new LazyPool<Marks>(() => [buildMarks()], () => root)
+  const marks = (): Marks => pool.get()[0]
+  const releaseMarks = (): void => {
+    if (!pool.live) return
+    for (const e of marks().all) engine.removeEntity(e)
+    pool.releaseHandled()
   }
 
-  const drawnH = hLines.map((row) => row.map(() => 0))
-  const drawnV = vLines.map((row) => row.map(() => 0))
-  const owned = fills.map((row) => row.map(() => -1))
+  const drawnH: number[][] = []
+  for (let r = 0; r <= ROWS; r++) drawnH.push(new Array<number>(COLS).fill(0))
+  const drawnV: number[][] = []
+  for (let r = 0; r < ROWS; r++) drawnV.push(new Array<number>(COLS + 1).fill(0))
+  const owned: number[][] = []
+  for (let r = 0; r < ROWS; r++) owned.push(new Array<number>(COLS).fill(-1))
   const selectedScale = Vector3.create(0.07, 0.07, HALF_T * 2 + 0.05)
   const normalScale = Vector3.create(0.045, 0.045, HALF_T * 2 + 0.03)
   let selectedIdx = -1
@@ -174,20 +197,26 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
   }
 
   const reset = (): void => {
-    for (let r = 0; r <= ROWS; r++) for (let c = 0; c < COLS; c++) if (drawnH[r][c]) { setLine(hLines[r][c], 0, false); drawnH[r][c] = 0 }
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c <= COLS; c++) if (drawnV[r][c]) { setLine(vLines[r][c], 0, false); drawnV[r][c] = 0 }
-    for (let r = 0; r < ROWS; r++)
-      for (let c = 0; c < COLS; c++)
-        if (owned[r][c] >= 0) {
-          VisibilityComponent.getMutable(fills[r][c]).visible = false
-          owned[r][c] = -1
-        }
+    if (pool.live) {
+      const m = marks()
+      for (let r = 0; r <= ROWS; r++) for (let c = 0; c < COLS; c++) if (drawnH[r][c]) setLine(m.hLines[r][c], 0, false)
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c <= COLS; c++) if (drawnV[r][c]) setLine(m.vLines[r][c], 0, false)
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (owned[r][c] >= 0) VisibilityComponent.getMutable(m.fills[r][c]).visible = false
+    }
+    for (const row of drawnH) row.fill(0)
+    for (const row of drawnV) row.fill(0)
+    for (const row of owned) row.fill(-1)
     setSelection(root, null)
   }
 
   return {
     reset,
+    idle() {
+      reset()
+      releaseMarks()
+    },
     update(raw) {
+      const { hLines, vLines, fills } = marks()
       const s = raw as DotLinesGameState
       // Lines are neutral in the engine; colour them by whoever drew them is
       // not recorded, so we colour by box ownership only and keep lines dark.

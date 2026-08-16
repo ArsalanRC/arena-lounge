@@ -67,3 +67,32 @@ export function boardHitArea(root: Entity, centre: Vector3, size: Vector3, hover
 export function clampInt(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, Math.floor(v)))
 }
+
+/**
+ * Entities a game view only needs while a round is running (pieces, discs,
+ * lines): built on first use, removed when the table goes idle. The client
+ * counts every mesh renderer against the mobile budget, visible or not, so
+ * idle tables should cost nothing beyond their board.
+ */
+export class LazyPool<T = Entity> {
+  private items: T[] | null = null
+  constructor(private readonly build: () => T[], private readonly entityOf: (item: T) => Entity = (item) => item as unknown as Entity) {}
+  /** The pool, built if needed. */
+  get(): T[] {
+    if (this.items === null) this.items = this.build()
+    return this.items
+  }
+  get live(): boolean {
+    return this.items !== null
+  }
+  /** Remove every pooled entity; the next get() rebuilds. */
+  release(): void {
+    if (this.items === null) return
+    for (const item of this.items) engine.removeEntity(this.entityOf(item))
+    this.items = null
+  }
+  /** Forget the items without touching entities (the caller removed them itself). */
+  releaseHandled(): void {
+    this.items = null
+  }
+}

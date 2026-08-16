@@ -11,7 +11,7 @@ import { Color3, Vector3 } from '@dcl/sdk/math'
 import type { ChessGameState, ChessPiece } from '../../engine/chess'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface ChessAction {
   from: number
@@ -76,16 +76,21 @@ export function createChessView(root: Entity, onTap: (sq: number) => void): View
   box(root, Vector3.create(0, CENTER_Y - BOARD / 2 - rim / 2, 0), Vector3.create(BOARD, rim, depth), PALETTE.woodDark)
   box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD + 0.2, 0.06, 0.26), PALETTE.woodDark)
 
-  // piece pool: thin boxes so both faces show the sprite (seat B looks from behind)
-  const pool: Entity[] = []
-  for (let i = 0; i < 32; i++) {
-    const e = engine.addEntity()
-    Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.01) })
-    MeshRenderer.setBox(e)
-    pieceMaterial(e, CHESS_SEAT_SPRITES[0], false)
-    VisibilityComponent.create(e, { visible: false })
-    pool.push(e)
-  }
+  // piece pool: thin boxes so both faces show the sprite (seat B looks from behind); built while a round runs
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < 32; i++) {
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.01) })
+      MeshRenderer.setBox(e)
+      pieceMaterial(e, CHESS_SEAT_SPRITES[0], false)
+      VisibilityComponent.create(e, { visible: false })
+      out.push(e)
+    }
+    free.length = 0
+    free.push(...out)
+    return out
+  })
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Move a piece', (local) => {
     const file = clampInt((local.x + BOARD / 2) / CELL, 0, N - 1)
     const rank = clampInt((local.y - (CENTER_Y - BOARD / 2)) / CELL, 0, N - 1)
@@ -94,7 +99,7 @@ export function createChessView(root: Entity, onTap: (sq: number) => void): View
 
   const entityAt = new Map<number, Entity>()
   const spriteAt = new Map<number, string>()
-  const free: Entity[] = [...pool]
+  const free: Entity[] = []
   let selectedSq = -1
 
   const place = (sq: number, e: Entity, p: ChessPiece, animateFrom: Vector3 | null): void => {
@@ -148,7 +153,14 @@ export function createChessView(root: Entity, onTap: (sq: number) => void): View
       for (const sq of Array.from(entityAt.keys())) release(sq)
       setChessSelection(root, null)
     },
+    idle() {
+      entityAt.clear()
+      spriteAt.clear()
+      free.length = 0
+      pool.release()
+    },
     update(raw, info) {
+      pool.get()
       const s = raw as ChessGameState
       const last = s.lastMove
       if (info.animate && last) {

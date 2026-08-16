@@ -8,7 +8,7 @@ import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
 import type { TTTGameState } from '../../engine/tictactoe'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface TTTAction {
   cell: number
@@ -57,16 +57,19 @@ export function createTicTacToeView(root: Entity, onAction: (a: TTTAction) => vo
     box(root, Vector3.create(-BOARD / 2 + CELL * k, CENTER_Y, 0), Vector3.create(0.03, BOARD, HALF_T * 2 + 0.006), PALETTE.woodDark)
     box(root, Vector3.create(0, CENTER_Y + BOARD / 2 - CELL * k, 0), Vector3.create(BOARD, 0.03, HALF_T * 2 + 0.006), PALETTE.woodDark)
   }
-  // marks
-  const marks: Entity[] = []
-  for (let i = 0; i < N * N; i++) {
-    const e = engine.addEntity()
-    Transform.create(e, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.72, CELL * 0.72, HALF_T * 2 + 0.01) })
-    MeshRenderer.setBox(e)
-    markMaterial(e, 'X', false)
-    VisibilityComponent.create(e, { visible: false })
-    marks.push(e)
-  }
+  // marks, built while a round runs
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < N * N; i++) {
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.72, CELL * 0.72, HALF_T * 2 + 0.01) })
+      MeshRenderer.setBox(e)
+      markMaterial(e, 'X', false)
+      VisibilityComponent.create(e, { visible: false })
+      out.push(e)
+    }
+    return out
+  })
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Place your mark', (local) => {
     const c = clampInt((local.x + BOARD / 2) / CELL, 0, N - 1)
     const r = clampInt((CENTER_Y + BOARD / 2 - local.y) / CELL, 0, N - 1)
@@ -77,16 +80,22 @@ export function createTicTacToeView(root: Entity, onAction: (a: TTTAction) => vo
   let winKey = ''
 
   const reset = (): void => {
-    for (let i = 0; i < N * N; i++) {
-      if (rendered[i] !== null) VisibilityComponent.getMutable(marks[i]).visible = false
-      rendered[i] = null
+    if (pool.live) {
+      const marks = pool.get()
+      for (let i = 0; i < N * N; i++) if (rendered[i] !== null) VisibilityComponent.getMutable(marks[i]).visible = false
     }
+    rendered.fill(null)
     winKey = ''
   }
 
   return {
     reset,
+    idle() {
+      reset()
+      pool.release()
+    },
     update(raw) {
+      const marks = pool.get()
       const s = raw as TTTGameState
       const win = new Set(s.winLine ?? [])
       const key = (s.winLine ?? []).join(',')

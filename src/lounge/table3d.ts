@@ -15,11 +15,8 @@ import {
   ColliderLayer,
   Entity,
   Font,
+  GltfContainer,
   InputAction,
-  Material,
-  MaterialTransparencyMode,
-  MeshCollider,
-  MeshRenderer,
   TextAlignMode,
   TextShape,
   Transform,
@@ -28,13 +25,13 @@ import {
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { PALETTE, SEAT_PAD_OFFSET } from './config'
+import { SEAT_PAD_OFFSET } from './config'
 import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
 import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, otherSeat, seatOf, sideOf, sit, sitWithBot, toast, type Table } from './tables'
-import { TABLE_TOP_Y, box, woodBox } from './views/shared'
+import { TABLE_TOP_Y, toTableLocal } from './views/shared'
 
 export { TABLE_TOP_Y, box } from './views/shared'
 
@@ -42,8 +39,6 @@ export interface TableVisual {
   table: Table
   view: View3DHandle
   sign: Entity
-  padA: Entity
-  padB: Entity
   camA: Entity
   camB: Entity
   sfx: TableSfx
@@ -65,64 +60,24 @@ export const visuals: TableVisual[] = []
 
 // ---------------------------------------------------------------- builders
 
-function makePad(parent: Entity, seat: Seat, color: Color4): { pad: Entity; cam: Entity } {
-  const e = engine.addEntity()
-  const z = seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET
-  Transform.create(e, { parent, position: Vector3.create(0, 0.015, z), scale: Vector3.create(1.0, 0.03, 1.0) })
-  MeshRenderer.setCylinder(e, 0.5, 0.5)
-  MeshCollider.setCylinder(e, 0.5, 0.5, ColliderLayer.CL_POINTER)
-  Material.setPbrMaterial(e, { albedoColor: color, roughness: 0.9, metallic: 0 })
-  // Camera area entity: gets a first-person CameraModeArea only while the
-  // *local* player holds this seat (see updateTableVisual), so bystanders who
-  // step on a pad keep their own camera.
+/**
+ * Camera area entity for a seat: gets a first-person CameraModeArea only
+ * while the *local* player holds this seat (see updateTableVisual), so
+ * bystanders who step on a pad keep their own camera. The pad itself is part
+ * of models/table.glb.
+ */
+function makeCam(parent: Entity, seat: Seat): Entity {
   const cam = engine.addEntity()
-  Transform.create(cam, { parent, position: Vector3.create(0, 1.2, z) })
-  return { pad: e, cam }
+  Transform.create(cam, { parent, position: Vector3.create(0, 1.2, seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET) })
+  return cam
 }
 
-/** Little three-box robot with glowing eyes; returns the clickable body. */
+/** Little robot token (models/robot.glb) with a pointer collider; returns the entity. */
 function makeBotFigure(parent: Entity, at: Vector3): Entity {
-  const body = engine.addEntity()
-  Transform.create(body, {
-    parent,
-    position: Vector3.create(at.x, at.y + 0.11, at.z),
-    rotation: Quaternion.fromEulerDegrees(0, 25, 0),
-    scale: Vector3.create(0.16, 0.2, 0.12)
-  })
-  MeshRenderer.setBox(body)
-  MeshCollider.setBox(body, ColliderLayer.CL_POINTER)
-  Material.setPbrMaterial(body, { albedoColor: PALETTE.frameDark, roughness: 0.4, metallic: 0.5 })
-  const head = engine.addEntity()
-  Transform.create(head, { parent: body, position: Vector3.create(0, 0.78, 0), scale: Vector3.create(0.85, 0.55, 0.9) })
-  MeshRenderer.setBox(head)
-  Material.setPbrMaterial(head, { albedoColor: PALETTE.frame, roughness: 0.4, metallic: 0.5 })
-  for (const x of [-0.25, 0.25]) {
-    const eye = engine.addEntity()
-    Transform.create(eye, { parent: head, position: Vector3.create(x, 0.05, -0.55), scale: Vector3.create(0.22, 0.28, 0.14) })
-    MeshRenderer.setBox(eye)
-    Material.setPbrMaterial(eye, {
-      albedoColor: Color4.fromHexString('#9ff0ffff'),
-      emissiveColor: Color3.fromHexString('#7fe6ff'),
-      emissiveIntensity: 2,
-      roughness: 0.2,
-      metallic: 0
-    })
-  }
-  const antenna = engine.addEntity()
-  Transform.create(antenna, { parent: head, position: Vector3.create(0, 0.75, 0), scale: Vector3.create(0.08, 0.5, 0.08) })
-  MeshRenderer.setCylinder(antenna, 0.5, 0.5)
-  Material.setPbrMaterial(antenna, { albedoColor: PALETTE.frameDark, roughness: 0.4, metallic: 0.5 })
-  const tip = engine.addEntity()
-  Transform.create(tip, { parent: head, position: Vector3.create(0, 1.05, 0), scale: Vector3.create(0.24, 0.35, 0.24) })
-  MeshRenderer.setBox(tip)
-  Material.setPbrMaterial(tip, {
-    albedoColor: PALETTE.red,
-    emissiveColor: Color3.fromHexString('#ff6a5e'),
-    emissiveIntensity: 1.2,
-    roughness: 0.3,
-    metallic: 0
-  })
-  return body
+  const e = engine.addEntity()
+  Transform.create(e, { parent, position: at, rotation: Quaternion.fromEulerDegrees(0, 25, 0) })
+  GltfContainer.create(e, { src: 'models/robot.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
+  return e
 }
 
 function makeSign(parent: Entity, y: number): Entity {
@@ -150,17 +105,9 @@ const SIGN_Y = TABLE_TOP_Y + 0.05 + 1.04 + 0.55
 export function buildTableVisual(t: Table): TableVisual {
   const root = t.root
 
-  // table top (wood) + apron + legs
-  woodBox(root, Vector3.create(0, TABLE_TOP_Y - 0.03, 0), Vector3.create(1.8, 0.06, 0.9), Vector3.create(2, 1, 1))
-  box(root, Vector3.create(0, TABLE_TOP_Y - 0.1, 0), Vector3.create(1.6, 0.08, 0.7), PALETTE.woodDark)
-  for (const [x, z] of [
-    [-0.78, -0.33],
-    [0.78, -0.33],
-    [-0.78, 0.33],
-    [0.78, 0.33]
-  ]) {
-    box(root, Vector3.create(x, (TABLE_TOP_Y - 0.06) / 2, z), Vector3.create(0.09, TABLE_TOP_Y - 0.06, 0.09), PALETTE.woodDark)
-  }
+  // table top + apron + legs + both seat pads: one GLB on the root (models/table.glb);
+  // the pads' pointer collider is an invisible mesh inside it
+  GltfContainer.create(root, { src: 'models/table.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
 
   // the game itself
   const view = t.game.createView3D(
@@ -171,20 +118,17 @@ export function buildTableVisual(t: Table): TableVisual {
     () => gameStateOf(t)
   )
 
-  // seat pads
-  // both pads look the same: chairs carry no colour, sides are dealt at random per round
-  const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.pad)
-  const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.pad)
+  // seat pads: both look the same (chairs carry no colour, sides are dealt at
+  // random per round); a tap on the GLB's pad collider picks the seat by the
+  // hit point's side of the table
+  const camA = makeCam(root, SEAT_A)
+  const camB = makeCam(root, SEAT_B)
   pointerEventsSystem.onPointerDown(
-    { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
-    () => {
-      sit(t, SEAT_A)
-    }
-  )
-  pointerEventsSystem.onPointerDown(
-    { entity: padB, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
-    () => {
-      sit(t, SEAT_B)
+    { entity: root, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
+    (event) => {
+      const p = event.hit?.position
+      if (!p) return
+      sit(t, toTableLocal(root, p).z < 0 ? SEAT_A : SEAT_B)
     }
   )
 
@@ -204,8 +148,6 @@ export function buildTableVisual(t: Table): TableVisual {
     table: t,
     view,
     sign,
-    padA,
-    padB,
     camA,
     camB,
     sfx: createTableSfx(root, Vector3.create(0, TABLE_TOP_Y + 0.6, 0)),
@@ -293,6 +235,7 @@ export function updateTableVisual(vis: TableVisual): void {
       if (animate) play(vis.sfx.move)
     } else {
       vis.view.reset()
+      vis.view.idle?.()
     }
     if (b.winner !== r.winner && b.winner !== Winner.None) {
       if (b.winner !== Winner.Draw) play(vis.sfx.win)

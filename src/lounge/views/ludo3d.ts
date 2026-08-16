@@ -13,7 +13,7 @@ import { positionToXY } from '../../engine/ludo'
 import type { PlayerColor } from '../../engine/types'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
+import { LazyPool, TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export type LudoAction = { roll: number } | { piece: number } | { skip: true }
 
@@ -64,16 +64,19 @@ export function createLudoView(root: Entity, onTap: (row: number, col: number) =
   Transform.create(dice, { parent: root, position: Vector3.create(0, CENTER_Y + BOARD / 2 + 0.16, 0) })
   TextShape.create(dice, { text: '', fontSize: 1.1, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), outlineWidth: 0.15, outlineColor: Color3.Black(), width: 3, height: 0.5 })
 
-  // eight pieces: index = colourIndex * 4 + pieceIndex
-  const pieces: Entity[] = []
-  for (let i = 0; i < 8; i++) {
-    const e = engine.addEntity()
-    Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.012 + (i % 4) * 0.002) })
-    MeshRenderer.setBox(e)
-    pieceMaterial(e, LUDO_COLORS[Math.floor(i / 4)], false)
-    VisibilityComponent.create(e, { visible: false })
-    pieces.push(e)
-  }
+  // eight pieces: index = colourIndex * 4 + pieceIndex; built while a round runs
+  const pool = new LazyPool(() => {
+    const out: Entity[] = []
+    for (let i = 0; i < 8; i++) {
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.012 + (i % 4) * 0.002) })
+      MeshRenderer.setBox(e)
+      pieceMaterial(e, LUDO_COLORS[Math.floor(i / 4)], false)
+      VisibilityComponent.create(e, { visible: false })
+      out.push(e)
+    }
+    return out
+  })
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Roll / move', (local) => {
     const col = clampInt((local.x + BOARD / 2) / CELL, 0, N - 1)
     const row = clampInt((CENTER_Y + BOARD / 2 - local.y) / CELL, 0, N - 1)
@@ -83,11 +86,16 @@ export function createLudoView(root: Entity, onTap: (row: number, col: number) =
   const lastPos = new Map<number, number>() // piece entity index -> relative position
   return {
     reset() {
-      for (const e of pieces) VisibilityComponent.getMutable(e).visible = false
+      if (pool.live) for (const e of pool.get()) VisibilityComponent.getMutable(e).visible = false
       lastPos.clear()
       TextShape.getMutable(dice).text = ''
     },
+    idle() {
+      lastPos.clear()
+      pool.release()
+    },
     update(raw, info) {
+      const pieces = pool.get()
       const s = raw as LudoGameState
       const movable = new Set(s.turnPhase === 'move' ? s.validMoves.map((m) => `${m.color}:${m.pieceIndex}`) : [])
       for (let ci = 0; ci < 2; ci++) {
