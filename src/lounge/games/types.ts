@@ -17,7 +17,7 @@ import type ReactEcs from '@dcl/sdk/react-ecs'
 import type { BotDifficulty } from '../../engine/types'
 
 /** Hosted games plus the ids reserved for the game-room corners (banner until the plugin lands). */
-export type GameId = 'connectfour' | 'dotlines' | 'reversi' | 'tictactoe' | 'matchpairs' | 'checkers' | 'chess' | 'backgammon' | 'crocsnap' | 'ludo'
+export type GameId = 'connectfour' | 'dotlines' | 'reversi' | 'tictactoe' | 'matchpairs' | 'checkers' | 'chess' | 'backgammon' | 'crocsnap' | 'ludo' | 'supertictactoe' | 'snakesladders'
 
 /** Seat numbers as stored in TableBoard.turn / winner (0 = nobody). */
 export type SeatNo = 1 | 2
