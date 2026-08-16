@@ -42,6 +42,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Checkers",
         "overview": "Checkers (American Draughts) is a two-player strategy game on the dark squares of an 8×8 board. Each side starts with 12 men; the goal is to capture every opposing piece or block the opponent so they have no legal move."
+      },
+      "chess": {
+        "name": "Chess",
+        "overview": "Chess is a two-player strategy game on an 8×8 board. Each player starts with 16 pieces; the goal is to deliver checkmate, attack the opposing king so it has no legal escape."
       }
     }
   },
@@ -73,6 +77,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Damas",
         "overview": "Las damas (American Draughts) son un juego para dos jugadores en las casillas oscuras de un tablero 8×8. Cada lado empieza con 12 piezas; el objetivo es capturar todas las del rival o dejarlo sin jugadas legales."
+      },
+      "chess": {
+        "name": "Ajedrez",
+        "overview": "El ajedrez es un juego de estrategia para dos jugadores en un tablero de 8×8. Cada jugador empieza con 16 piezas; el objetivo es dar jaque mate, atacar al rey rival sin que pueda escapar."
       }
     }
   },
@@ -104,6 +112,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Damas",
         "overview": "Damas (American Draughts) é jogado nas casas escuras de um tabuleiro 8×8. Cada lado começa com 12 peças; o objetivo é capturar todas as peças adversárias ou bloquear o oponente."
+      },
+      "chess": {
+        "name": "Xadrez",
+        "overview": "Xadrez é um jogo de estratégia para dois jogadores em um tabuleiro 8×8. Cada jogador começa com 16 peças; o objetivo é dar xeque-mate, atacar o rei adversário sem escapatória."
       }
     }
   },
@@ -135,6 +147,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Dame",
         "overview": "Dame (American Draughts) wird auf den dunklen Feldern eines 8×8-Bretts gespielt. Jede Seite startet mit 12 Steinen; Ziel ist es, alle gegnerischen Steine zu schlagen oder den Gegner so zu blockieren, dass er keinen legalen Zug hat."
+      },
+      "chess": {
+        "name": "Schach",
+        "overview": "Schach ist ein Zweispieler-Strategiespiel auf einem 8×8-Brett. Jeder Spieler startet mit 16 Figuren; das Ziel ist Schachmatt, den gegnerischen König so anzugreifen, dass er keinen legalen Ausweg hat."
       }
     }
   },
@@ -166,6 +182,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Jeu de dames",
         "overview": "Les dames (variante américaine) se jouent à deux sur les cases sombres d'un plateau 8×8. Chaque camp commence avec 12 pions ; le but est de capturer tous les pions adverses ou de bloquer l'adversaire sans coup légal."
+      },
+      "chess": {
+        "name": "Échecs",
+        "overview": "Les échecs sont un jeu de stratégie à deux joueurs sur un échiquier 8×8. Chaque joueur commence avec 16 pièces ; le but est le mat, attaquer le roi adverse sans issue possible."
       }
     }
   },
@@ -197,6 +217,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Dama",
         "overview": "La dama (American Draughts) si gioca sulle caselle scure di una scacchiera 8×8. Ogni lato inizia con 12 pezzi; l'obiettivo è catturare tutti i pezzi avversari o bloccare l'avversario."
+      },
+      "chess": {
+        "name": "Scacchi",
+        "overview": "Gli scacchi sono un gioco di strategia per due giocatori su una scacchiera 8×8. Ogni giocatore inizia con 16 pezzi; l'obiettivo è dare scaccomatto, attaccare il re avversario senza via di fuga."
       }
     }
   },
@@ -228,6 +252,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Warcaby",
         "overview": "Warcaby (American Draughts) to gra dwuosobowa na ciemnych polach planszy 8×8. Każda strona ma 12 pionków; celem jest zbicie wszystkich pionków przeciwnika lub zablokowanie go."
+      },
+      "chess": {
+        "name": "Szachy",
+        "overview": "Szachy to strategiczna gra dwuosobowa na planszy 8×8. Każdy gracz ma 16 figur; celem jest mat, zaatakowanie króla bez możliwości ucieczki."
       }
     }
   },
@@ -259,6 +287,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Dama",
         "overview": "Dama (Amerikan kuralları) 8×8 tahtanın koyu karelerinde iki oyunculudur. Her taraf 12 taşla başlar; tüm rakip taşları almayı veya hareket edemez hale getirmeyi hedefle."
+      },
+      "chess": {
+        "name": "Satranç",
+        "overview": "Satranç 8×8 tahtada iki oyunculu strateji oyunudur. Her oyuncunun 16 taşı vardır; amaç mat, rakip şahı kaçamayacak şekilde tehdit et."
       }
     }
   },
@@ -290,6 +322,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Шашки",
         "overview": "Шашки (американский вариант), игра на двоих на тёмных клетках доски 8×8. У каждой стороны 12 шашек; цель, захватить все шашки противника или заблокировать его."
+      },
+      "chess": {
+        "name": "Шахматы",
+        "overview": "Шахматы, стратегическая игра на двоих на доске 8×8. У каждого игрока 16 фигур; цель, поставить мат, атаковать короля противника так, чтобы ему некуда было деться."
       }
     }
   },
@@ -321,6 +357,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "西洋跳棋",
         "overview": "西洋跳棋（美式）在8×8棋盘的深色格子上进行。每位玩家12枚棋子，目标是吃掉对方所有棋子或使对方无法走棋。"
+      },
+      "chess": {
+        "name": "国际象棋",
+        "overview": "国际象棋是8×8棋盘上的双人策略游戏。每位玩家拥有16枚棋子，目标是将死对方的王。"
       }
     }
   },
@@ -352,6 +392,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "チェッカー",
         "overview": "チェッカー（アメリカン・ドラフツ）は8×8の暗い色のマスで2人が対戦。各プレイヤーは12個の駒でスタートし、相手の駒を全て取るか動けなくすると勝ちです。"
+      },
+      "chess": {
+        "name": "チェス",
+        "overview": "チェスは8×8の盤上で行う2人用の戦略ゲーム。各プレイヤーは16個の駒でスタートし、相手のキングをチェックメイトすると勝ちです。"
       }
     }
   },
@@ -383,6 +427,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "चेकर्स",
         "overview": "चेकर्स (American Draughts) 8×8 बोर्ड के गहरे वर्गों पर दो खिलाड़ियों का खेल है।"
+      },
+      "chess": {
+        "name": "शतरंज",
+        "overview": "शतरंज दो खिलाड़ियों का 8×8 बोर्ड पर सामरिक खेल है। विरोधी राजा को चेकमेट करें।"
       }
     }
   },
@@ -414,6 +462,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Dam",
         "overview": "Dam (American Draughts) adalah permainan strategi dua pemain di kotak gelap papan 8×8. Setiap sisi memulai dengan 12 bidak; tujuannya adalah menangkap semua bidak lawan atau memblokir lawan sehingga tidak punya langkah legal."
+      },
+      "chess": {
+        "name": "Catur",
+        "overview": "Catur adalah permainan strategi dua pemain di papan 8×8. Setiap pemain memulai dengan 16 bidak; tujuannya adalah memberikan skakmat, menyerang raja lawan sehingga tidak ada jalan keluar legal."
       }
     }
   },
@@ -445,6 +497,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Cờ Đam",
         "overview": "Checkers (Cờ đam Mỹ) là trò chơi chiến thuật hai người trên ô tối của bàn 8×8. Mỗi bên bắt đầu với 12 quân; mục tiêu là bắt hết quân đối phương hoặc chặn để họ không có nước hợp lệ."
+      },
+      "chess": {
+        "name": "Cờ Vua",
+        "overview": "Cờ vua là trò chơi chiến thuật hai người trên bàn 8×8. Mỗi người bắt đầu với 16 quân; mục tiêu là chiếu hết, tấn công vua đối phương sao cho không có đường thoát hợp lệ."
       }
     }
   },
@@ -476,6 +532,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Dama",
         "overview": "Ang Checkers (American Draughts) ay isang two-player strategy game sa mga dark squares ng 8×8 board. Ang bawat panig ay nagsisimula ng 12 men; ang layunin ay mahuli lahat ng piyesa ng kalaban o i-block sila na walang legal na galaw."
+      },
+      "chess": {
+        "name": "Ahedres",
+        "overview": "Ang Chess ay isang two-player strategy game sa 8×8 board. Ang bawat manlalaro ay nagsisimula ng 16 piyesa; ang layunin ay mag-deliver ng checkmate, atakihin ang hari ng kalaban na walang legal na escape."
       }
     }
   },
@@ -507,6 +567,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "চেকার্স",
         "overview": "চেকার্স ৮×৮ বোর্ডে কৌশল খেলা।"
+      },
+      "chess": {
+        "name": "দাবা",
+        "overview": "দাবা ৮×৮ বোর্ডে কৌশল খেলা। প্রতিপক্ষ রাজাকে চেকমেট করুন।"
       }
     }
   },
@@ -538,6 +602,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "चेकर्स",
         "overview": "चेकर्स 8×8 बोर्डवर दोन खेळाडूंचा खेळ."
+      },
+      "chess": {
+        "name": "बुद्धिबळ",
+        "overview": "बुद्धिबळ 8×8 बोर्डवर दोन खेळाडूंचा रणनीती खेळ."
       }
     }
   },
@@ -569,6 +637,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "செக்கர்ஸ்",
         "overview": "செக்கர்ஸ் 8×8 போர்டில் இரு வீரர்களின் விளையாட்டு."
+      },
+      "chess": {
+        "name": "சதுரங்கம்",
+        "overview": "செஸ் 8×8 போர்டில் இரு வீரர்களின் உத்தி."
       }
     }
   },
@@ -600,6 +672,10 @@ export const LOCALES: LocaleInfo[] = [
       "checkers": {
         "name": "Draught",
         "overview": "Checkers (American Draughts) na two-player strategy game for di dark squares of 8×8 board. Each side start with 12 men; di goal na to capture every opponent piece or block dem so dem no get legal move."
+      },
+      "chess": {
+        "name": "Chess",
+        "overview": "Chess na two-player strategy game for 8×8 board. Each player start with 16 pieces; di goal na to deliver checkmate, attack di opponent king so e no get any legal escape."
       }
     }
   }

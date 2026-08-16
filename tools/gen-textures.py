@@ -7,6 +7,7 @@
   images/floor.png         512  dark parquet, tiles seamlessly
   images/rug.png           512  round woven rug with alpha outside the circle
 UI (all alpha):
+  images/ui/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
   images/ui/disc-yellow.png / disc-red.png  128  shaded discs
   images/ui/hole.png        128  recessed empty cell
   images/ui/ring.png        128  white ring (win / last-move highlight)
@@ -352,6 +353,101 @@ def gen_ui_plain():
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
 
+# ------------------------------------------------------------------ chess pieces
+def _sd_circle(px, py, cx, cy, r):
+    return math.hypot(px - cx, py - cy) - r
+
+def _sd_ellipse(px, py, cx, cy, rx, ry):
+    # scaled circle: good enough for a few px of anti-aliasing
+    k = math.hypot((px - cx) / rx, (py - cy) / ry)
+    return (k - 1) * min(rx, ry)
+
+def _sd_box(px, py, cx, cy, hw, hh):
+    dx, dy = abs(px - cx) - hw, abs(py - cy) - hh
+    return math.hypot(max(dx, 0), max(dy, 0)) + min(max(dx, dy), 0)
+
+def _sd_poly(px, py, pts):
+    """Signed distance to a convex polygon (either winding)."""
+    area = sum(pts[i][0] * pts[(i + 1) % len(pts)][1] - pts[(i + 1) % len(pts)][0] * pts[i][1] for i in range(len(pts)))
+    if area < 0: pts = pts[::-1]   # normalise winding so "outside" is positive below
+    d = -1e9
+    n = len(pts)
+    inside = True
+    best = 1e9
+    for i in range(n):
+        ax, ay = pts[i]; bx, by = pts[(i + 1) % n]
+        ex, ey = bx - ax, by - ay
+        L = math.hypot(ex, ey) or 1e-9
+        # signed distance to the edge line (positive = outside for CCW polygons)
+        sd = ((px - ax) * ey - (py - ay) * ex) / L
+        d = max(d, sd)
+        # distance to the segment (for the outside)
+        t = max(0.0, min(1.0, ((px - ax) * ex + (py - ay) * ey) / (L * L)))
+        best = min(best, math.hypot(px - (ax + t * ex), py - (ay + t * ey)))
+        if sd > 0: inside = False
+    return d if inside else best
+
+# Each piece: list of (shape, params) unioned, then 'cut' shapes subtracted.
+# Coordinates in a 1x1 box, y down, base at the bottom.
+BASE = [('box', (0.5, 0.86, 0.19, 0.045)), ('box', (0.5, 0.79, 0.14, 0.035))]
+PIECES = {
+    'P': BASE + [('poly', [(0.40, 0.76), (0.60, 0.76), (0.56, 0.52), (0.44, 0.52)]),
+                 ('circle', (0.5, 0.42, 0.115))],
+    'R': BASE + [('poly', [(0.36, 0.76), (0.64, 0.76), (0.62, 0.40), (0.38, 0.40)]),
+                 ('box', (0.5, 0.36, 0.17, 0.035)),
+                 ('box', (0.36, 0.28, 0.045, 0.06)), ('box', (0.5, 0.28, 0.045, 0.06)), ('box', (0.64, 0.28, 0.045, 0.06))],
+    'N': BASE + [('poly', [(0.36, 0.76), (0.62, 0.76), (0.60, 0.50), (0.50, 0.36), (0.36, 0.52)]),
+                 ('circle', (0.53, 0.37, 0.14)),
+                 ('poly', [(0.58, 0.31), (0.78, 0.40), (0.76, 0.50), (0.60, 0.48)]),
+                 ('poly', [(0.46, 0.27), (0.51, 0.12), (0.58, 0.28)])],
+    'B': BASE + [('poly', [(0.40, 0.76), (0.60, 0.76), (0.56, 0.62), (0.44, 0.62)]),
+                 ('ellipse', (0.5, 0.45, 0.145, 0.20)),
+                 ('circle', (0.5, 0.22, 0.045))],
+    'Q': BASE + [('poly', [(0.36, 0.76), (0.64, 0.76), (0.60, 0.44), (0.40, 0.44)]),
+                 ('poly', [(0.31, 0.44), (0.69, 0.44), (0.66, 0.30), (0.34, 0.30)]),
+                 ('circle', (0.32, 0.26, 0.04)), ('circle', (0.41, 0.22, 0.04)), ('circle', (0.5, 0.20, 0.04)),
+                 ('circle', (0.59, 0.22, 0.04)), ('circle', (0.68, 0.26, 0.04))],
+    'K': BASE + [('poly', [(0.36, 0.76), (0.64, 0.76), (0.60, 0.44), (0.40, 0.44)]),
+                 ('poly', [(0.33, 0.44), (0.67, 0.44), (0.62, 0.32), (0.38, 0.32)]),
+                 ('box', (0.5, 0.20, 0.035, 0.11)), ('box', (0.5, 0.20, 0.10, 0.035))],
+}
+CUTS = {
+    'N': [('circle', (0.56, 0.36, 0.028))],
+    'B': [('poly', [(0.44, 0.34), (0.60, 0.44), (0.62, 0.40), (0.47, 0.30)])],
+}
+
+def _sd_shape(px, py, shape):
+    kind, prm = shape
+    if kind == 'circle': return _sd_circle(px, py, *prm)
+    if kind == 'ellipse': return _sd_ellipse(px, py, *prm)
+    if kind == 'box': return _sd_box(px, py, *prm)
+    return _sd_poly(px, py, prm)
+
+def gen_chess_piece(path, kind, fill, edge):
+    """Flat piece silhouette with a 2.5 px outline, alpha outside."""
+    S = 128
+    f, e = hex_rgb(fill), hex_rgb(edge)
+    def px(x, y):
+        u, v = (x + 0.5) / S, (y + 0.5) / S
+        d = min(_sd_shape(u, v, sh) for sh in PIECES[kind]) * S
+        for c in CUTS.get(kind, []):
+            d = max(d, -_sd_shape(u, v, c) * S)
+        cov = 1 - smoothstep(-0.7, 0.7, d)
+        if cov <= 0:
+            return (0, 0, 0, 0)
+        # outline band on the inside of the edge, plus a soft top-left light
+        outline = smoothstep(-3.2, -2.0, d)
+        col = mix(f, e, outline)
+        light = 0.10 * (1 - smoothstep(0.0, 0.5, math.hypot(u - 0.42, v - 0.36)))
+        col = mix(col, (1, 1, 1), light * (1 - outline))
+        return (*col, cov)
+    write_png(path, S, S, px)
+
+def gen_chess_pieces():
+    for k in 'KQRBNP':
+        gen_chess_piece(f'images/ui/chess-w{k}.png', k, '#f4ecd8', '#2b2320')
+        gen_chess_piece(f'images/ui/chess-b{k}.png', k, '#2b2320', '#d8ccb4')
+
 if __name__ == '__main__':
     gen_board_face()
     gen_wood()
@@ -375,3 +471,4 @@ if __name__ == '__main__':
     gen_ui_panel('images/ui/pill.png', 512, 128, 60, '#17130f', 0.86, '#5a4a3c', 0.9)
     gen_ui_button()
     gen_ui_plain()
+    gen_chess_pieces()
