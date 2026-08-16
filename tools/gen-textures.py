@@ -6,6 +6,7 @@
   images/backgammon-board.png 512x410 two rows of points + bar (Backgammon)
   images/ludo-board.png    510  15x15 Ludo board (yards, cross track, home)
   images/snakes-board.png  512  10x10 numbered board with snakes + ladders
+  images/sea-grid.png      256  water grid for the Sea Strike tracking boards
   images/board-face.png    512  frame face with see-through holes + bevel
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
@@ -448,6 +449,24 @@ def gen_snakes_board(path='images/snakes-board.png'):
         return (*colour, 1.0)
     write_png(path, S, S, px)
 
+# ------------------------------------------------------------------ sea grid (Sea Strike)
+def gen_sea_grid(path='images/sea-grid.png'):
+    """10x10 water grid with lighter lines: one plane per tracking grid instead of 18 line boxes."""
+    S = 256
+    water, line = hex_rgb('#1f4e7f'), hex_rgb('#3f7fc0')
+    cell = S / 10
+    def px(x, y):
+        u, v = x + 0.5, y + 0.5
+        fx, fy = u % cell, v % cell
+        n = fbm(x / 30, y / 30, 2) - 0.5
+        col = mix(water, hex_rgb('#2b6aa8'), 0.25 + 0.3 * n)
+        if fx < 1.5 or fy < 1.5:
+            col = line
+        if u < 2 or v < 2 or u > S - 2 or v > S - 2:
+            col = line
+        return (*col, 1.0)
+    write_png(path, S, S, px)
+
 # ------------------------------------------------------------------ die faces
 def gen_die_faces():
     """images/ui/die-1.png .. die-6.png: rounded cream die faces with dark pips (Dice Royale)."""
@@ -750,5 +769,6 @@ if __name__ == '__main__':
     gen_rug_ring()
     gen_snakes_board()
     gen_die_faces()
+    gen_sea_grid()
     gen_ui_disc('images/ui/disc-blue.png', '#3a7bd5', '#1f4b8f', '#8fc0ff')
     gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')

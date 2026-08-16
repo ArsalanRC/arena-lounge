@@ -7,7 +7,7 @@
  * fires at that cell of that grid; the plugin checks whose grid it is.
  */
 import { Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
-import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import type { CellState, SeaStrikeGameState } from '../../engine/seastrike'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -28,8 +28,6 @@ const GRID_Y = CENTER_Y - 0.05
 const HALF_T = 0.02
 export const SEA_COLORS: [Color4, Color4] = [Color4.fromHexString('#e2453dff'), Color4.fromHexString('#3a7bd5ff')]
 
-const WATER = Color4.fromHexString('#1f4e7fff')
-const GRID_LINE = Color4.fromHexString('#2f6aa8ff')
 const HIT = Color4.fromHexString('#ff5a4dff')
 const MISS = Color4.fromHexString('#cfe3ffff')
 const SUNK = Color4.fromHexString('#7a1f18ff')
@@ -69,10 +67,12 @@ export function createSeaStrikeView(root: Entity, onTap: (grid: 0 | 1, cell: num
   box(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD_W, BOARD_H, HALF_T * 2), PALETTE.woodDark)
   for (const grid of [0, 1] as const) {
     const gx = gridX(grid, 0)
-    box(root, Vector3.create(gx, GRID_Y, 0), Vector3.create(GRID, GRID, HALF_T * 2 + 0.002), WATER)
-    for (let k = 1; k < N; k++) {
-      box(root, Vector3.create(gx - GRID / 2 + CELL * k, GRID_Y, 0), Vector3.create(0.005, GRID, HALF_T * 2 + 0.004), GRID_LINE)
-      box(root, Vector3.create(gx, GRID_Y + GRID / 2 - CELL * k, 0), Vector3.create(GRID, 0.005, HALF_T * 2 + 0.004), GRID_LINE)
+    // one textured plane per face for the water + grid lines (a plane per grid instead of 18 line boxes)
+    for (const face of [0, 1] as const) {
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: Vector3.create(face === 0 ? gx : -gx, GRID_Y, face === 0 ? -HALF_T - 0.002 : HALF_T + 0.002), scale: Vector3.create(GRID, GRID, 1), rotation: Quaternion.fromEulerDegrees(0, face === 0 ? 0 : 180, 0) })
+      MeshRenderer.setPlane(e)
+      Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: 'images/sea-grid.png' }), roughness: 0.6, metallic: 0.1, castShadows: false })
     }
     // colour tab above each grid: whose shots these are
     box(root, Vector3.create(gx, GRID_Y + GRID / 2 + 0.06, 0), Vector3.create(GRID * 0.5, 0.05, HALF_T * 2 + 0.006), SEA_COLORS[grid])

@@ -374,10 +374,6 @@ function buildTower(): void {
 
   // game room (floor 1): lamps between the corners, planters at the oculus edge
   const y1 = FLOORS[1].y
-  for (const deg of [112, 158, 248, 292]) {
-    const t = (deg * Math.PI) / 180
-    lamp(PLAZA.x + Math.sin(t) * 7.4, PLAZA.z + Math.cos(t) * 7.4, y1)
-  }
   for (const deg of [22, 68, 112, 158, 202, 248, 292, 338]) {
     const t = (deg * Math.PI) / 180
     planter(PLAZA.x + Math.sin(t) * 6.4, PLAZA.z + Math.cos(t) * 6.4, y1)
@@ -396,10 +392,6 @@ function buildTower(): void {
     const t = (deg * Math.PI) / 180
     planter(PLAZA.x + Math.sin(t) * 5.0, PLAZA.z + Math.cos(t) * 5.0, y2)
   }
-  for (const deg of [70, 250]) {
-    const t = (deg * Math.PI) / 180
-    lamp(PLAZA.x + Math.sin(t) * 8.6, PLAZA.z + Math.cos(t) * 8.6, y2)
-  }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
 
   // rooftop terrace (floor 3): benches looking down the oculus, planters, a sign under the crown
@@ -408,10 +400,6 @@ function buildTower(): void {
   for (const deg of [30, 100, 170, 260, 330]) {
     const t = (deg * Math.PI) / 180
     bench(Vector3.create(PLAZA.x + Math.sin(t) * 6.0, y3, PLAZA.z + Math.cos(t) * 6.0), roofCentre)
-  }
-  for (const deg of [60, 130, 210, 280]) {
-    const t = (deg * Math.PI) / 180
-    lamp(PLAZA.x + Math.sin(t) * 8.4, PLAZA.z + Math.cos(t) * 8.4, y3)
   }
   planter(PLAZA.x - 8.0, PLAZA.z + 3, y3)
   planter(PLAZA.x + 8.0, PLAZA.z + 3, y3)
