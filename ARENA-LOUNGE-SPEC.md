@@ -2,10 +2,28 @@
 
 Single source of truth for the Arena Lounge project. Updated after every
 meaningful change (new commit, decision, test result). If a chat is closed,
-start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
-and continue". Keep this file honest: only verified facts under "State".
+start the next one with the continuation prompt in section 0. Keep this file
+honest: only verified facts under "State".
 
-Last update: 2026-08-16 16:40 (Europe/Berlin)
+## 0. Continuation prompt (paste this into a fresh Claude Code chat)
+
+> Read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md fully, then
+> ~/PR-PROJECT/arena-lounge/CLAUDE.md, before doing anything. This is the
+> Decentraland Friendzone Mobile Buildathon entry (deadline 4 Sept 2026). The
+> repo is PRIVATE until submission; branch + PR for every change; commits as
+> ArsalanRC with the noreply address; no AI attribution; no em-dashes in copy.
+> Start the previews with `pnpm start:mcp` (desktop + MCP harness) and
+> `pnpm start:mobile` (phone QR), test through tools/dev (README there).
+> Then continue with the "Next up" list in section 4b of the spec, and keep
+> the spec's changelog updated after every merged PR.
+
+Rules Arsalan set on 16 Aug (keep them): code stays private until the
+DoraHacks submission; the landing page + profile/portfolio entries are fine
+and stay public; nothing gets published beyond that without asking; the
+lounge stays one floor (six corners) for the buildathon, the multi-floor
+house is for later.
+
+Last update: 2026-08-16 16:55 (Europe/Berlin), session handoff
 
 ## 1. What this is
 
@@ -76,6 +94,23 @@ version works as well", 16 Aug 11:30):
   overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
 
+### 4b. Next up (in order)
+
+1. Arsalan: reload the phone build, walk the plaza, try every corner, send
+   screenshots (the mobile controller layout has never been seen by Claude).
+2. Arsalan: guest-login on the phone + Claude seated on desktop = first real
+   two-player test (seat claiming, moves, turn timer, opponent-left toast).
+3. Arsalan: buy the NAME (docs/DEPLOY.md), then Claude deploys the World and
+   both test it from the real app; keep deploying often after that.
+4. Claude: mobile layout tuning from the phone screenshots; the compact
+   controller for Dot Lines / Reversi / Checkers on a 720-high virtual screen.
+5. Claude: lounge chrome strings in DE/ES/PT/FR (help panel tips exist in
+   EN/DE/ES); native review of imported overviews.
+6. Claude: README + submission text refresh (six games, corners), phone
+   screenshots into README and the landing page.
+7. Later: Multiplayer Server for a persistent leaderboard, the house floors,
+   tournaments (see sections 6 and 10).
+
 Not done: buy NAME, deploy, DoraHacks form, GitHub Pages
 landing page (Arsalan's standing repo ritual), phone screenshots for the README.
 
@@ -119,6 +154,13 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
 
 ## 7. How to run / test / deploy
 
+Preview processes are per session: a fresh chat must start them again
+(`pnpm start:mcp`, and `pnpm start:mobile` for the phone QR; never
+`pnpm start -p`, pnpm eats `-p`). The Explorer MCP harness and the gh
+wrapper live in `tools/dev/` (README there); `tools/dev/coords.mjs` prints
+click coordinates per table. `tools/dev/ghrc` must be used for every `gh`
+call (loads the ArsalanRC token from game-platform's direnv).
+
 ```
 cd ~/PR-PROJECT/arena-lounge
 pnpm install
@@ -142,6 +184,16 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - Creator Hub autosaves `assets/scene/main.composite`; do not edit it while
   the scene is open there. Gameplay entities are code, composite is decor only.
 
+## 8b. Session log 16 Aug (what happened, for orientation)
+
+10:30 scaffold + first playable build; 11:30 phone confirmed working by
+Arsalan; 11:45 repo public + CI; 12:00-13:00 generic tables, Dot Lines,
+Reversi, how-to-play, landing page, collider collapse; 13:35 "don't publish
+yet"; 14:05 repo made private, page moved to the portfolio repo; 14:30 UI
+cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
+15:55 Match Pairs (+ pending-action hook); 16:25 Checkers (+ getState for 3D
+input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
+
 ## 9. Changelog
 
 - 2026-08-16 10:35 scaffold, engine port, sync model, first playable build
@@ -153,6 +205,8 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 16:55 session handoff: tools/dev harness committed (mcp.sh, shot.sh, ghrc, coords.mjs, README), continuation prompt in section 0, next-up list in 4b
+- 2026-08-16 16:40 texture trim (four PNGs fewer; solid rects and runtime tints)
 - 2026-08-16 16:25 Checkers plugin (engine ported, 37 tests): tap piece then target, forced jumps + chains from the engine, 24-piece pool sliding with tweens, kings via crown sprites; createView3D now receives getState for multi-step 3D input. All six games live (Tables 1-7).
 - 2026-08-16 15:55 Match Pairs plugin (engine ported, 43 tests): 4x4 memory with shape+colour symbols, delayed flip-back via the new TableGame.pending hook, memory bot; purple corner (Table 4). Bot difficulty moved to games/botSettings.ts
 - 2026-08-16 15:25 Tic Tac Toe plugin (engine ported, 32 tests): 3x3 upright board with X/O sprite boxes, 3x3 touch grid; coral corner (Table 5)
