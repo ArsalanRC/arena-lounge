@@ -64,25 +64,6 @@ export const visuals: TableVisual[] = []
 
 // ---------------------------------------------------------------- builders
 
-function rugPlane(parent: Entity, size: number): void {
-  const e = engine.addEntity()
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(0, 0.012, 0),
-    rotation: Quaternion.fromEulerDegrees(90, 0, 0),
-    scale: Vector3.create(size, size, 1)
-  })
-  MeshRenderer.setPlane(e)
-  Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: 'images/rug.png' }),
-    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
-    alphaTest: 0.5,
-    roughness: 1,
-    metallic: 0,
-    castShadows: false
-  })
-}
-
 function makePad(parent: Entity, seat: Seat, color: Color4): { pad: Entity; cam: Entity } {
   const e = engine.addEntity()
   const z = seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET
@@ -179,7 +160,6 @@ export function buildTableVisual(t: Table): TableVisual {
   ]) {
     box(root, Vector3.create(x, (TABLE_TOP_Y - 0.06) / 2, z), Vector3.create(0.09, TABLE_TOP_Y - 0.06, 0.09), PALETTE.woodDark)
   }
-  rugPlane(root, 4.6)
 
   // the game itself
   const view = t.game.createView3D(root, (action) => {

@@ -12,7 +12,7 @@ export { LOCALES }
 export interface LoungeStrings {
   howToPlay: string
   howToSit: string
-  move: Record<GameId, string>
+  move: Partial<Record<GameId, string>>
   timer: string
   language: string
   gotIt: string
@@ -24,7 +24,10 @@ const EN: LoungeStrings = {
   move: {
     connectfour: 'Tap a column to drop your disc.',
     dotlines: 'Tap a dot, then a neighbouring dot, to draw the line between them. Closing a box gives you another turn.',
-    reversi: 'Tap a marked square to place a disc; every enemy disc you flank flips to your colour.'
+    reversi: 'Tap a marked square to place a disc; every enemy disc you flank flips to your colour.',
+    tictactoe: 'Tap an empty square. Three in a row wins.',
+    matchpairs: 'Tap two cards. A pair stays open and gives you another turn.',
+    checkers: 'Tap one of your pieces, then a highlighted square. Jumps are mandatory.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -37,7 +40,10 @@ const DE: LoungeStrings = {
   move: {
     connectfour: 'Tippe auf eine Spalte, um deinen Stein fallen zu lassen.',
     dotlines: 'Tippe auf einen Punkt und dann auf einen Nachbarpunkt, um die Linie dazwischen zu zeichnen. Wer ein Kästchen schließt, ist noch einmal dran.',
-    reversi: 'Tippe auf ein markiertes Feld, um einen Stein zu setzen. Jeder eingeschlossene gegnerische Stein wechselt die Farbe.'
+    reversi: 'Tippe auf ein markiertes Feld, um einen Stein zu setzen. Jeder eingeschlossene gegnerische Stein wechselt die Farbe.',
+    tictactoe: 'Tippe auf ein leeres Feld. Drei in einer Reihe gewinnen.',
+    matchpairs: 'Tippe auf zwei Karten. Ein Paar bleibt offen, und du bist noch einmal dran.',
+    checkers: 'Tippe auf einen deiner Steine und dann auf ein markiertes Feld. Schlagen ist Pflicht.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -50,7 +56,10 @@ const ES: LoungeStrings = {
   move: {
     connectfour: 'Toca una columna para soltar tu ficha.',
     dotlines: 'Toca un punto y luego un punto vecino para dibujar la línea entre ellos. Si cierras una caja, vuelves a jugar.',
-    reversi: 'Toca una casilla marcada para colocar una ficha; cada ficha rival que encierres cambia a tu color.'
+    reversi: 'Toca una casilla marcada para colocar una ficha; cada ficha rival que encierres cambia a tu color.',
+    tictactoe: 'Toca una casilla vacía. Tres en raya gana.',
+    matchpairs: 'Toca dos cartas. Una pareja se queda abierta y vuelves a jugar.',
+    checkers: 'Toca una de tus fichas y luego una casilla marcada. Capturar es obligatorio.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',
