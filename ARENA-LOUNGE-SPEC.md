@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 11:45 (Europe/Berlin)
+Last update: 2026-08-16 11:50 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -51,7 +51,9 @@ version works as well", 16 Aug 11:30):
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
   token (tap = play the house bot), floating sign with live status.
 - Networking: serverless CRDT (`syncEntity`), one entity per table with
-  `C4Board` + `C4SeatA` + `C4SeatB` (fixed sync ids 100..102). Write
+  `TableBoard` (gameId + engine state JSON + turn/status/score) + `TableSeatA`
+  + `TableSeatB` (fixed sync ids 100..102). Games plug in through
+  `src/lounge/games/types.ts` (TableGame: rules, bot, 3D view, controls). Write
   discipline documented in src/lounge/tables.ts. Seat heartbeats (5 s),
   stale seat cleanup (30 s), onLeaveScene cleanup, orphan-bot cleanup,
   60 s turn timer applied by seated players, auto-stand at 7 m for 8 s.
@@ -144,3 +146,4 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 11:50 tables made game-agnostic: TableBoard carries gameId + engine state JSON; games plug in via src/lounge/games/types.ts (rules, bot, 3D view, controls); Connect Four is the first plugin (behaviour unchanged)

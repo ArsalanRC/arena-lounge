@@ -1,14 +1,11 @@
 /**
- * 3D representation of a Connect Four table.
+ * 3D representation of a lounge table (game-agnostic part).
  *
- * Everything is built from SDK primitives so the scene has zero external
- * assets to download on mobile: a wooden table, an upright frame made of two
- * alpha-tested planes (holes are see-through, like the real toy), a rim, 42
- * pooled disc entities, two seat pads on the floor, invisible per-column
- * colliders for desktop clicks, and a billboarded sign.
- *
- * `updateTableVisual` reconciles the visuals with the synced state and is
- * cheap enough to run every frame: it exits early unless something changed.
+ * Builds the wooden bar table, rug, seat pads (with per-seat camera areas),
+ * the little robot token, the floating sign and the spatial sound sources,
+ * then hands the table root to the game plugin's `createView3D` for the game
+ * itself. `updateTableVisual` reconciles everything with the synced state and
+ * is cheap enough to run every frame: it exits early unless something changed.
  */
 import {
   Billboard,
@@ -16,7 +13,6 @@ import {
   CameraModeArea,
   CameraType,
   ColliderLayer,
-  EasingFunction,
   Entity,
   Font,
   InputAction,
@@ -26,44 +22,24 @@ import {
   MeshRenderer,
   TextAlignMode,
   TextShape,
-  TextureWrapMode,
   Transform,
-  Tween,
   VisibilityComponent,
   engine,
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { COLS, ROWS } from '../engine/connectfour'
-import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE, SEAT_PAD_OFFSET } from './config'
-import { CELL_COUNT, SEAT_A, SEAT_B, Status, Winner, cellCol, cellRow, type Seat } from './state'
-import { boardOf, drop, local, mySeatAt, otherSeat, seatOf, sit, sitWithBot, inviteBot, toast, type Table } from './tables'
+import { PALETTE, SEAT_PAD_OFFSET } from './config'
+import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
+import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
+import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, otherSeat, seatOf, sit, sitWithBot, toast, type Table } from './tables'
+import { TABLE_TOP_Y, box, woodBox } from './views/shared'
 
-// ---------------------------------------------------------------- geometry
-/** Board plane size in metres (matches the pre-distorted texture). */
-const BOARD_W = 1.2
-const BOARD_H = 1.04
-/** Bar-height table: a standing player in first person sees the board level. */
-const TABLE_TOP_Y = 1.02
-const BOARD_CENTER_Y = TABLE_TOP_Y + 0.05 + BOARD_H / 2
-const CELL_PITCH = 0.16
-const HALF_GAP = 0.035 // planes sit at z = ±HALF_GAP
-const DISC_R = 0.132 // disc diameter in metres (sprite plane)
-
-const BOARD_TOP = BOARD_CENTER_Y + BOARD_H / 2
-
-function cellLocalPosition(index: number): Vector3 {
-  const r = cellRow(index)
-  const c = cellCol(index)
-  const x = -BOARD_W / 2 + CELL_PITCH * (0.75 + c)
-  const y = BOARD_TOP - CELL_PITCH * (0.75 + r)
-  return Vector3.create(x, y, 0)
-}
+export { TABLE_TOP_Y, box } from './views/shared'
 
 export interface TableVisual {
   table: Table
-  discs: Entity[]
+  view: View3DHandle
   sign: Entity
   padA: Entity
   padB: Entity
@@ -72,12 +48,11 @@ export interface TableVisual {
   sfx: TableSfx
   rendered: {
     round: number
-    cells: number[]
-    winKey: string
+    moveCount: number
+    status: number
+    winner: number
     signText: string
     signVisible: boolean
-    /** round:moveCount of the last state we reacted to (sounds, cues). */
-    moveKey: string
     myTurnKey: string
     seated: boolean
     /** Address in the opponent seat last frame (to notice them leaving). */
@@ -88,30 +63,6 @@ export interface TableVisual {
 export const visuals: TableVisual[] = []
 
 // ---------------------------------------------------------------- builders
-
-function box(parent: Entity, pos: Vector3, scale: Vector3, color: Color4, rotY = 0): Entity {
-  const e = engine.addEntity()
-  Transform.create(e, { parent, position: pos, scale, rotation: Quaternion.fromEulerDegrees(0, rotY, 0) })
-  MeshRenderer.setBox(e)
-  Material.setPbrMaterial(e, { albedoColor: color, roughness: 0.85, metallic: 0 })
-  return e
-}
-
-function woodBox(parent: Entity, pos: Vector3, scale: Vector3, tiling: Vector3 = Vector3.One()): Entity {
-  const e = engine.addEntity()
-  Transform.create(e, { parent, position: pos, scale })
-  MeshRenderer.setBox(e)
-  Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({
-      src: 'images/wood.png',
-      wrapMode: TextureWrapMode.TWM_REPEAT,
-      tiling: { x: tiling.x, y: tiling.y }
-    }),
-    roughness: 0.7,
-    metallic: 0
-  })
-  return e
-}
 
 function rugPlane(parent: Entity, size: number): void {
   const e = engine.addEntity()
@@ -132,65 +83,10 @@ function rugPlane(parent: Entity, size: number): void {
   })
 }
 
-function boardPlane(parent: Entity, z: number): void {
-  const e = engine.addEntity()
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(0, BOARD_CENTER_Y, z),
-    scale: Vector3.create(BOARD_W, BOARD_H, 1)
-  })
-  MeshRenderer.setPlane(e)
-  Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: 'images/board-face.png' }),
-    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
-    alphaTest: 0.5,
-    roughness: 0.6,
-    metallic: 0.05,
-    castShadows: false
-  })
-}
-
-/**
- * Discs are alpha-tested sprite planes (2 triangles) rather than cylinders:
- * 126 pooled cylinders alone blew the 4-parcel triangle budget, and the baked
- * sprite shading reads better than a flat primitive anyway. They sit in the
- * gap between the two frame planes, so they are only ever seen face-on.
- */
-function makeDisc(parent: Entity): Entity {
-  const e = engine.addEntity()
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(0, -5, 0),
-    scale: Vector3.create(DISC_R, DISC_R, 1)
-  })
-  MeshRenderer.setPlane(e)
-  applyDiscMaterial(e, 1, false)
-  VisibilityComponent.create(e, { visible: false })
-  return e
-}
-
-function applyDiscMaterial(e: Entity, v: number, glow: boolean): void {
-  Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: v === 1 ? 'images/ui/disc-yellow.png' : 'images/ui/disc-red.png' }),
-    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
-    alphaTest: 0.5,
-    roughness: 0.5,
-    metallic: 0,
-    castShadows: false,
-    // a touch of self-illumination keeps discs vivid in shade; winners glow
-    emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
-    emissiveIntensity: glow ? 0.45 : 0.12
-  })
-}
-
 function makePad(parent: Entity, seat: Seat, color: Color4): { pad: Entity; cam: Entity } {
   const e = engine.addEntity()
   const z = seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(0, 0.015, z),
-    scale: Vector3.create(1.0, 0.03, 1.0)
-  })
+  Transform.create(e, { parent, position: Vector3.create(0, 0.015, z), scale: Vector3.create(1.0, 0.03, 1.0) })
   MeshRenderer.setCylinder(e, 0.5, 0.5)
   MeshCollider.setCylinder(e, 0.5, 0.5, ColliderLayer.CL_POINTER)
   Material.setPbrMaterial(e, { albedoColor: color, roughness: 0.9, metallic: 0 })
@@ -247,9 +143,9 @@ function makeBotFigure(parent: Entity, at: Vector3): Entity {
   return body
 }
 
-function makeSign(parent: Entity): Entity {
+function makeSign(parent: Entity, y: number): Entity {
   const e = engine.addEntity()
-  Transform.create(e, { parent, position: Vector3.create(0, BOARD_CENTER_Y + BOARD_H / 2 + 0.55, 0) })
+  Transform.create(e, { parent, position: Vector3.create(0, y, 0) })
   TextShape.create(e, {
     text: '',
     fontSize: 1.7,
@@ -266,30 +162,13 @@ function makeSign(parent: Entity): Entity {
   return e
 }
 
-function makeColumnCollider(t: Table, parent: Entity, col: number): void {
-  const e = engine.addEntity()
-  const x = -BOARD_W / 2 + CELL_PITCH * (0.75 + col)
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(x, BOARD_CENTER_Y, 0),
-    scale: Vector3.create(CELL_PITCH * 0.95, BOARD_H, 0.16)
-  })
-  MeshCollider.setBox(e, ColliderLayer.CL_POINTER)
-  pointerEventsSystem.onPointerDown(
-    {
-      entity: e,
-      opts: { button: InputAction.IA_POINTER, hoverText: 'Drop here', maxDistance: 6, showHighlight: false }
-    },
-    () => {
-      drop(t, col)
-    }
-  )
-}
+/** Height of the sign above the table; games taller than Connect Four can bump this. */
+const SIGN_Y = TABLE_TOP_Y + 0.05 + 1.04 + 0.55
 
 export function buildTableVisual(t: Table): TableVisual {
   const root = t.root
 
-  // table top (wood) + legs + apron
+  // table top (wood) + apron + legs
   woodBox(root, Vector3.create(0, TABLE_TOP_Y - 0.03, 0), Vector3.create(1.8, 0.06, 0.9), Vector3.create(2, 1, 1))
   box(root, Vector3.create(0, TABLE_TOP_Y - 0.1, 0), Vector3.create(1.6, 0.08, 0.7), PALETTE.woodDark)
   for (const [x, z] of [
@@ -300,38 +179,25 @@ export function buildTableVisual(t: Table): TableVisual {
   ]) {
     box(root, Vector3.create(x, (TABLE_TOP_Y - 0.06) / 2, z), Vector3.create(0.09, TABLE_TOP_Y - 0.06, 0.09), PALETTE.woodDark)
   }
-  // woven rug under the table
   rugPlane(root, 4.6)
 
-  // frame: two see-through planes, a rim and a foot
-  boardPlane(root, -HALF_GAP)
-  boardPlane(root, HALF_GAP)
-  const rimT = 0.05
-  const rimD = HALF_GAP * 2 + 0.01
-  box(root, Vector3.create(0, BOARD_TOP + rimT / 2, 0), Vector3.create(BOARD_W + rimT * 2, rimT, rimD), PALETTE.frameDark)
-  box(root, Vector3.create(-BOARD_W / 2 - rimT / 2, BOARD_CENTER_Y, 0), Vector3.create(rimT, BOARD_H + rimT * 2, rimD), PALETTE.frameDark)
-  box(root, Vector3.create(BOARD_W / 2 + rimT / 2, BOARD_CENTER_Y, 0), Vector3.create(rimT, BOARD_H + rimT * 2, rimD), PALETTE.frameDark)
-  box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD_W + 0.2, 0.06, 0.26), PALETTE.frameDark)
-  box(root, Vector3.create(0, BOARD_CENTER_Y - BOARD_H / 2 - 0.01, 0), Vector3.create(BOARD_W + 0.05, 0.02, rimD), PALETTE.frameDark)
-
-  // discs (pooled, one per cell)
-  const discs: Entity[] = []
-  for (let i = 0; i < CELL_COUNT; i++) discs.push(makeDisc(root))
-
-  // desktop click targets
-  for (let c = 0; c < COLS; c++) makeColumnCollider(t, root, c)
+  // the game itself
+  const view = t.game.createView3D(root, (action) => {
+    act(t, action)
+  })
 
   // seat pads
   const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.padYellow)
   const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.padRed)
+  const [nameA, nameB] = t.game.seatNames
   pointerEventsSystem.onPointerDown(
-    { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here (Yellow)', maxDistance: 8 } },
+    { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: `Sit here (${nameA})`, maxDistance: 8 } },
     () => {
       sit(t, SEAT_A)
     }
   )
   pointerEventsSystem.onPointerDown(
-    { entity: padB, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here (Red)', maxDistance: 8 } },
+    { entity: padB, opts: { button: InputAction.IA_POINTER, hoverText: `Sit here (${nameB})`, maxDistance: 8 } },
     () => {
       sit(t, SEAT_B)
     }
@@ -347,24 +213,24 @@ export function buildTableVisual(t: Table): TableVisual {
     }
   )
 
-  const sign = makeSign(root)
+  const sign = makeSign(root, SIGN_Y)
 
   const vis: TableVisual = {
     table: t,
-    discs,
+    view,
     sign,
     padA,
     padB,
     camA,
     camB,
-    sfx: createTableSfx(root, Vector3.create(0, BOARD_CENTER_Y, 0)),
+    sfx: createTableSfx(root, Vector3.create(0, TABLE_TOP_Y + 0.6, 0)),
     rendered: {
       round: -1,
-      cells: new Array<number>(CELL_COUNT).fill(0),
-      winKey: '',
+      moveCount: -1,
+      status: -1,
+      winner: -1,
       signText: '',
       signVisible: true,
-      moveKey: '',
       myTurnKey: '',
       seated: false,
       oppAddr: ''
@@ -376,21 +242,18 @@ export function buildTableVisual(t: Table): TableVisual {
 
 // ---------------------------------------------------------------- update
 
-const setDisc = applyDiscMaterial
-
 function signTextFor(t: Table): string {
   const b = boardOf(t)
   const a = seatOf(t, SEAT_A)
   const s = seatOf(t, SEAT_B)
-  const title = t.def.label
+  const title = `${t.def.label} · ${t.game.label}`
   if (a.addr === '' && s.addr === '') return `${title}\nOpen table · come play`
   if (b.status === Status.Playing) {
     const who = b.turn === SEAT_A ? a.name : s.name
     return `${title}\n${a.name} vs ${s.name}\n${who} to move · ${b.winsA}:${b.winsB}`
   }
   if (b.status === Status.Finished) {
-    const line =
-      b.winner === Winner.Draw ? 'Draw!' : `${b.winner === SEAT_A ? a.name : s.name} wins!`
+    const line = b.winner === Winner.Draw ? 'Draw!' : `${b.winner === SEAT_A ? a.name : s.name} wins!`
     return `${title}\n${a.name} vs ${s.name}\n${line} · ${b.winsA}:${b.winsB}`
   }
   const waiting = a.addr === '' ? s.name : a.name
@@ -404,108 +267,72 @@ function setFirstPersonArea(cam: Entity, on: boolean): void {
 }
 
 export function updateTableVisual(vis: TableVisual): void {
-  const b = boardOf(vis.table)
+  const t = vis.table
+  const b = boardOf(t)
+  const r = vis.rendered
 
   // first person only for the local player's own seat
-  const mine = mySeatAt(vis.table)
+  const mine = mySeatAt(t)
   setFirstPersonArea(vis.camA, mine === SEAT_A)
   setFirstPersonArea(vis.camB, mine === SEAT_B)
 
   // sign (hidden for the local player while they are at this table: the UI
   // card / controller carries the same info and the sign would loom overhead)
-  const text = signTextFor(vis.table)
-  if (text !== vis.rendered.signText) {
-    vis.rendered.signText = text
+  const text = signTextFor(t)
+  if (text !== r.signText) {
+    r.signText = text
     TextShape.getMutable(vis.sign).text = text
   }
-  const signVisible = local.nearTableId !== vis.table.def.id
-  if (signVisible !== vis.rendered.signVisible) {
-    vis.rendered.signVisible = signVisible
+  const signVisible = local.nearTableId !== t.def.id
+  if (signVisible !== r.signVisible) {
+    r.signVisible = signVisible
     VisibilityComponent.getMutable(vis.sign).visible = signVisible
   }
 
-  // fresh round: hide everything
-  if (b.round !== vis.rendered.round) {
-    vis.rendered.round = b.round
-    vis.rendered.winKey = ''
-    for (let i = 0; i < CELL_COUNT; i++) {
-      if (vis.rendered.cells[i] !== 0) {
-        VisibilityComponent.getMutable(vis.discs[i]).visible = false
-        Tween.deleteFrom(vis.discs[i])
-      }
-      vis.rendered.cells[i] = 0
-    }
+  // game state -> view
+  if (b.round !== r.round) {
+    r.round = b.round
+    r.moveCount = -1
+    r.winner = -1
+    vis.view.reset()
   }
-
-  // discs
-  const cells = b.cells
-  const animate = b.lastCell >= 0
-  for (let i = 0; i < CELL_COUNT; i++) {
-    const v = cells[i] ?? 0
-    if (v === vis.rendered.cells[i]) continue
-    vis.rendered.cells[i] = v
-    const disc = vis.discs[i]
-    if (v === 0) {
-      VisibilityComponent.getMutable(disc).visible = false
-      Tween.deleteFrom(disc)
-      continue
-    }
-    setDisc(disc, v, false)
-    VisibilityComponent.getMutable(disc).visible = true
-    const end = cellLocalPosition(i)
-    if (animate && i === b.lastCell) {
-      const start = Vector3.create(end.x, BOARD_TOP + 0.25, 0)
-      Transform.getMutable(disc).position = start
-      Tween.setMove(disc, start, end, 380, EasingFunction.EF_EASEOUTBOUNCE)
-      play(vis.sfx.drop)
+  if (b.moveCount !== r.moveCount || b.status !== r.status || b.winner !== r.winner) {
+    const state = gameStateOf(t)
+    const animate = b.moveCount === r.moveCount + 1
+    if (state !== null) {
+      vis.view.update(state, { lastAction: lastActionOf(t), animate, round: b.round, winner: b.winner })
+      if (animate) play(vis.sfx.move)
     } else {
-      Tween.deleteFrom(disc)
-      Transform.getMutable(disc).position = end
+      vis.view.reset()
     }
+    if (b.winner !== r.winner && b.winner !== Winner.None) {
+      if (b.winner !== Winner.Draw) play(vis.sfx.win)
+      if (mine && b.winner !== mine && b.winner !== Winner.Draw) playPersonal('lose')
+    }
+    r.moveCount = b.moveCount
+    r.status = b.status
+    r.winner = b.winner
   }
 
-  // winning line glow
-  const winKey = b.winCells.join(',')
-  if (winKey !== vis.rendered.winKey) {
-    // clear previous glow
-    if (vis.rendered.winKey !== '') {
-      for (const idx of vis.rendered.winKey.split(',')) {
-        const i = Number(idx)
-        if (vis.rendered.cells[i] !== 0) setDisc(vis.discs[i], vis.rendered.cells[i], false)
-      }
-    }
-    vis.rendered.winKey = winKey
-    if (winKey !== '') {
-      for (const i of b.winCells) {
-        if (vis.rendered.cells[i] !== 0) setDisc(vis.discs[i], vis.rendered.cells[i], true)
-      }
-      play(vis.sfx.win)
-      if (mine && b.winner !== mine) playPersonal('lose')
-    }
-  }
-
-  // personal cues: sit click, "your move" ding
+  // personal cues: sit click, "your move" ding, opponent left
   const seated = mine !== 0
-  if (seated !== vis.rendered.seated) {
-    vis.rendered.seated = seated
+  if (seated !== r.seated) {
+    r.seated = seated
     if (seated) playPersonal('sit')
   }
   const turnKey = `${b.round}:${b.moveCount}:${b.turn}`
-  if (turnKey !== vis.rendered.myTurnKey) {
-    vis.rendered.myTurnKey = turnKey
+  if (turnKey !== r.myTurnKey) {
+    r.myTurnKey = turnKey
     if (seated && b.status === Status.Playing && b.turn === mine) playPersonal('turn')
   }
-  const oppAddr = seated ? seatOf(vis.table, otherSeat(mine as Seat)).addr : ''
-  if (oppAddr !== vis.rendered.oppAddr) {
-    const wasHuman = vis.rendered.oppAddr !== '' && vis.rendered.oppAddr !== 'bot'
+  const oppAddr = seated ? seatOf(t, otherSeat(mine as Seat)).addr : ''
+  if (oppAddr !== r.oppAddr) {
+    const wasHuman = r.oppAddr !== '' && r.oppAddr !== 'bot'
     if (seated && wasHuman && oppAddr === '') toast('Your opponent left the table')
-    vis.rendered.oppAddr = oppAddr
+    r.oppAddr = oppAddr
   }
 }
 
 export function tableVisualsSystem(): void {
   for (const vis of visuals) updateTableVisual(vis)
 }
-
-/** Rows/cols exported for the UI mini board. */
-export const GRID = { ROWS, COLS }
