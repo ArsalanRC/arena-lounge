@@ -106,6 +106,11 @@ export interface LoungeStrings {
     youPlay: (mark: string) => string
     tapEmpty: string
     anyBoard: string
+    square: (n: number) => string
+    snakeDown: (n: number) => string
+    ladderUp: (n: number) => string
+    reached100: (side: string) => string
+    blue: string
     pairs: string
     noMatch: string
     findTwin: string
@@ -149,7 +154,8 @@ const EN: LoungeStrings = {
     crocsnap: 'Tap any open tooth. One of them is the trigger: press it and you lose the round.',
     backgammon: 'Tap "Roll the dice", then a checker and a marked point (or Off to bear off). Each die is one move.',
     ludo: 'Tap "Roll the die", then one of the piece buttons. A six leaves the yard and rolls again; land on a rival to send it home.',
-    supertictactoe: 'Tap a square in the highlighted board. The square you pick sends your rival to the board with that position; win three boards in a row.'
+    supertictactoe: 'Tap a square in the highlighted board. The square you pick sends your rival to the board with that position; win three boards in a row.',
+    snakesladders: 'Tap "Roll the die": your piece moves ahead. Ladders climb, snakes slide down, a six rolls again, exactly 100 wins.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -208,7 +214,7 @@ const EN: LoungeStrings = {
   gameRoom: 'GAME ROOM',
   rooftop: 'ROOFTOP',
   rooftopNote: 'Leaderboard and tournaments: coming after the buildathon',
-  seat: { Yellow: 'Yellow', Red: 'Red', Black: 'Black', White: 'White', Green: 'Green', X: 'X', O: 'O' },
+  seat: { Yellow: 'Yellow', Red: 'Red', Black: 'Black', White: 'White', Green: 'Green', Blue: 'Blue', X: 'X', O: 'O' },
   g: {
     boxes: 'Boxes',
     tapDot: 'Tap a dot, then a neighbour',
@@ -229,6 +235,11 @@ const EN: LoungeStrings = {
     youPlay: (mark) => `You play ${mark}`,
     tapEmpty: 'Tap an empty square',
     anyBoard: 'Any open board: tap a square',
+    square: (n) => (n > 0 ? `Square ${n}` : 'Not on the board yet'),
+    snakeDown: (n) => `Snake! Down to ${n}`,
+    ladderUp: (n) => `Ladder! Up to ${n}`,
+    reached100: (side) => `${side} reached 100`,
+    blue: 'Blue',
     pairs: 'Pairs',
     noMatch: 'No match, flipping back…',
     findTwin: 'Find its twin',
@@ -272,7 +283,8 @@ const DE: LoungeStrings = {
     crocsnap: 'Tippe auf einen freien Zahn. Einer davon ist der Auslöser: Wer ihn drückt, verliert die Runde.',
     backgammon: 'Tippe auf "Würfeln", dann auf einen Stein und ein markiertes Feld (oder Raus zum Herauswürfeln). Jeder Würfel ist ein Zug.',
     ludo: 'Tippe auf "Würfeln" und dann auf einen der Figuren-Buttons. Mit einer Sechs kommst du raus und würfelst noch einmal; wer auf einem Gegner landet, schickt ihn zurück.',
-    supertictactoe: 'Tippe auf ein Feld im markierten Brett. Dein Feld schickt den Gegner in das Brett mit derselben Position; wer drei Bretter in einer Reihe gewinnt, gewinnt.'
+    supertictactoe: 'Tippe auf ein Feld im markierten Brett. Dein Feld schickt den Gegner in das Brett mit derselben Position; wer drei Bretter in einer Reihe gewinnt, gewinnt.',
+    snakesladders: 'Tippe auf "Würfeln": deine Figur zieht vor. Leitern führen hoch, Schlangen runter, eine Sechs würfelt noch einmal, genau 100 gewinnt.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -331,7 +343,7 @@ const DE: LoungeStrings = {
   gameRoom: 'SPIELZIMMER',
   rooftop: 'DACHTERRASSE',
   rooftopNote: 'Bestenliste und Turniere: kommen nach dem Buildathon',
-  seat: { Yellow: 'Gelb', Red: 'Rot', Black: 'Schwarz', White: 'Weiß', Green: 'Grün', X: 'X', O: 'O' },
+  seat: { Yellow: 'Gelb', Red: 'Rot', Black: 'Schwarz', White: 'Weiß', Green: 'Grün', Blue: 'Blau', X: 'X', O: 'O' },
   g: {
     boxes: 'Kästchen',
     tapDot: 'Tippe auf einen Punkt, dann auf den Nachbarn',
@@ -352,6 +364,11 @@ const DE: LoungeStrings = {
     youPlay: (mark) => `Du spielst ${mark}`,
     tapEmpty: 'Tippe auf ein leeres Feld',
     anyBoard: 'Freie Wahl: tippe auf ein Feld in einem offenen Brett',
+    square: (n) => (n > 0 ? `Feld ${n}` : 'Noch nicht auf dem Brett'),
+    snakeDown: (n) => `Schlange! Runter auf ${n}`,
+    ladderUp: (n) => `Leiter! Hoch auf ${n}`,
+    reached100: (side) => `${side} hat die 100 erreicht`,
+    blue: 'Blau',
     pairs: 'Paare',
     noMatch: 'Kein Paar, wird umgedreht…',
     findTwin: 'Finde das Gegenstück',
@@ -395,7 +412,8 @@ const ES: LoungeStrings = {
     crocsnap: 'Toca cualquier diente libre. Uno de ellos es el gatillo: si lo pulsas, pierdes la ronda.',
     backgammon: 'Toca "Tirar los dados", luego una ficha y un punto marcado (o Fuera para sacarla). Cada dado es un movimiento.',
     ludo: 'Toca "Tirar el dado" y luego uno de los botones de ficha. Con un seis sales del patio y vuelves a tirar; si caes sobre un rival, lo mandas a casa.',
-    supertictactoe: 'Toca una casilla del tablero marcado. Tu casilla manda al rival al tablero de esa posición; gana quien hace tres tableros en raya.'
+    supertictactoe: 'Toca una casilla del tablero marcado. Tu casilla manda al rival al tablero de esa posición; gana quien hace tres tableros en raya.',
+    snakesladders: 'Toca "Tirar el dado": tu ficha avanza. Las escaleras suben, las serpientes bajan, un seis vuelve a tirar, gana quien llega justo a 100.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',
@@ -454,7 +472,7 @@ const ES: LoungeStrings = {
   gameRoom: 'SALA DE JUEGOS',
   rooftop: 'AZOTEA',
   rooftopNote: 'Clasificación y torneos: después del buildathon',
-  seat: { Yellow: 'Amarillo', Red: 'Rojo', Black: 'Negras', White: 'Blancas', Green: 'Verde', X: 'X', O: 'O' },
+  seat: { Yellow: 'Amarillo', Red: 'Rojo', Black: 'Negras', White: 'Blancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
   g: {
     boxes: 'Cajas',
     tapDot: 'Toca un punto y luego un vecino',
@@ -475,6 +493,11 @@ const ES: LoungeStrings = {
     youPlay: (mark) => `Juegas con ${mark}`,
     tapEmpty: 'Toca una casilla vacía',
     anyBoard: 'Tablero libre: toca una casilla en cualquier tablero abierto',
+    square: (n) => (n > 0 ? `Casilla ${n}` : 'Aún fuera del tablero'),
+    snakeDown: (n) => `¡Serpiente! Bajas a ${n}`,
+    ladderUp: (n) => `¡Escalera! Subes a ${n}`,
+    reached100: (side) => `${side} llegó a 100`,
+    blue: 'Azul',
     pairs: 'Parejas',
     noMatch: 'No coinciden, se dan la vuelta…',
     findTwin: 'Encuentra su pareja',
@@ -518,7 +541,8 @@ const PT: LoungeStrings = {
     crocsnap: 'Toque em qualquer dente livre. Um deles é o gatilho: aperte e você perde a rodada.',
     backgammon: 'Toque em "Lançar os dados", depois numa peça e num ponto marcado (ou Fora para retirar). Cada dado é um movimento.',
     ludo: 'Toque em "Lançar o dado" e depois num dos botões de peça. Um seis tira a peça da base e joga de novo; caia sobre um rival para mandá-lo de volta.',
-    supertictactoe: 'Toque numa casa do tabuleiro marcado. A sua casa manda o rival para o tabuleiro dessa posição; vence quem faz três tabuleiros em linha.'
+    supertictactoe: 'Toque numa casa do tabuleiro marcado. A sua casa manda o rival para o tabuleiro dessa posição; vence quem faz três tabuleiros em linha.',
+    snakesladders: 'Toque em "Lançar o dado": a sua peça avança. Escadas sobem, cobras descem, um seis joga de novo, vence quem chega exatamente a 100.'
   },
   timer: 'Você tem 60 segundos por jogada. Levante-se quando quiser.',
   language: 'Idioma',
@@ -577,7 +601,7 @@ const PT: LoungeStrings = {
   gameRoom: 'SALA DE JOGOS',
   rooftop: 'TERRAÇO',
   rooftopNote: 'Ranking e torneios: depois do buildathon',
-  seat: { Yellow: 'Amarelo', Red: 'Vermelho', Black: 'Pretas', White: 'Brancas', Green: 'Verde', X: 'X', O: 'O' },
+  seat: { Yellow: 'Amarelo', Red: 'Vermelho', Black: 'Pretas', White: 'Brancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
   g: {
     boxes: 'Caixas',
     tapDot: 'Toque num ponto e depois num vizinho',
@@ -598,6 +622,11 @@ const PT: LoungeStrings = {
     youPlay: (mark) => `Você joga com ${mark}`,
     tapEmpty: 'Toque numa casa vazia',
     anyBoard: 'Escolha livre: toque numa casa de qualquer tabuleiro aberto',
+    square: (n) => (n > 0 ? `Casa ${n}` : 'Ainda fora do tabuleiro'),
+    snakeDown: (n) => `Cobra! Desce para ${n}`,
+    ladderUp: (n) => `Escada! Sobe para ${n}`,
+    reached100: (side) => `${side} chegou aos 100`,
+    blue: 'Azul',
     pairs: 'Pares',
     noMatch: 'Não combinam, virando de volta…',
     findTwin: 'Ache o par',
@@ -641,7 +670,8 @@ const FR: LoungeStrings = {
     crocsnap: 'Touche une dent libre. L\'une d\'elles est le déclencheur : appuie dessus et tu perds la manche.',
     backgammon: 'Touche « Lancer les dés », puis un pion et un point marqué (ou Sortie pour le sortir). Chaque dé est un coup.',
     ludo: 'Touche « Lancer le dé », puis un des boutons de pion. Un six fait sortir un pion et tu relances ; tomber sur un adversaire le renvoie à sa base.',
-    supertictactoe: 'Touche une case de la grille en surbrillance. Ta case envoie l\'adversaire dans la grille de même position ; gagne trois grilles alignées.'
+    supertictactoe: 'Touche une case de la grille en surbrillance. Ta case envoie l\'adversaire dans la grille de même position ; gagne trois grilles alignées.',
+    snakesladders: 'Touche « Lancer le dé » : ton pion avance. Les échelles montent, les serpents descendent, un six rejoue, arriver pile sur 100 gagne.'
   },
   timer: 'Tu as 60 secondes par coup. Lève-toi quand tu veux.',
   language: 'Langue',
@@ -700,7 +730,7 @@ const FR: LoungeStrings = {
   gameRoom: 'SALLE DE JEUX',
   rooftop: 'TOIT-TERRASSE',
   rooftopNote: 'Classement et tournois : après le buildathon',
-  seat: { Yellow: 'les jaunes', Red: 'les rouges', Black: 'les noirs', White: 'les blancs', Green: 'les verts', X: 'X', O: 'O' },
+  seat: { Yellow: 'les jaunes', Red: 'les rouges', Black: 'les noirs', White: 'les blancs', Green: 'les verts', Blue: 'les bleus', X: 'X', O: 'O' },
   g: {
     boxes: 'Cases',
     tapDot: 'Touche un point, puis un voisin',
@@ -721,6 +751,11 @@ const FR: LoungeStrings = {
     youPlay: (mark) => `Tu joues ${mark}`,
     tapEmpty: 'Touche une case vide',
     anyBoard: 'Choix libre : touche une case dans une grille ouverte',
+    square: (n) => (n > 0 ? `Case ${n}` : 'Pas encore sur le plateau'),
+    snakeDown: (n) => `Serpent ! Descente en ${n}`,
+    ladderUp: (n) => `Échelle ! Montée en ${n}`,
+    reached100: (side) => `${side} ont atteint 100`,
+    blue: 'les bleus',
     pairs: 'Paires',
     noMatch: 'Pas de paire, retournement…',
     findTwin: 'Trouve sa jumelle',
