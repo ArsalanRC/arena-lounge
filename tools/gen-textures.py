@@ -5,6 +5,7 @@
   images/croc-face.png     256  green croc head for Croc Snap (alpha disc)
   images/backgammon-board.png 512x410 two rows of points + bar (Backgammon)
   images/ludo-board.png    510  15x15 Ludo board (yards, cross track, home)
+  images/snakes-board.png  512  10x10 numbered board with snakes + ladders
   images/board-face.png    512  frame face with see-through holes + bevel
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
@@ -357,6 +358,95 @@ def gen_ui_plain():
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
 
+# ------------------------------------------------------------------ snakes & ladders board
+_DIGITS = {  # 3x5 bitmap font for the square numbers
+    '0': ['111', '101', '101', '101', '111'], '1': ['010', '110', '010', '010', '111'], '2': ['111', '001', '111', '100', '111'],
+    '3': ['111', '001', '111', '001', '111'], '4': ['101', '101', '111', '001', '001'], '5': ['111', '100', '111', '001', '111'],
+    '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '001', '001', '001'], '8': ['111', '101', '111', '101', '111'],
+    '9': ['111', '101', '111', '001', '111'],
+}
+
+def _sl_layout():
+    """Parse DEFAULT_LADDERS / DEFAULT_SNAKES from the engine so the texture matches the rules."""
+    import re
+    src = open('src/engine/snakesladders/constants.ts').read()
+    def pairs(name):
+        body = src[src.index(name):]
+        body = body[:body.index('];')]
+        return [(int(a), int(b)) for a, b in re.findall(r'from:\s*(\d+),\s*to:\s*(\d+)', body)]
+    return pairs('DEFAULT_LADDERS'), pairs('DEFAULT_SNAKES')
+
+def _sl_centre(square, cell):
+    """Centre of a square (1..100) in pixels, row 0 at the top, boustrophedon."""
+    z = square - 1
+    rb = z // 10
+    row = 9 - rb
+    col = z % 10 if rb % 2 == 0 else 9 - z % 10
+    return (col + 0.5) * cell, (row + 0.5) * cell
+
+def _seg_dist(px, py, ax, ay, bx, by):
+    vx, vy = bx - ax, by - ay
+    L2 = vx * vx + vy * vy or 1e-9
+    t = max(0.0, min(1.0, ((px - ax) * vx + (py - ay) * vy) / L2))
+    return math.hypot(px - (ax + t * vx), py - (ay + t * vy)), t
+
+def gen_snakes_board(path='images/snakes-board.png'):
+    S = 512
+    cell = S / 10
+    ladders, snakes = _sl_layout()
+    light, dark = hex_rgb('#f2e8d5'), hex_rgb('#d8c9a8')
+    line = hex_rgb('#8c7b62')
+    ladder_c = hex_rgb('#8b5a2b')
+    snake_c, snake_d = hex_rgb('#3f8f4a'), hex_rgb('#245c2e')
+    num_c = hex_rgb('#4a3d2e')
+    lad = [(_sl_centre(a, cell), _sl_centre(b, cell)) for a, b in ladders]
+    snk = [(_sl_centre(a, cell), _sl_centre(b, cell)) for a, b in snakes]
+    def px(x, y):
+        u, v = x + 0.5, y + 0.5
+        col_i, row_i = int(u // cell), int(v // cell)
+        colour = light if (col_i + row_i) % 2 == 0 else dark
+        fx, fy = u - col_i * cell, v - row_i * cell
+        # square number, top-left corner
+        sq = (9 - row_i) * 10 + ((col_i if (9 - row_i) % 2 == 0 else 9 - col_i)) + 1
+        txt = str(sq)
+        gx0, gy0 = 3, 3
+        for gi, ch in enumerate(txt):
+            g = _DIGITS[ch]
+            for gy in range(5):
+                for gx in range(3):
+                    if g[gy][gx] == '1':
+                        px0 = gx0 + gi * 8 + gx * 2; py0 = gy0 + gy * 2
+                        if px0 <= fx < px0 + 2 and py0 <= fy < py0 + 2:
+                            colour = num_c
+        # grid lines
+        if fx < 1 or fy < 1:
+            colour = mix(colour, line, 0.6)
+        # ladders: two rails + rungs
+        for (ax, ay), (bx, by) in lad:
+            d, t = _seg_dist(u, v, ax, ay, bx, by)
+            L = math.hypot(bx - ax, by - ay)
+            if d < 7 and 0.02 < t < 0.98:
+                if abs(d - 5) < 1.6:
+                    colour = ladder_c
+                elif d < 5 and (t * L) % 12 < 2.4:
+                    colour = ladder_c
+        # snakes: wavy thick body, darker head at the top end
+        for (ax, ay), (bx, by) in snk:
+            L = math.hypot(bx - ax, by - ay)
+            d, t = _seg_dist(u, v, ax, ay, bx, by)
+            if d < 16 and 0.0 <= t <= 1.0:
+                # wave offset perpendicular to the segment
+                nx, ny = -(by - ay) / L, (bx - ax) / L
+                off = 6 * math.sin(t * L / 14)
+                wd, _ = _seg_dist(u - nx * off, v - ny * off, ax, ay, bx, by)
+                w = 4.5 if t > 0.1 else 6.5
+                if wd < w:
+                    colour = mix(snake_c, snake_d, 0.5 * (1 - smoothstep(0, w, wd)) if t > 0.1 else 0.9)
+        if u < 3 or v < 3 or u > S - 3 or v > S - 3:
+            colour = hex_rgb('#3a2a1e')
+        return (*colour, 1.0)
+    write_png(path, S, S, px)
+
 # ------------------------------------------------------------------ rug ring (emissive mask)
 def gen_rug_ring(path='images/rug-ring.png'):
     """White ring on black: used as the emissive texture of every rug, tinted
@@ -636,4 +726,6 @@ if __name__ == '__main__':
     gen_backgammon_board()
     gen_ludo_board()
     gen_rug_ring()
+    gen_snakes_board()
+    gen_ui_disc('images/ui/disc-blue.png', '#3a7bd5', '#1f4b8f', '#8fc0ff')
     gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')
