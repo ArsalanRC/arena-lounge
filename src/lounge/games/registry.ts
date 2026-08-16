@@ -12,6 +12,8 @@ import { backgammonGame } from './backgammon'
 import { ludoGame } from './ludo'
 import { superTicTacToeGame } from './supertictactoe'
 import { snakesLaddersGame } from './snakesladders'
+import { seaStrikeGame } from './seastrike'
+import { diceRoyaleGame } from './diceroyale'
 
 const GAMES: Partial<Record<GameId, TableGame>> = {
   connectfour: connectFourGame as TableGame,
@@ -25,7 +27,9 @@ const GAMES: Partial<Record<GameId, TableGame>> = {
   backgammon: backgammonGame as TableGame,
   ludo: ludoGame as TableGame,
   supertictactoe: superTicTacToeGame as TableGame,
-  snakesladders: snakesLaddersGame as TableGame
+  snakesladders: snakesLaddersGame as TableGame,
+  seastrike: seaStrikeGame as TableGame,
+  diceroyale: diceRoyaleGame as TableGame
 }
 
 export function getGame(id: string): TableGame {
@@ -45,5 +49,7 @@ export const GAME_NAMES: Record<GameId, string> = {
   crocsnap: 'Croc Snap',
   ludo: 'Ludo',
   supertictactoe: 'Super Tic Tac Toe',
-  snakesladders: 'Snakes & Ladders'
+  snakesladders: 'Snakes & Ladders',
+  seastrike: 'Sea Strike',
+  diceroyale: 'Dice Royale'
 }

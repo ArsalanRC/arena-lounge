@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 18:20 (Europe/Berlin), night lighting
+Last update: 2026-08-16 18:35 (Europe/Berlin), sky room + Sea Strike + Dice Royale (14 games)
 
 ## 1. What this is
 
@@ -150,7 +150,22 @@ version works as well", 16 Aug 11:30):
   one material per colour. Deployed bundle ~0.7 MB minified (`deploy` builds
   with --production; the dev bin/index.js is 8 MB with sourcemaps) + GLBs +
   32 PNGs.
-- Tests: 489 vitest tests over the twelve pure engines. `pnpm build` strict type-check green.
+- Tests: 561 vitest tests over the fourteen pure engines. `pnpm build` strict type-check green.
+- Four floors (Arsalan 18:00: "we can add another floor"): Lounge 0, Game
+  room 8, Sky room 16 (was the rooftop; two corners N Sea Strike + S Dice
+  Royale, sofas E/W over the oculus, three columns 45/120/225), Rooftop 24
+  (new slab inside the crown ring, benches, lamps, planters, glowing posts).
+  Shafts reach 28 m, pads on all four floors, elevator panel lists four.
+- Sea Strike (Table 14): fleets placed at random at the deal (no placement
+  phase on phones), fire at a 10x10 grid, sink five ships; 3D board shows
+  both tracking grids side by side (shots are public, unshot ships never
+  shown; the fleets do travel in the synced state, documented as casual
+  honesty); UI: enemy waters (tap to fire) + your fleet.
+- Dice Royale duel (Table 15): a wrapper around the solo engine (32 tests):
+  each side plays its own 13-turn sheet in alternation, higher grand total
+  wins; actions roll (five client-chosen faces) / hold / score; greedy bot
+  (holds the mode face, hard keeps straights); die-face sprites; UI: dice
+  row with hold, Roll (n), 13 category buttons with live previews.
 - Snakes & Ladders (Table 13, game room SW corner, red vs blue): engine from
   game-platform (65 tests, single die: a six rolls again, three sixes forfeit,
   overshoot bounces, exactly 100 wins); board texture generated from the
@@ -228,12 +243,11 @@ version works as well", 16 Aug 11:30):
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
    bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
    finger-sized boards for all six games, verified in the desktop emulation.
-5. Claude: (Chess, Croc Snap, Backgammon, Ludo, Super TTT 17:45, Snakes &
-   Ladders 17:55 done: twelve games, thirteen tables, no placeholders.) Next
-   if wanted: Sea Strike (ship-placement phase, hidden ships in the shared
-   state), a Dice Royale duel (wrapper around the solo engine). They need new
-   corners: the game room ring is full (six corners + two elevators), so a
-   third floor or a wider ring.
+5. Claude: (Chess, Croc Snap, Backgammon, Ludo, Super TTT, Snakes & Ladders,
+   Sea Strike, Dice Royale duel done 18:35: fourteen games, fifteen tables on
+   four floors, no placeholders.) Left in Game Arena that could still fit a
+   table: Color Clash and Card Lines (hidden hands), Poker (play money, T&C
+   check first). Only if Arsalan asks; the sky room's E/W spots are sofas.
 6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
    (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
    PNG in the GLB), lighting accents, more garden.
@@ -364,7 +378,8 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
-- 2026-08-16 18:20 night lighting: fixed 21:00 skybox (scene.json + SkyboxTime), beacon lattice on the rib crossings and crown, column collars, string lights on every floor, bar light strips, seven point lights; README hero screenshots at night
+- 2026-08-16 18:35 fourth floor + two games: rooftop moved to 24 m (new slab inside the crown), the 16 m slab is the Sky room with Sea Strike (N) and a Dice Royale duel (S), sofas E/W; shafts to 28 m; Sea Strike engine (40 tests) with random fleets and a two-grid public 3D board; Dice Royale duel wrapper (32 tests) with die-face sprites; strings in five languages, catalog rows in 19; 14 games / 15 tables; sea grid as a texture (36 line boxes fewer), upper-floor lamp posts dropped (string lights + collars light them); idle 512 entities / 529 renderers (the phone shows amber above 500 while idle; each running table adds 10 to 90, so expect a red line during busy hours; cosmetic)
+- 2026-08-16 18:05 night lighting: fixed 21:00 skybox (scene.json + SkyboxTime), beacon lattice on the rib crossings and crown, column collars, string lights on every floor, bar light strips, seven point lights; README hero screenshots at night
 - 2026-08-16 17:55 Snakes & Ladders plugin (engine ported, 65 tests): generated 10x10 board texture with numbers, snakes and ladders from the engine layout, sliding pieces, roll-only controls, catalog rows in 19 languages + tips in five, seat colour Blue added; game room SW corner live, no "coming soon" left (12 games, 13 tables)
 - 2026-08-16 17:45 Super Tic Tac Toe plugin (engine ported, 47 tests): 9x9 upright board with forced-board glow + won-board plates, 9x9 touch grid, catalog rows in 19 languages + tips in five; game room NE corner live, SW corner reserved for Snakes & Ladders; game-room columns/lamps moved between the six corners. Desktop Explorer had to be restarted (scene stopped loading after a rebuild storm; `sdk-commands start --mcp --skip-auth-screen true`)
 - 2026-08-16 18:05 design pass 1: glass facade + entrance portal (marquee sign), string lights, big billboard game names per corner, directory board, glowing rug rings per corner, sofas + bar counters (models/decor.glb, board.glb, sofa.glb, bar.glb); Four in a Row naming everywhere

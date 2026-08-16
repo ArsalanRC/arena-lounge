@@ -31,8 +31,9 @@ TWIST = math.radians(110)   # total twist over H (each direction)
 SEGS = 24           # rib segments
 RIB_W, RIB_D = 0.42, 0.26   # rib cross-section (tangential x radial)
 FLOORS = [          # (y, inner radius, outer radius, thickness)
-    (8.0, 5.5, 12.4, 0.45),
-    (16.0, 3.0, 10.9, 0.45),
+    (8.0, 5.5, 12.4, 0.45),     # game room
+    (16.0, 3.0, 10.9, 0.45),    # sky room
+    (24.0, 3.0, 10.1, 0.45),    # rooftop terrace, inside the crown ring
 ]
 RAIL_H = 1.1        # railing height above the slab top
 CIRC_SEGS = 48
@@ -379,7 +380,7 @@ box_mesh(gw_wood, (0, 3.5, 0), (6.9, 0.22, 0.3))
 write_glb('models/gateway.glb', [("wood", gw_wood, 0), ("lights", gw_light, 1)], [WOOD_DARK, LAMP])
 
 # elevator shaft: posts, glass on three sides (open towards -z), roof, pads + light rings on every floor
-SHAFT_TOP = 16 + 4.2
+SHAFT_TOP = 24 + 4.2
 sh_posts, sh_glass, sh_pads, sh_rings, sh_coll = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
 half = 1.25
 for (x, z) in [(-half, -half), (half, -half), (-half, half), (half, half)]:
@@ -388,7 +389,7 @@ box_mesh(sh_posts, (0, SHAFT_TOP + 0.1, 0), (half * 2 + 0.3, 0.2, half * 2 + 0.3
 for (c, size) in [((0, SHAFT_TOP / 2, half), (half * 2, SHAFT_TOP, 0.04)), ((-half, SHAFT_TOP / 2, 0), (0.04, SHAFT_TOP, half * 2)), ((half, SHAFT_TOP / 2, 0), (0.04, SHAFT_TOP, half * 2))]:
     box_mesh(sh_glass, c, size)
     box_mesh(sh_coll, c, size)
-for y in (0, 8, 16):
+for y in (0, 8, 16, 24):
     prism(sh_pads, 0, 0, 1.1, y + 0.005, y + 0.04, 24)
     box_mesh(sh_rings, (0, y + 2.6, -half), (half * 2 + 0.2, 0.08, 0.08))
 write_glb('models/shaft.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [COLUMN, GLASS, GLOW_CYAN, GLOW_CYAN, COLLIDER])
@@ -533,6 +534,13 @@ string(gr[0], gr[1], 14.6); string(gr[1], gr[2], 14.6); string(gr[3], gr[0], 14.
 for i in range(32):
     a = 2 * math.pi * i / 32
     box_mesh(lights, (8.6 * math.cos(a), 19.2 + 0.25 * math.sin(a * 8), 8.6 * math.sin(a)), (0.12, 0.12, 0.12))
+for deg in [45, 120, 225]:
+    collar(deg, 9.5, 16.55)
+    collar(deg, 9.5, 23.3)
+# rooftop terrace: light posts around the crown edge (short glowing rods)
+for i in range(16):
+    a = 2 * math.pi * i / 16
+    box_mesh(lights, (9.7 * math.cos(a), 25.6, 9.7 * math.sin(a)), (0.1, 0.9, 0.1))
 
 # directory board near the gateway (text is a TextShape in the scene): dark plate + copper frame
 board, board_frame = Mesh(), Mesh()

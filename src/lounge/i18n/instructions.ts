@@ -66,6 +66,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Snakes & Ladders",
         "overview": "Snakes & Ladders is a classic board game for 2–4 players. Roll the dice, move your piece forward, and race to square 100. Land on a ladder to climb up, but watch out for snakes that slide you down!"
+      },
+      "seastrike": {
+        "name": "Sea Strike",
+        "overview": "Sea Strike is a classic naval warfare game for 2 players. Each player secretly places 5 ships on a 10×10 grid, then takes turns calling shots to sink the opponent's fleet. First to sink all 5 enemy ships wins."
+      },
+      "diceroyale": {
+        "name": "Dice Royale",
+        "overview": "Solo dice scoring game. You have 13 turns. On each turn you roll 5 dice up to 3 times, holding any dice between rolls, and then assign the result to one of 13 scoring categories. Highest grand total wins; categories can only be used once."
       }
     }
   },
@@ -121,6 +129,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Serpientes y escaleras",
         "overview": "Serpientes y Escaleras es un juego clásico para 2–4 jugadores. Tira el dado, avanza y corre hacia la casilla 100. ¡Sube por escaleras y cuidado con las serpientes!"
+      },
+      "seastrike": {
+        "name": "Batalla naval",
+        "overview": "Sea Strike es un juego naval clásico para 2 jugadores. Cada jugador coloca 5 barcos en secreto en una cuadrícula de 10×10 y luego dispara por turnos para hundir la flota enemiga. Gana el primero en hundir los 5 barcos."
+      },
+      "diceroyale": {
+        "name": "Dados Royale",
+        "overview": "Juego de dados de puntuación en solitario. Tienes 13 turnos. En cada turno tiras 5 dados hasta 3 veces, manteniendo los que quieras entre tiradas, y asignas el resultado a una de las 13 categorías de puntuación. El mayor total general gana; cada categoría solo se puede usar una vez."
       }
     }
   },
@@ -176,6 +192,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Cobras e escadas",
         "overview": "Snakes & Ladders é um jogo clássico para 2–4 jogadores. Role os dados, mova sua peça e corra até a casa 100. Pare em uma escada para subir, mas cuidado com as cobras que te fazem descer!"
+      },
+      "seastrike": {
+        "name": "Batalha naval",
+        "overview": "Sea Strike é um jogo clássico de guerra naval para 2 jogadores. Cada jogador coloca 5 navios secretamente em uma grade 10×10, depois se reveza disparando para afundar a frota inimiga. O primeiro a afundar todos os 5 navios inimigos vence."
+      },
+      "diceroyale": {
+        "name": "Dados Royale",
+        "overview": "Jogo de dados solo com pontuação. Você tem 13 turnos. Em cada turno, role 5 dados até 3 vezes, segurando dados entre rolagens, e atribua o resultado a uma das 13 categorias de pontuação. O maior total geral vence; categorias só podem ser usadas uma vez."
       }
     }
   },
@@ -231,6 +255,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Schlangen & Leitern",
         "overview": "Snakes & Ladders ist ein klassisches Brettspiel für 2–4 Spieler. Würfle, bewege deine Figur und wettrenne zu Feld 100. Lande auf einer Leiter, um hochzuklettern, aber Vorsicht vor Schlangen, die dich runterrutschen lassen!"
+      },
+      "seastrike": {
+        "name": "Schiffe versenken",
+        "overview": "Sea Strike ist ein klassisches Seegefecht für 2 Spieler. Jeder platziert 5 Schiffe auf einem 10×10-Raster und feuert dann abwechselnd Schüsse, um die gegnerische Flotte zu versenken. Wer zuerst alle 5 Schiffe versenkt, gewinnt."
+      },
+      "diceroyale": {
+        "name": "Würfel-Royale",
+        "overview": "Solo-Würfelspiel. Du hast 13 Runden. Jede Runde würfelst du 5 Würfel bis zu 3-mal, hältst beliebige Würfel zwischen den Würfen und ordnest dann das Ergebnis einer von 13 Wertungskategorien zu. Die höchste Gesamtpunktzahl gewinnt; jede Kategorie kann nur einmal benutzt werden."
       }
     }
   },
@@ -286,6 +318,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Serpents & échelles",
         "overview": "Serpents et Échelles est un jeu classique pour 2 à 4 joueurs. Lancez le dé, avancez et foncez vers la case 100. Grimpez les échelles et méfiez-vous des serpents !"
+      },
+      "seastrike": {
+        "name": "Bataille navale",
+        "overview": "Sea Strike est un jeu naval classique pour 2 joueurs. Chacun place 5 navires en secret sur une grille 10×10, puis tire à tour de rôle pour couler la flotte adverse. Le premier à couler les 5 navires ennemis gagne."
+      },
+      "diceroyale": {
+        "name": "Dés Royale",
+        "overview": "Jeu de dés à score en solo. Vous avez 13 tours. À chaque tour, lancez 5 dés jusqu'à 3 fois, en gardant ceux que vous voulez entre les lancers, puis assignez le résultat à l'une des 13 catégories de score. Le plus grand total général gagne ; chaque catégorie ne peut être utilisée qu'une fois."
       }
     }
   },
@@ -341,6 +381,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Scale e serpenti",
         "overview": "Snakes & Ladders è un classico per 2–4 giocatori. Lancia i dadi, muovi la tua pedina e corri alla casella 100. Fermati su una scala per salire, ma attento ai serpenti che ti fanno scendere!"
+      },
+      "seastrike": {
+        "name": "Battaglia navale",
+        "overview": "Sea Strike è un classico gioco di battaglia navale per 2 giocatori. Ogni giocatore piazza 5 navi in segreto su una griglia 10×10, poi si alternano a sparare per affondare la flotta nemica. Il primo ad affondare tutte le 5 navi nemiche vince."
+      },
+      "diceroyale": {
+        "name": "Dadi Royale",
+        "overview": "Gioco di dadi in solitario con punteggio. Hai 13 turni. In ogni turno lanci 5 dadi fino a 3 volte, tenendo dadi tra i lanci, e poi assegni il risultato a una delle 13 categorie di punteggio. Il totale più alto vince; le categorie possono essere usate una sola volta."
       }
     }
   },
@@ -396,6 +444,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Węże i drabiny",
         "overview": "Węże i Drabiny to klasyczna gra dla 2–4 graczy. Rzuć kostką i ścigaj się do pola 100. Drabiny podnoszą, węże zsuwają!"
+      },
+      "seastrike": {
+        "name": "Statki",
+        "overview": "Sea Strike to klasyczna bitwa morska dla 2 graczy. Każdy umieszcza 5 statków na siatce 10×10, potem strzela. Pierwszy, kto zatopi wszystkie 5, wygrywa."
+      },
+      "diceroyale": {
+        "name": "Król kości",
+        "overview": "Solowa gra punktowa z kośćmi. 13 tur. Każda tura: rzuć 5 kośćmi do 3 razy, przytrzymuj dowolne, potem zapisz wynik w kategorii. Najwyższy wynik wygrywa."
       }
     }
   },
@@ -451,6 +507,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Yılan Merdiven",
         "overview": "Yılan ve Merdiven 2–4 oyunculu klasik oyundur. Zar at, ilerle ve 100. kareye yarış. Merdivenler çıkarır, yılanlar düşürür!"
+      },
+      "seastrike": {
+        "name": "Deniz Saldırısı",
+        "overview": "Sea Strike 2 oyunculu klasik deniz savaşı oyunudur. Her oyuncu 10×10 ızgaraya 5 gemi yerleştirir, sonra sırayla ateş eder. 5 gemiyi batıran kazanır."
+      },
+      "diceroyale": {
+        "name": "Zar Kralı",
+        "overview": "Solo zar puanlama oyunu. 13 tur. Her tur: 5 zarı 3 kez at, aralarda istediğini tut, sonra kategoriye yaz. En yüksek toplam kazanır."
       }
     }
   },
@@ -506,6 +570,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Змеи и лестницы",
         "overview": "Змеи и лестницы, классическая настольная игра для 2–4 игроков. Бросайте кости, двигайтесь вперёд и мчитесь к клетке 100. Лестницы поднимают, змеи спускают!"
+      },
+      "seastrike": {
+        "name": "Морской бой",
+        "overview": "Sea Strike, классический морской бой для 2 игроков. Каждый тайно размещает 5 кораблей на сетке 10×10, затем по очереди стреляет, чтобы потопить флот противника. Первый, кто потопит все 5 кораблей, побеждает."
+      },
+      "diceroyale": {
+        "name": "Король кубиков",
+        "overview": "Одиночная игра с подсчётом очков на костях. 13 ходов. Каждый ход бросайте 5 костей до 3 раз, придерживая любые, затем запишите результат в категорию. Наивысший итог побеждает."
       }
     }
   },
@@ -561,6 +633,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "蛇梯棋",
         "overview": "蛇梯棋是经典2–4人棋盘游戏。掷骰子移动棋子，目标到达100格。踩到梯子底部往上爬，踩到蛇头往下滑！"
+      },
+      "seastrike": {
+        "name": "海战棋",
+        "overview": "海战棋是经典双人海战游戏。每人在10×10网格上秘密摆放5艘舰船，然后轮流射击，先击沉对方全部5艘舰船的玩家获胜。"
+      },
+      "diceroyale": {
+        "name": "骰子皇家",
+        "overview": "单人骰子计分游戏。共13个回合。每回合掷5颗骰子最多3次，两次投掷间可以保留骰子，然后将结果分配到13个计分类别之一。总分最高者胜；每个类别只能用一次。"
       }
     }
   },
@@ -616,6 +696,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "蛇と梯子",
         "overview": "蛇と梯子は2〜4人用の古典的ボードゲーム。サイコロを振ってコマを進め、100マスを目指します。はしごに止まれば上に登り、蛇の頭に止まると下に滑ります!"
+      },
+      "seastrike": {
+        "name": "海戦",
+        "overview": "海戦は2人用の対戦ゲーム。各プレイヤーは10×10のグリッドに5隻の艦船を秘密裏に配置し、交互に攻撃して相手の全艦隊を沈めた方が勝ちです。"
+      },
+      "diceroyale": {
+        "name": "ダイスロイヤル",
+        "overview": "ソロのダイススコアリングゲーム。13ターンで各ターンにサイコロ5個を最大3回振り、ロール間にホールドし、13のスコアカテゴリのいずれかに割り当てます。総合計が最高スコア。各カテゴリは1回のみ使用可能。"
       }
     }
   },
@@ -671,6 +759,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "सांप-सीढ़ी",
         "overview": "सांप और सीढ़ी 2–4 खिलाड़ियों का क्लासिक बोर्ड गेम है। 100 वर्ग तक पहुंचें।"
+      },
+      "seastrike": {
+        "name": "समुद्री युद्ध",
+        "overview": "Sea Strike दो खिलाड़ियों का क्लासिक नौसैनिक खेल है। 10×10 ग्रिड पर 5 जहाज रखें।"
+      },
+      "diceroyale": {
+        "name": "डाइस रॉयल",
+        "overview": "सोलो पासा स्कोरिंग गेम। 13 बारी, 5 पासे, 13 श्रेणियां।"
       }
     }
   },
@@ -726,6 +822,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Ular Tangga",
         "overview": "Ular Tangga adalah permainan papan klasik untuk 2–4 pemain. Lempar dadu, gerakkan bidak ke depan, dan berpacu ke kotak 100. Mendarat di tangga untuk naik, tapi hati-hati ular yang menurunkanmu!"
+      },
+      "seastrike": {
+        "name": "Serangan Laut",
+        "overview": "Sea Strike adalah permainan perang laut klasik untuk 2 pemain. Setiap pemain secara rahasia menempatkan 5 kapal di kisi 10×10, lalu bergiliran menembak untuk menenggelamkan armada lawan. Yang pertama menenggelamkan semua 5 kapal musuh menang."
+      },
+      "diceroyale": {
+        "name": "Dadu Royal",
+        "overview": "Permainan skor dadu solo. Kamu punya 13 giliran. Setiap giliran lempar 5 dadu hingga 3 kali, tahan dadu apa saja di antara lemparan, lalu tetapkan hasilnya ke salah satu dari 13 kategori skor. Total keseluruhan tertinggi menang; kategori hanya bisa digunakan sekali."
       }
     }
   },
@@ -781,6 +885,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Rắn & Thang",
         "overview": "Rắn & Thang là trò bàn cờ cổ điển cho 2–4 người. Tung xúc xắc, di chuyển quân, và đua đến ô 100. Dừng ở chân thang để leo lên, nhưng coi chừng rắn kéo bạn xuống!"
+      },
+      "seastrike": {
+        "name": "Đánh Tàu",
+        "overview": "Sea Strike là trò chiến tranh hải quân cổ điển cho 2 người. Mỗi người bí mật đặt 5 tàu trên lưới 10×10, rồi luân phiên bắn để đánh chìm hạm đội đối thủ. Người đầu tiên đánh chìm cả 5 tàu địch thắng."
+      },
+      "diceroyale": {
+        "name": "Xúc Xắc Hoàng Gia",
+        "overview": "Trò ghi điểm xúc xắc solo. Bạn có 13 lượt. Mỗi lượt tung 5 xúc xắc tối đa 3 lần, giữ xúc xắc giữa các lần tung, rồi gán kết quả vào một trong 13 hạng mục. Tổng cao nhất thắng; mỗi hạng mục chỉ dùng một lần."
       }
     }
   },
@@ -836,6 +948,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Ahas at Hagdan",
         "overview": "Ang Snakes & Ladders ay isang klasikong board game para sa 2–4 manlalaro. I-roll ang dice, igalaw ang piyesa, at mag-unahan papuntang square 100. Tumapak sa hagdan para umakyat, pero mag-ingat sa mga ahas na magpapababa sa iyo!"
+      },
+      "seastrike": {
+        "name": "Salakay sa Dagat",
+        "overview": "Ang Sea Strike ay isang klasikong naval warfare game para sa 2 manlalaro. Lihim na maglagay ng 5 barko sa 10×10 grid, tapos mag-turn na bumaril para ilubog ang fleet ng kalaban. Unang makalubog ng lahat ng 5 barko ng kalaban ang panalo."
+      },
+      "diceroyale": {
+        "name": "Dados Royal",
+        "overview": "Solo dice scoring game. May 13 turns ka. Sa bawat turn, mag-roll ng 5 dice hanggang 3 beses, mag-hold ng kahit anong dice sa pagitan ng rolls, at i-assign ang resulta sa isa sa 13 scoring categories. Pinakamataas na grand total ang panalo; ang mga category ay isang beses lang magagamit."
       }
     }
   },
@@ -891,6 +1011,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "সাপ-সিঁড়ি",
         "overview": "সাপ ও মই ২–৪ খেলোয়াড়ের ক্লাসিক। ১০০ ঘরে পৌঁছান।"
+      },
+      "seastrike": {
+        "name": "সমুদ্র যুদ্ধ",
+        "overview": "সি স্ট্রাইক দুই খেলোয়াড়ের ক্লাসিক নৌযুদ্ধ।"
+      },
+      "diceroyale": {
+        "name": "ডাইস রয়্যাল",
+        "overview": "সোলো পাশা গেম। ১৩ পালায় ৫ পাশা ৩ বার গড়ান।"
       }
     }
   },
@@ -946,6 +1074,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "साप-शिडी",
         "overview": "साप-शिड्या 2–4 खेळाडूंचा क्लासिक बोर्ड गेम."
+      },
+      "seastrike": {
+        "name": "समुद्रयुद्ध",
+        "overview": "Sea Strike दोन खेळाडूंचा नौसैनिक खेळ."
+      },
+      "diceroyale": {
+        "name": "डाइस रॉयल",
+        "overview": "एकट्याचा फासा स्कोरिंग गेम."
       }
     }
   },
@@ -1001,6 +1137,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "பாம்பும் ஏணியும்",
         "overview": "பாம்பும் ஏணியும் 2–4 வீரர்களுக்கான கிளாசிக்."
+      },
+      "seastrike": {
+        "name": "கடல் போர்",
+        "overview": "சீ ஸ்ட்ரைக் இரு வீரர்களுக்கான கடல் போர்."
+      },
+      "diceroyale": {
+        "name": "டைஸ் ராயல்",
+        "overview": "தனி நபர் பகடை மதிப்பெண் விளையாட்டு."
       }
     }
   },
@@ -1056,6 +1200,14 @@ export const LOCALES: LocaleInfo[] = [
       "snakesladders": {
         "name": "Snake an Ladder",
         "overview": "Snakes & Ladders na classic board game for 2–4 players. Roll dice, move your piece forward, race go square 100. Land for ladder make you climb up, but watch out for snake wey go slide you down!"
+      },
+      "seastrike": {
+        "name": "Sea Fight",
+        "overview": "Sea Strike na classic naval war game for 2 players. Each player secretly put 5 ships for 10×10 grid, then take turns to shoot make you sink di opponent fleet. First person wey sink all 5 enemy ships win."
+      },
+      "diceroyale": {
+        "name": "Dice Royale",
+        "overview": "Solo dice scoring game. You get 13 turns. Each turn roll 5 dice up to 3 times, hold any dice between rolls, then assign di result to one of 13 scoring categories. Highest grand total win; each category you fit use only once."
       }
     }
   }
