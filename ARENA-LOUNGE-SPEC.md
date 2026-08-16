@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 18:10 (Europe/Berlin), chrome i18n
+Last update: 2026-08-16 15:45 (Europe/Berlin), chrome i18n (times below corrected to git)
 
 ## 1. What this is
 
@@ -179,7 +179,7 @@ version works as well", 16 Aug 11:30):
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
    bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
    finger-sized boards for all six games, verified in the desktop emulation.
-5. Claude: (Chess 15:20, Croc Snap 15:45, Backgammon 17:00, Ludo 17:35
+5. Claude: (Chess 14:55, Croc Snap 15:01, Backgammon 15:22, Ludo 15:28
    done: ten games, eleven tables, no placeholders left.) Next games in the
    order Arsalan confirms: Super Tic Tac Toe, Snakes & Ladders, Sea Strike,
    Dice Royale duel. They need new corners: widen the game room ring or add
@@ -188,7 +188,7 @@ version works as well", 16 Aug 11:30):
 6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
    (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
    PNG in the GLB), lighting accents, more garden.
-7. Claude: (done 18:10) lounge chrome in EN/DE/ES/PT/FR. Still open: native
+7. Claude: (done 15:37) lounge chrome in EN/DE/ES/PT/FR. Still open: native
    review of the imported rule overviews in the other languages, and a
    picker entry outside the help panel if testers ask for it.
 8. Claude: README + submission text refresh (seven games, tower, floors),
@@ -225,9 +225,9 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
   budget, the ground-floor lounge unchanged, a generated diagrid tower over the
   plaza with a game room + rooftop, elevator = pad + teleport panel. Screenshots
   in docs/screenshots/tower-*.jpg for his reaction.
-- 16 Aug ~16:00 (Arsalan, on the tower screenshots): "looks great ... i love
+- 16 Aug ~15:05 (Arsalan, on the tower screenshots): "looks great ... i love
   the design"; asked for two elevators that are clearly elevators (done
-  16:15: glass shafts), and which other games can be added (answer given in
+  15:12: glass shafts), and which other games can be added (answer given in
   chat: Backgammon, Ludo 2-player, Super TTT, Snakes & Ladders, Sea Strike,
   Dice Royale as a duel; card games only with hidden-hand caveats; solo games
   as side arcades at most). Order to be confirmed by him.
@@ -291,7 +291,9 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
   wrappers loses its padding top and bottom; give the inner wrapper explicit
   vertical margins (see the phone bar in ui.tsx) or the last row a fixed height.
 - The 16 Aug session log below (12:00 to 16:55) ran ahead of the clock; git
-  says the same work landed 12:00 to 13:28. From 14:00 on the times are real.
+  says the same work landed 12:00 to 13:28. The afternoon session made the
+  same mistake and was corrected against git at 15:45: when in doubt, the
+  changelog time is the commit time (`git log --date=format:%H:%M`).
 
 ## 8b. Session log 16 Aug (what happened, for orientation)
 
@@ -305,14 +307,14 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
-- 2026-08-16 18:10 lounge chrome i18n: every lounge string (hint, toasts, table card, controller, elevator panel, table signs, banners, kiosk, gateway, floor labels, per-game hints, seat colours) through `t()` in EN/DE/ES/PT/FR written natively; `uiLang` shared by UI, toasts and 3D labels; relabelSystem for TextShapes; game names on signs from the catalog; house bot name localised per viewer
-- 2026-08-16 17:35 Ludo plugin (engine ported, 69 tests): red vs green duel, board texture from the engine's constants, eight sliding pieces, roll/piece/skip actions with client-chosen die, pending skip, mini board + move buttons; catalog rows in 19 languages + tips EN/DE/ES; game room west corner live, all four game-room corners built
-- 2026-08-16 17:00 Backgammon plugin (engine ported, 23 tests): upright board texture, 30-disc pool with bar + off trays, dice readout, roll/move/pass actions with client-chosen dice, pending pass, 24-point touch board with Roll button; catalog rows in 19 languages + tips EN/DE/ES; game room east corner live
-- 2026-08-16 16:15 two elevator shafts (glass, posts, light rings, ELEVATOR signs on every floor), rides land just outside the shaft the player used; README + docs/SUBMISSION.md refreshed (PR 23); landing page + portfolio card updated (portfolio PR 27, screenshots tower-overview + arrival)
-- 2026-08-16 15:45 Croc Snap plugin (engine ported, 37 tests): upright croc face with 12 tooth boxes, SNAP! label, ring-of-teeth UI, catalog rows in 19 languages + tips EN/DE/ES; game room south corner live (Table 9)
-- 2026-08-16 15:20 Chess plugin (engine ported with 47 tests + 2 budget tests): iterative-deepening bot with a 350 ms budget, 12 generated piece sprites, 32-piece sliding pool with castling + en passant + promotion handling, check/result status, chess rows in the how-to-play catalog (19 languages) and lounge tips EN/DE/ES; game room Chess corner live (Table 8)
+- 2026-08-16 15:37 lounge chrome i18n: every lounge string (hint, toasts, table card, controller, elevator panel, table signs, banners, kiosk, gateway, floor labels, per-game hints, seat colours) through `t()` in EN/DE/ES/PT/FR written natively; `uiLang` shared by UI, toasts and 3D labels; relabelSystem for TextShapes; game names on signs from the catalog; house bot name localised per viewer
+- 2026-08-16 15:28 Ludo plugin (engine ported, 69 tests): red vs green duel, board texture from the engine's constants, eight sliding pieces, roll/piece/skip actions with client-chosen die, pending skip, mini board + move buttons; catalog rows in 19 languages + tips EN/DE/ES; game room west corner live, all four game-room corners built
+- 2026-08-16 15:22 Backgammon plugin (engine ported, 23 tests): upright board texture, 30-disc pool with bar + off trays, dice readout, roll/move/pass actions with client-chosen dice, pending pass, 24-point touch board with Roll button; catalog rows in 19 languages + tips EN/DE/ES; game room east corner live
+- 2026-08-16 15:12 two elevator shafts (glass, posts, light rings, ELEVATOR signs on every floor), rides land just outside the shaft the player used; README + docs/SUBMISSION.md refreshed (PR 23); landing page + portfolio card updated (portfolio PR 27, screenshots tower-overview + arrival)
+- 2026-08-16 15:01 Croc Snap plugin (engine ported, 37 tests): upright croc face with 12 tooth boxes, SNAP! label, ring-of-teeth UI, catalog rows in 19 languages + tips EN/DE/ES; game room south corner live (Table 9)
+- 2026-08-16 14:55 Chess plugin (engine ported with 47 tests + 2 budget tests): iterative-deepening bot with a 350 ms budget, 12 generated piece sprites, 32-piece sliding pool with castling + en passant + promotion handling, check/result status, chess rows in the how-to-play catalog (19 languages) and lounge tips EN/DE/ES; game room Chess corner live (Table 8)
 - 2026-08-16 14:45 tower + floors + elevator: scene 3x3 parcels (lounge centred, garden ring, path), models/tower.glb (diagrid ribs, two annular slabs, railings, glowing rims, crown, `_collider` meshes) + models/canopy.glb from tools/gen-models.py, columns, elevator pads + floor panel + rideTo, FLOORS/ZONES per floor (game room corners for Chess / Backgammon / Croc Snap / Ludo as "coming soon"), rooftop terrace, y-aware table proximity + seat snap, spheres replaced (triangles 79k -> 50k), .dclignore trimmed, build:prod script, DEPLOY.md size note
-- 2026-08-16 14:25 phone controller bar: on phones the seated controller is a wide bottom bar (info | game controls | actions) with finger-sized boards (8x8 at 56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76); TableGame.Controls now takes `phone` + `fullBoard` (was `compact`), `hasStrip` marks games with a "Show board" toggle (Connect Four); spectator mini board desktop-only; help panel 1000 wide on phones; bot-strength control stacked in the phone column; Dot Lines undrawn-edge hints visible; `DEBUG_MOBILE_UI` flag + tools/dev/shot.sh fix
+- 2026-08-16 14:22 phone controller bar: on phones the seated controller is a wide bottom bar (info | game controls | actions) with finger-sized boards (8x8 at 56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76); TableGame.Controls now takes `phone` + `fullBoard` (was `compact`), `hasStrip` marks games with a "Show board" toggle (Connect Four); spectator mini board desktop-only; help panel 1000 wide on phones; bot-strength control stacked in the phone column; Dot Lines undrawn-edge hints visible; `DEBUG_MOBILE_UI` flag + tools/dev/shot.sh fix
 - 2026-08-16 10:35 scaffold, engine port, sync model, first playable build
 - 2026-08-16 11:05 textures, UI sprites, bar tables, robot token, seat camera
 - 2026-08-16 11:20 card layout fix, SDK pins, mobile QR script
