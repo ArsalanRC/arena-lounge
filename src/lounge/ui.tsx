@@ -137,6 +137,7 @@ function contextFor(t: Table): GameContext {
   const mySeat = mySeatAt(t)
   const b = boardOf(t)
   return {
+    root: t.root,
     mySeat,
     myTurn: mySeat !== 0 && b.status === Status.Playing && b.turn === mySeat,
     act: (action) => act(t, action)

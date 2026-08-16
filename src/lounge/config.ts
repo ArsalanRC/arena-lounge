@@ -33,7 +33,7 @@ export interface TableDef {
 export const TABLES: TableDef[] = [
   { id: 0, gameId: 'connectfour', label: 'Table 1', position: Vector3.create(9.5, 0, 19), rotationY: 35 },
   { id: 1, gameId: 'connectfour', label: 'Table 2', position: Vector3.create(16, 0, 21.5), rotationY: 0 },
-  { id: 2, gameId: 'connectfour', label: 'Table 3', position: Vector3.create(22.5, 0, 19), rotationY: -35 }
+  { id: 2, gameId: 'dotlines', label: 'Table 3', position: Vector3.create(22.5, 0, 19), rotationY: -35 }
 ]
 
 /** Base network sync id for table entities (table i uses SYNC_TABLE_BASE + i). */
