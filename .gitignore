@@ -19,3 +19,8 @@ yarn.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# duplicate agent skill trees created by `npx skills add --all`
+agent/
+data/
+skills/
