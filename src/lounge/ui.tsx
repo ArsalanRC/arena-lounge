@@ -25,6 +25,7 @@ import ReactEcs, { ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dc
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
 import { TURN_LIMIT_MS, UI } from './config'
+import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
 import { LOCALES, localeInfo, stringsFor } from './i18n'
@@ -332,8 +333,8 @@ function Controller() {
           <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: 'Bot', fontSize: T.small, color: UI.muted }} />
           <Segmented
             options={[{ key: 'easy', label: 'Easy' }, { key: 'medium', label: 'Medium' }, { key: 'hard', label: 'Hard' }]}
-            active={local.botDifficulty}
-            onPick={(k) => (local.botDifficulty = k as typeof local.botDifficulty)}
+            active={botSettings.difficulty}
+            onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
           />
         </Row>
       )}
