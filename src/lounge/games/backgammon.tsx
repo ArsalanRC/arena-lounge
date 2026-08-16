@@ -150,7 +150,7 @@ function Board(props: { state: BackgammonGameState; ctx: GameContext; phone: boo
   const col = props.phone ? 40 : 30
   const rowH = props.phone ? 150 : 112
   const barW = props.phone ? 34 : 26
-  const mirror = ctx.mySeat === 2
+  const mirror = ctx.behind // columns as seen from behind the upright board
   const rolled = state.dice !== null
   const legal = ctx.myTurn && rolled ? getLegalMoves(state) : []
   const sel = bgSelection.get(ctx.root)

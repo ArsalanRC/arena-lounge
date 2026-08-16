@@ -81,7 +81,7 @@ function seatOfIndex(i: number): SeatNo {
 function Board(props: { state: ReversiGameState; ctx: GameContext; phone: boolean }) {
   const { state, ctx } = props
   const cell = props.phone ? 56 : 36
-  const mirror = ctx.mySeat === 2
+  const mirror = ctx.behind // columns as seen from behind the upright board
   const legal = new Set(ctx.myTurn ? getLegalMoves(state).map((m) => m.r * N + m.c) : [])
   const last = state.lastMove ? state.lastMove.r * N + state.lastMove.c : -1
   const rows = []

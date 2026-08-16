@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 15:45 (Europe/Berlin), chrome i18n (times below corrected to git)
+Last update: 2026-08-16 16:05 (Europe/Berlin), random sides
 
 ## 1. What this is
 
@@ -89,8 +89,14 @@ version works as well", 16 Aug 11:30):
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
   token (tap = play the house bot), floating sign with live status.
 - Networking: serverless CRDT (`syncEntity`), one entity per table with
-  `TableBoard` (gameId + engine state JSON + turn/status/score) + `TableSeatA`
-  + `TableSeatB` (fixed sync ids 100..102). Games plug in through
+  `TableBoard` (gameId + engine state JSON + turn/status/score + `swap`) +
+  `TableSeatA` + `TableSeatB` (fixed sync ids 100..102). Chairs carry no
+  colour: at each deal `swap` says which chair plays the game's first side
+  (random when a pairing starts, also against the bot, then alternating per
+  round); tables.ts maps chair <-> side (`sideOf`), plugins only ever see
+  sides (`ctx.mySeat` = my colour, `ctx.behind` = I sit behind the upright
+  board and see it mirrored). The card offers one "Take a seat" button; a
+  toast at the deal says which colour you got. Games plug in through
   `src/lounge/games/types.ts` (TableGame: rules, bot, 3D view, controls). Write
   discipline documented in src/lounge/tables.ts. Seat heartbeats (5 s),
   stale seat cleanup (30 s), onLeaveScene cleanup, orphan-bot cleanup,
@@ -231,6 +237,14 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
   chat: Backgammon, Ludo 2-player, Super TTT, Snakes & Ladders, Sea Strike,
   Dice Royale as a duel; card games only with hidden-hand caveats; solo games
   as side arcades at most). Order to be confirmed by him.
+- 16 Aug ~15:50 (Arsalan): "you don't choose white or black: when players
+  sit down it's random who gets white and who gets black, same against the
+  bot" -> chairs are colourless, sides dealt at random then alternating (done
+  16:05). Also asked: a nice ground-floor entrance, rounded glass around the
+  facade, more colour + interior design ("a gaming place"), big per-game
+  signs readable from afar, a copyright check of the game names (like
+  game-platform's IP-safe names), the materials warning on the phone
+  (836/500 red), and confirmation that all requirements are being met.
 - 16 Aug: game boards on phones are the controller (finger-sized cells); the
   "Show board" toggle only exists for Connect Four (its strip). Confirmed by
   Arsalan's phone test ("show/hide board doesn't do much for some games").
@@ -307,6 +321,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 16:05 random sides: TableBoard.swap decides which chair plays the first colour (random at a new pairing, alternating per round, bot included); plugins see sides via ctx.mySeat and the chair via ctx.behind (rows follow the colour, mirroring follows the chair); one "Take a seat" button, neutral seat pads, "You play White this round" toast; strings in five languages
 - 2026-08-16 15:37 lounge chrome i18n: every lounge string (hint, toasts, table card, controller, elevator panel, table signs, banners, kiosk, gateway, floor labels, per-game hints, seat colours) through `t()` in EN/DE/ES/PT/FR written natively; `uiLang` shared by UI, toasts and 3D labels; relabelSystem for TextShapes; game names on signs from the catalog; house bot name localised per viewer
 - 2026-08-16 15:28 Ludo plugin (engine ported, 69 tests): red vs green duel, board texture from the engine's constants, eight sliding pieces, roll/piece/skip actions with client-chosen die, pending skip, mini board + move buttons; catalog rows in 19 languages + tips EN/DE/ES; game room west corner live, all four game-room corners built
 - 2026-08-16 15:22 Backgammon plugin (engine ported, 23 tests): upright board texture, 30-disc pool with bar + off trays, dice readout, roll/move/pass actions with client-chosen dice, pending pass, 24-point touch board with Roll button; catalog rows in 19 languages + tips EN/DE/ES; game room east corner live

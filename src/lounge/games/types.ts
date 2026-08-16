@@ -28,8 +28,15 @@ export const WIN_DRAW = 3
 export interface GameContext {
   /** Table root entity: a stable per-table key for plugin-local state. */
   root: Entity
-  /** Seat of the local player at this table, 0 when spectating. */
+  /**
+   * The game side the local player plays at this table: 1 = the game's first
+   * side (yellow / white / X / red), 2 = the second, 0 when spectating. Sides
+   * are dealt at random and alternate per round; the physical chair is
+   * separate (see `behind`).
+   */
   mySeat: 0 | SeatNo
+  /** True when the local player sits behind the upright board (physical seat B) and sees it mirrored left-right. */
+  behind: boolean
   /** True when the local player may act right now. */
   myTurn: boolean
   /** Send an action for the local player; returns false if rejected. */
@@ -56,7 +63,7 @@ export interface TableGame<S = unknown, A = unknown> {
   /** Button tints for the two sides (seat buttons, turn colour). */
   seatColors: [Color4, Color4]
 
-  /** A fresh state where `opening` moves first. */
+  /** A fresh state where side `opening` moves first (the lounge always passes 1: the game's own first mover; chairs get sides at random). */
   newGame(opening: SeatNo): S
   encode(state: S): string
   decode(json: string): S
