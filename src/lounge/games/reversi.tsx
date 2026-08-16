@@ -9,6 +9,7 @@ import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getBotMove, getLegalMoves, score, type ReversiCell, type ReversiGameState } from '../../engine/reversi'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { createReversiView, type ReversiAction } from '../views/reversi3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -127,7 +128,7 @@ function Controls(props: { state: ReversiGameState; ctx: GameContext; phone: boo
   const sc = score(props.state.board)
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
-      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Discs  ${sc.black} : ${sc.white}${props.ctx.myTurn ? '   ·   Tap a marked square' : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${L().g.discs}  ${sc.black} : ${sc.white}${props.ctx.myTurn ? '   ·   ' + L().g.tapMarked : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Board state={props.state} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )

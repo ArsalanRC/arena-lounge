@@ -30,7 +30,7 @@ import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
-import { LOCALES, localeInfo, stringsFor } from './i18n'
+import { LOCALES, localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
 import {
   act,
@@ -208,6 +208,16 @@ function contextFor(t: Table): GameContext {
   }
 }
 
+/** Seat holder's name; the house bot's name is localised per viewer. */
+function displayName(s: { name: string; bot: boolean }): string {
+  return s.bot ? L().houseBot : s.name
+}
+
+/** "Table 5 · Checkers" with the table word and the game name in the UI language. */
+function tableTitle(tb: Table): string {
+  return `${L().table(tb.def.id + 1)} · ${localeInfo(uiLang.code).games[tb.game.id]?.name ?? tb.game.label}`
+}
+
 const bottomCentre = (width: number, bottom: number): UiTransformProps => ({ positionType: 'absolute', position: { bottom, left: '50%' }, margin: { left: -width / 2 } })
 const rightMiddle = (width: number, halfHeight: number): UiTransformProps => ({ positionType: 'absolute', position: { right: 36, top: '50%' }, margin: { top: -halfHeight } })
 
@@ -221,10 +231,10 @@ function visibleTableCard(): Table | undefined {
 }
 
 function hintText(): string {
-  if (!me.ready) return 'Loading your profile…'
-  if (!isStateSyncronized() && !local.offline) return 'Connecting to the lounge…'
+  if (!me.ready) return L().loadingProfile
+  if (!isStateSyncronized() && !local.offline) return L().connecting
   if (findMySeat() || visibleTableCard() || local.helpOpen) return ''
-  if (!local.hasEverSat) return 'Walk up to a table and tap a seat to play'
+  if (!local.hasEverSat) return L().walkUp
   return ''
 }
 
@@ -260,34 +270,35 @@ function TableCard() {
   const b = boardOf(t)
   const a = seatOf(t, SEAT_A)
   const s = seatOf(t, SEAT_B)
-  const [nameA, nameB] = t.game.seatNames
+  const [nameA, nameB] = t.game.seatNames.map(seatLabel)
+  const str = L()
   const bothTaken = a.addr !== '' && s.addr !== ''
   const line = bothTaken
     ? b.status === Status.Playing
-      ? `${a.name} vs ${s.name} · ${b.winsA}:${b.winsB}`
-      : `${a.name} vs ${s.name}`
+      ? `${str.vs(displayName(a), displayName(s))} · ${b.winsA}:${b.winsB}`
+      : str.vs(displayName(a), displayName(s))
     : a.addr !== ''
-      ? `${a.name} is waiting for a rival`
+      ? str.waitingForRival(displayName(a))
       : s.addr !== ''
-        ? `${s.name} is waiting for a rival`
-        : 'Open table'
+        ? str.waitingForRival(displayName(s))
+        : str.openTable
   const state = bothTaken ? gameStateOf(t) : null
   const W = 480
   return (
     <Panel width={W} place={bottomCentre(W, 36)}>
-      <Text value={`${t.def.label} · ${t.game.label}`} size={T.title} />
+      <Text value={`${tableTitle(t)}`} size={T.title} />
       <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
       {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
       {!bothTaken && (
         <Row>
-          {a.addr === '' && <Btn label={`Sit as ${nameA}`} color={seatTint(t, SEAT_A)} textColor={textOn(seatTint(t, SEAT_A))} onClick={() => sit(t, SEAT_A)} width={205} />}
-          {s.addr === '' && <Btn label={`Sit as ${nameB}`} color={seatTint(t, SEAT_B)} textColor={textOn(seatTint(t, SEAT_B))} onClick={() => sit(t, SEAT_B)} width={205} />}
+          {a.addr === '' && <Btn label={str.sitAs(nameA)} color={seatTint(t, SEAT_A)} textColor={textOn(seatTint(t, SEAT_A))} onClick={() => sit(t, SEAT_A)} width={205} fontSize={18} />}
+          {s.addr === '' && <Btn label={str.sitAs(nameB)} color={seatTint(t, SEAT_B)} textColor={textOn(seatTint(t, SEAT_B))} onClick={() => sit(t, SEAT_B)} width={205} fontSize={18} />}
         </Row>
       )}
       <Row>
-        {!bothTaken && a.addr === '' && s.addr === '' && <Btn label="Play the house bot" quiet onClick={() => sitWithBot(t)} width={230} />}
+        {!bothTaken && a.addr === '' && s.addr === '' && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
-        <Btn label="Not now" quiet onClick={() => (local.dismissedTableId = t.def.id)} width={130} />
+        <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} />
       </Row>
     </Panel>
   )
@@ -315,21 +326,22 @@ function Controller() {
   const state = gameStateOf(t)
   const sprites = t.game.seatSprites
 
+  const str = L()
   let status = ''
   let statusColor = UI.text
   if (b.status === Status.Waiting) {
-    status = opp.addr === '' ? 'Waiting for an opponent…' : 'Dealing…'
+    status = opp.addr === '' ? str.waitingOpponent : str.dealing
     statusColor = UI.muted
   } else if (b.status === Status.Playing) {
     const secs = secondsLeft(b.updatedAt)
-    status = myTurn ? `Your move · ${secs}s` : `${opp.name} is thinking… ${secs}s`
+    status = myTurn ? str.yourMove(secs) : str.thinking(displayName(opp), secs)
     if (myTurn) {
       const tint = seatTint(t, seat)
       statusColor = textOn(tint) === UI.text ? UI.text : tint
     } else statusColor = UI.muted
-  } else if (b.winner === Winner.Draw) status = 'Draw! Well played.'
-  else if (b.winner === seat) status = 'You win the round!'
-  else status = `${opp.name} takes the round`
+  } else if (b.winner === Winner.Draw) status = str.draw
+  else if (b.winner === seat) status = str.youWin
+  else status = str.takesRound(displayName(opp))
 
   const showBotRow = opp.bot && b.status !== Status.Playing
   const showBotInvite = b.status === Status.Waiting && opp.addr === ''
@@ -338,15 +350,15 @@ function Controller() {
 
   const header = (
     <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Chip sprite={sprites[seat - 1]} label="You" tint={t.game.seatSpriteTints?.[seat - 1]} />
+      <Chip sprite={sprites[seat - 1]} label={str.you} tint={t.game.seatSpriteTints?.[seat - 1]} />
       <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
-      <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : opp.name} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
+      <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : displayName(opp)} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
     </UiEntity>
   )
   const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
   const difficulty = (
     <Segmented
-      options={[{ key: 'easy', label: 'Easy' }, { key: 'medium', label: 'Medium' }, { key: 'hard', label: 'Hard' }]}
+      options={[{ key: 'easy', label: str.easy }, { key: 'medium', label: str.medium }, { key: 'hard', label: str.hard }]}
       active={botSettings.difficulty}
       onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
       width={mobile ? 66 : 92}
@@ -356,12 +368,12 @@ function Controller() {
   // Bot strength: caption beside the control on desktop, above it on the narrow phone column
   const botRow = !showBotRow ? null : mobile ? (
     <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'column', alignItems: 'center', margin: { top: 4 } }}>
-      <Text value="Bot" size={T.small} color={UI.muted} />
+      <Text value={str.bot} size={T.small} color={UI.muted} />
       {difficulty}
     </UiEntity>
   ) : (
     <Row height={46} margin={{ top: 6 }}>
-      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: 'Bot', fontSize: T.small, color: UI.muted }} />
+      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.bot, fontSize: T.small, color: UI.muted }} />
       {difficulty}
     </Row>
   )
@@ -376,20 +388,20 @@ function Controller() {
           <UiEntity uiTransform={{ width: 'auto', height: 'auto', flexDirection: 'row', alignItems: 'center' }}>
             <UiEntity uiTransform={{ width: 320, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { right: 12 } }}>
               {header}
-              <Text value={`${t.def.label} · ${t.game.label}`} size={T.small} color={UI.muted} margin={{ top: 4 }} />
+              <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 4 }} />
               <Text value={status} size={T.status} color={statusColor} margin={{ top: 4 }} />
             </UiEntity>
             {/* explicit vertical margins: nested auto-height wrappers eat the panel padding */}
             <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { top: 10, bottom: 10 } }}>{controls}</UiEntity>
             <UiEntity uiTransform={{ width: 220, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { left: 12 } }}>
-              {showBotInvite && <Btn label="Play the house bot" onClick={() => inviteBot(t)} width={btnW} fontSize={18} />}
-              {showRematch && <Btn label="Play again" onClick={() => rematch(t)} width={btnW} />}
-              {showBotRow && <Btn label="Dismiss bot" quiet onClick={() => dismissBot(t)} width={btnW} />}
+              {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} />}
+              {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={btnW} />}
+              {showBotRow && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} />}
               {botRow}
-              {showBoardToggle && <Btn label={local.showMiniBoard ? 'Hide board' : 'Show board'} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} />}
+              {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} />}
               <Row height={60}>
                 <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
-                <Btn label="Stand up" color={UI.danger} onClick={() => stand(t)} width={126} />
+                <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={126} fontSize={18} />
               </Row>
             </UiEntity>
           </UiEntity>
@@ -402,18 +414,18 @@ function Controller() {
   return (
     <Panel width={W} place={rightMiddle(W, 250)} padding={14}>
       {header}
-      <Text value={`${t.def.label} · ${t.game.label}`} size={T.small} color={UI.muted} margin={{ top: 2 }} />
+      <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 2 }} />
       <Text value={status} size={T.status} color={statusColor} margin={{ top: 4, bottom: 6 }} />
       {controls}
       {botRow}
       <Row wrap height={showRematch || showBotInvite ? 60 : 0}>
-        {showBotInvite && <Btn label="Play the house bot" onClick={() => inviteBot(t)} />}
-        {showRematch && <Btn label="Play again" onClick={() => rematch(t)} />}
-        {showBotRow && <Btn label="Dismiss bot" quiet onClick={() => dismissBot(t)} />}
+        {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} />}
+        {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} />}
+        {showBotRow && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} />}
       </Row>
       <Row>
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
-        <Btn label="Stand up" color={UI.danger} onClick={() => stand(t)} />
+        <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} />
       </Row>
     </Panel>
   )
@@ -424,15 +436,16 @@ function Controller() {
 /** Floor picker, shown while the player stands on an elevator pad. */
 function ElevatorPanel() {
   if (!local.elevatorOpen) return null
+  const str = L()
   const W = 460
   return (
     <Panel width={W} place={bottomCentre(W, 36)}>
-      <Text value="Elevator · Where to?" size={T.title} />
-      <Text value="Tap a floor. Step off the pad to stay." size={T.small} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
+      <Text value={str.elevatorTitle} size={T.title} />
+      <Text value={str.elevatorHint} size={T.small} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
       {FLOORS.map((f) => (
         <Btn
           key={`f${f.id}`}
-          label={f.id === local.floor ? `${f.name} · you are here` : f.name}
+          label={f.id === local.floor ? str.youAreHere(str.floors[f.id] ?? f.name) : (str.floors[f.id] ?? f.name)}
           quiet={f.id === local.floor}
           onClick={() => {
             if (f.id !== local.floor) rideTo(f)
@@ -441,7 +454,7 @@ function ElevatorPanel() {
         />
       ))}
       <Row height={56} margin={{ top: 4 }}>
-        <Btn label="Close" quiet onClick={() => ((local.elevatorOpen = false), (local.elevatorArmed = false))} width={130} />
+        <Btn label={str.close} quiet onClick={() => ((local.elevatorOpen = false), (local.elevatorArmed = false))} width={130} />
       </Row>
     </Panel>
   )
@@ -469,8 +482,8 @@ function HelpPanel() {
   if (local.helpGame === '') local.helpGame = defaultHelpGame()
   const gameId = local.helpGame as GameId
   const game = getGame(gameId)
-  const info = localeInfo(local.lang)
-  const str = stringsFor(local.lang)
+  const info = localeInfo(uiLang.code)
+  const str = L()
   const rules = info.games[gameId] ?? info.games.connectfour ?? { name: game.label, overview: '' }
   const mobile = phone()
   const width = mobile ? 1000 : 720
@@ -484,7 +497,7 @@ function HelpPanel() {
         <Text value={str.howToPlay} size={T.title} />
         <Row height={48} margin={{ top: 4, bottom: 8 }} wrap>
           <Segmented
-            options={hostedGames().map((id) => ({ key: id, label: localeInfo(local.lang).games[id]?.name ?? getGame(id).label }))}
+            options={hostedGames().map((id) => ({ key: id, label: info.games[id]?.name ?? getGame(id).label }))}
             active={gameId}
             onPick={(k) => (local.helpGame = k)}
             width={mobile ? 150 : 132}
@@ -504,9 +517,9 @@ function HelpPanel() {
               <UiEntity
                 key={l.code}
                 uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 38, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-                uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: local.lang === l.code ? UI.accent : UI.panelSoft }}
+                uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: uiLang.code === l.code ? UI.accent : UI.panelSoft }}
                 uiText={{ value: l.name, fontSize: 16, color: UI.text, textAlign: 'middle-center' }}
-                onMouseDown={() => ((local.lang = l.code), (local.langPickerOpen = false))}
+                onMouseDown={() => ((uiLang.code = l.code), (local.langPickerOpen = false))}
               />
             ))}
           </UiEntity>

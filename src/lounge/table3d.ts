@@ -29,6 +29,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { PALETTE, SEAT_PAD_OFFSET } from './config'
+import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
@@ -173,7 +174,7 @@ export function buildTableVisual(t: Table): TableVisual {
   // seat pads
   const { pad: padA, cam: camA } = makePad(root, SEAT_A, PALETTE.padYellow)
   const { pad: padB, cam: camB } = makePad(root, SEAT_B, PALETTE.padRed)
-  const [nameA, nameB] = t.game.seatNames
+  const [nameA, nameB] = t.game.seatNames.map(seatLabel)
   pointerEventsSystem.onPointerDown(
     { entity: padA, opts: { button: InputAction.IA_POINTER, hoverText: `Sit here (${nameA})`, maxDistance: 8 } },
     () => {
@@ -226,22 +227,25 @@ export function buildTableVisual(t: Table): TableVisual {
 
 // ---------------------------------------------------------------- update
 
+/** Sign text in the viewer's UI language (signs are local entities, so every client renders its own). */
 function signTextFor(t: Table): string {
   const b = boardOf(t)
   const a = seatOf(t, SEAT_A)
   const s = seatOf(t, SEAT_B)
-  const title = `${t.def.label} · ${t.game.label}`
-  if (a.addr === '' && s.addr === '') return `${title}\nOpen table · come play`
+  const str = L()
+  const nameOf = (x: { name: string; bot: boolean }) => (x.bot ? str.houseBot : x.name)
+  const title = `${str.table(t.def.id + 1)} · ${localeInfo(uiLang.code).games[t.game.id]?.name ?? t.game.label}`
+  if (a.addr === '' && s.addr === '') return `${title}\n${str.comePlay}`
   if (b.status === Status.Playing) {
-    const who = b.turn === SEAT_A ? a.name : s.name
-    return `${title}\n${a.name} vs ${s.name}\n${who} to move · ${b.winsA}:${b.winsB}`
+    const who = b.turn === SEAT_A ? nameOf(a) : nameOf(s)
+    return `${title}\n${str.vs(nameOf(a), nameOf(s))}\n${str.toMove(who)} · ${b.winsA}:${b.winsB}`
   }
   if (b.status === Status.Finished) {
-    const line = b.winner === Winner.Draw ? 'Draw!' : `${b.winner === SEAT_A ? a.name : s.name} wins!`
-    return `${title}\n${a.name} vs ${s.name}\n${line} · ${b.winsA}:${b.winsB}`
+    const line = b.winner === Winner.Draw ? str.drawShort : str.wins(b.winner === SEAT_A ? nameOf(a) : nameOf(s))
+    return `${title}\n${str.vs(nameOf(a), nameOf(s))}\n${line} · ${b.winsA}:${b.winsB}`
   }
-  const waiting = a.addr === '' ? s.name : a.name
-  return `${title}\n${waiting} is waiting for a rival\nOne seat free`
+  const waiting = a.addr === '' ? nameOf(s) : nameOf(a)
+  return `${title}\n${str.waitingForRival(waiting)}\n${str.oneSeatFree}`
 }
 
 function setFirstPersonArea(cam: Entity, on: boolean): void {
@@ -312,7 +316,7 @@ export function updateTableVisual(vis: TableVisual): void {
   const oppAddr = seated ? seatOf(t, otherSeat(mine as Seat)).addr : ''
   if (oppAddr !== r.oppAddr) {
     const wasHuman = r.oppAddr !== '' && r.oppAddr !== 'bot'
-    if (seated && wasHuman && oppAddr === '') toast('Your opponent left the table')
+    if (seated && wasHuman && oppAddr === '') toast(L().opponentLeft)
     r.oppAddr = oppAddr
   }
 }

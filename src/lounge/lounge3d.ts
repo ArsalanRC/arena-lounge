@@ -29,7 +29,25 @@ import {
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { BUILT_GAMES, ELEVATORS, FLOORS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
 import { GAME_NAMES } from './games/registry'
+import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
+
+/**
+ * Text labels that follow the UI language: each entry re-renders its text
+ * when the player picks another language (relabelSystem below).
+ */
+const liveLabels: Array<{ entity: Entity; text: () => string }> = []
+let labelledLang = ''
+function liveLabel(pos: Vector3, text: () => string, fontSize: number, color = Color4.White(), width = 8): Entity {
+  const e = label(pos, text(), fontSize, color, width)
+  liveLabels.push({ entity: e, text })
+  return e
+}
+export function relabelSystem(): void {
+  if (uiLang.code === labelledLang) return
+  labelledLang = uiLang.code
+  for (const l of liveLabels) TextShape.getMutable(l.entity).text = l.text()
+}
 
 // ---------------------------------------------------------------- primitives
 
@@ -162,7 +180,8 @@ function zoneBanner(z: ZoneDef): void {
   MeshRenderer.setPlane(cloth)
   Material.setPbrMaterial(cloth, { albedoColor: z.banner, roughness: 0.9, metallic: 0, castShadows: false })
   const built = BUILT_GAMES.includes(z.gameId)
-  label(Vector3.create(pos.x, y + 3.75, pos.z), built ? GAME_NAMES[z.gameId] : `${GAME_NAMES[z.gameId]}\ncoming soon`, built ? 2.2 : 1.6, Color4.White(), 8)
+  const name = () => localeInfo(uiLang.code).games[z.gameId]?.name ?? GAME_NAMES[z.gameId]
+  liveLabel(Vector3.create(pos.x, y + 3.75, pos.z), () => (built ? name() : `${name()}\n${L().comingSoon}`), built ? 2.2 : 1.6, Color4.White(), 8)
 }
 
 /**
@@ -204,8 +223,8 @@ function elevatorShaft(pad: Vector3): void {
     Transform.create(ring, { parent: root, position: Vector3.create(0, y + 2.6, -half), scale: Vector3.create(half * 2 + 0.2, 0.08, 0.08) })
     MeshRenderer.setBox(ring)
     Material.setPbrMaterial(ring, { albedoColor: Color4.fromHexString('#9ff0ffff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 2, roughness: 0.3, metallic: 0 })
-    label(Vector3.create(pad.x, y + 3.05, pad.z), 'ELEVATOR', 2.0, Color4.White(), 6)
-    label(Vector3.create(pad.x, y + 2.35, pad.z), 'Lounge · Game room · Rooftop', 0.9, PALETTE.cream, 6)
+    liveLabel(Vector3.create(pad.x, y + 3.05, pad.z), () => L().elevator, 2.0, Color4.White(), 6)
+    liveLabel(Vector3.create(pad.x, y + 2.35, pad.z), () => L().floors.join(' · '), 0.9, PALETTE.cream, 6)
   }
 }
 
@@ -218,7 +237,7 @@ function infoKiosk(x: number, z: number): void {
   MeshCollider.setBox(cube, ColliderLayer.CL_POINTER)
   Material.setPbrMaterial(cube, { albedoColor: PALETTE.frame, emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 0.8, roughness: 0.3, metallic: 0.2 })
   label(Vector3.create(x, 1.45, z), '?', 4, Color4.White(), 2)
-  label(Vector3.create(x, 2.05, z), 'How to play', 1.4, Color4.White(), 4)
+  liveLabel(Vector3.create(x, 2.05, z), () => L().howToPlay, 1.4, Color4.White(), 4)
   pointerEventsSystem.onPointerDown({ entity: cube, opts: { button: InputAction.IA_POINTER, hoverText: 'How to play', maxDistance: 10 } }, () => {
     local.helpOpen = true
   })
@@ -321,7 +340,7 @@ export function buildLounge(): void {
   solid(Vector3.create(SPAWN.x, 3.5, gz), Vector3.create(6.9, 0.22, 0.3), PALETTE.woodDark)
   for (const x of [SPAWN.x - 3.2, SPAWN.x + 3.2]) lantern(Vector3.create(x, 3.75, gz), 0.34)
   label(Vector3.create(SPAWN.x, 4.35, gz), 'ARENA LOUNGE', 3.4, Color4.White(), 10)
-  label(Vector3.create(SPAWN.x, 2.95, gz), 'Pick a table, take a seat, play a friend', 1.5, PALETTE.cream, 10)
+  liveLabel(Vector3.create(SPAWN.x, 2.95, gz), () => L().welcome, 1.5, PALETTE.cream, 10)
   infoKiosk(SPAWN.x - 4.6, SPAWN.z + 1.6)
 
   buildTower()
@@ -358,7 +377,7 @@ function buildTower(): void {
     const t = (deg * Math.PI) / 180
     planter(PLAZA.x + Math.sin(t) * 6.4, PLAZA.z + Math.cos(t) * 6.4, y1)
   }
-  label(Vector3.create(PLAZA.x, y1 + 3.2, PLAZA.z + 5.2), 'GAME ROOM', 2.6, Color4.White(), 8)
+  liveLabel(Vector3.create(PLAZA.x, y1 + 3.2, PLAZA.z + 5.2), () => L().gameRoom, 2.6, Color4.White(), 8)
 
   // rooftop terrace (floor 2): benches looking down the oculus, lamps, a sign
   const y2 = FLOORS[2].y
@@ -373,6 +392,6 @@ function buildTower(): void {
   }
   planter(PLAZA.x - 8.6, PLAZA.z + 3, y2)
   planter(PLAZA.x + 8.6, PLAZA.z + 3, y2)
-  label(Vector3.create(PLAZA.x, y2 + 3.4, PLAZA.z + 7.5), 'ROOFTOP', 2.6, Color4.White(), 8)
-  label(Vector3.create(PLAZA.x, y2 + 2.2, PLAZA.z + 7.5), 'Leaderboard and tournaments: coming after the buildathon', 1.1, PALETTE.cream, 10)
+  liveLabel(Vector3.create(PLAZA.x, y2 + 3.4, PLAZA.z + 7.5), () => L().rooftop, 2.6, Color4.White(), 8)
+  liveLabel(Vector3.create(PLAZA.x, y2 + 2.2, PLAZA.z + 7.5), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
 }

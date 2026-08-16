@@ -10,6 +10,7 @@ import type { Entity } from '@dcl/sdk/ecs'
 import { applyMove, createInitialState, getValidMoves, selectBotMove, type CheckersBoard, type CheckersGameState, type CheckersMove, type CheckersPiece } from '../../engine/checkers'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { PIECE_SPRITES, checkersSelection, createCheckersView, setCheckersSelection, type CheckersAction } from '../views/checkers3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -161,10 +162,11 @@ function Controls(props: { state: CheckersGameState; ctx: GameContext; phone: bo
   const s = props.state
   const sel = checkersSelection.get(props.ctx.root)
   const forced = props.ctx.myTurn && getValidMoves(s).some((m) => m.captures.length > 0)
-  const hint = props.ctx.myTurn ? (sel !== undefined ? 'Tap a marked square' : forced ? 'You must jump' : 'Tap a piece') : ''
+  const g = L().g
+  const hint = props.ctx.myTurn ? (sel !== undefined ? g.tapMarked : forced ? g.mustJump : g.tapPiece) : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
-      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `Pieces  ${countPieces(s.board, 'white')} : ${countPieces(s.board, 'black')}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${g.pieces}  ${countPieces(s.board, 'white')} : ${countPieces(s.board, 'black')}${hint ? '   ·   ' + hint : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Board state={s} ctx={props.ctx} phone={props.phone} />
     </UiEntity>
   )

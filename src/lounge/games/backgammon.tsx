@@ -26,6 +26,7 @@ import {
 } from '../../engine/backgammon'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
+import { t as L } from '../i18n'
 import { BG_SPRITES, bgSelection, createBackgammonView, pointColumn, setBgSelection, type BgAction, type BgTarget } from '../views/backgammon3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
@@ -229,20 +230,19 @@ function Controls(props: { state: BackgammonGameState; ctx: GameContext; phone: 
   const rolled = s.dice !== null
   const finished = s.status === 'finished'
   const sel = bgSelection.get(props.ctx.root)
+  const g = L().g
   const hint = finished
-    ? s.gameResult === 'white_wins'
-      ? 'White bears off first'
-      : 'Black bears off first'
+    ? g.bearsOff(s.gameResult === 'white_wins' ? g.white : g.black)
     : props.ctx.myTurn
       ? !rolled
-        ? 'Tap Roll'
+        ? g.tapRoll
         : sel !== undefined
-          ? 'Tap a marked point (or Off)'
+          ? g.tapMarkedPoint
           : hasLegalMove(s)
-            ? 'Tap a checker to move'
-            : 'No move possible, passing…'
+            ? g.tapChecker
+            : g.noMove
       : ''
-  const diceText = s.dice ? `Dice ${s.dice[0]} · ${s.dice[1]}   left: ${s.remainingPips.join(' ') || 'none'}` : ''
+  const diceText = s.dice ? g.dice(s.dice[0], s.dice[1], s.remainingPips.join(' ') || '–') : ''
   return (
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${diceText}${diceText && hint ? '   ·   ' : ''}${hint}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
@@ -251,7 +251,7 @@ function Controls(props: { state: BackgammonGameState; ctx: GameContext; phone: 
         <UiEntity
           uiTransform={{ width: 220, height: 52, margin: { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
           uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
-          uiText={{ value: 'Roll the dice', fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
+          uiText={{ value: g.rollDice, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
           onMouseDown={() => props.ctx.act({ roll: [d6(), d6()] } as BgAction)}
         />
       )}
