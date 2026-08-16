@@ -48,8 +48,7 @@ const TABLE_TOP_Y = 1.02
 const BOARD_CENTER_Y = TABLE_TOP_Y + 0.05 + BOARD_H / 2
 const CELL_PITCH = 0.16
 const HALF_GAP = 0.035 // planes sit at z = ±HALF_GAP
-const DISC_R = 0.13 // disc diameter as scale (0.13 m)
-const DISC_T = 0.06 // disc thickness
+const DISC_R = 0.132 // disc diameter in metres (sprite plane)
 
 const BOARD_TOP = BOARD_CENTER_Y + BOARD_H / 2
 
@@ -143,18 +142,37 @@ function boardPlane(parent: Entity, z: number): void {
   })
 }
 
+/**
+ * Discs are alpha-tested sprite planes (2 triangles) rather than cylinders:
+ * 126 pooled cylinders alone blew the 4-parcel triangle budget, and the baked
+ * sprite shading reads better than a flat primitive anyway. They sit in the
+ * gap between the two frame planes, so they are only ever seen face-on.
+ */
 function makeDisc(parent: Entity): Entity {
   const e = engine.addEntity()
   Transform.create(e, {
     parent,
     position: Vector3.create(0, -5, 0),
-    rotation: Quaternion.fromEulerDegrees(90, 0, 0),
-    scale: Vector3.create(DISC_R, DISC_T, DISC_R)
+    scale: Vector3.create(DISC_R, DISC_R, 1)
   })
-  MeshRenderer.setCylinder(e, 0.5, 0.5)
-  Material.setPbrMaterial(e, { albedoColor: PALETTE.yellow, roughness: 0.35, metallic: 0.1 })
+  MeshRenderer.setPlane(e)
+  applyDiscMaterial(e, 1, false)
   VisibilityComponent.create(e, { visible: false })
   return e
+}
+
+function applyDiscMaterial(e: Entity, v: number, glow: boolean): void {
+  Material.setPbrMaterial(e, {
+    texture: Material.Texture.Common({ src: v === 1 ? 'images/ui/disc-yellow.png' : 'images/ui/disc-red.png' }),
+    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
+    alphaTest: 0.5,
+    roughness: 0.5,
+    metallic: 0,
+    castShadows: false,
+    // a touch of self-illumination keeps discs vivid in shade; winners glow
+    emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
+    emissiveIntensity: glow ? 1.6 : 0.15
+  })
 }
 
 function makePad(parent: Entity, seat: Seat, color: Color4): { pad: Entity; cam: Entity } {
@@ -194,8 +212,8 @@ function makeBotFigure(parent: Entity, at: Vector3): Entity {
   Material.setPbrMaterial(head, { albedoColor: PALETTE.frame, roughness: 0.4, metallic: 0.5 })
   for (const x of [-0.25, 0.25]) {
     const eye = engine.addEntity()
-    Transform.create(eye, { parent: head, position: Vector3.create(x, 0.05, -0.55), scale: Vector3.create(0.22, 0.3, 0.2) })
-    MeshRenderer.setSphere(eye)
+    Transform.create(eye, { parent: head, position: Vector3.create(x, 0.05, -0.55), scale: Vector3.create(0.22, 0.28, 0.14) })
+    MeshRenderer.setBox(eye)
     Material.setPbrMaterial(eye, {
       albedoColor: Color4.fromHexString('#9ff0ffff'),
       emissiveColor: Color3.fromHexString('#7fe6ff'),
@@ -209,8 +227,8 @@ function makeBotFigure(parent: Entity, at: Vector3): Entity {
   MeshRenderer.setCylinder(antenna, 0.5, 0.5)
   Material.setPbrMaterial(antenna, { albedoColor: PALETTE.frameDark, roughness: 0.4, metallic: 0.5 })
   const tip = engine.addEntity()
-  Transform.create(tip, { parent: head, position: Vector3.create(0, 1.05, 0), scale: Vector3.create(0.22, 0.4, 0.22) })
-  MeshRenderer.setSphere(tip)
+  Transform.create(tip, { parent: head, position: Vector3.create(0, 1.05, 0), scale: Vector3.create(0.24, 0.35, 0.24) })
+  MeshRenderer.setBox(tip)
   Material.setPbrMaterial(tip, {
     albedoColor: PALETTE.red,
     emissiveColor: Color3.fromHexString('#ff6a5e'),
@@ -339,20 +357,7 @@ export function buildTableVisual(t: Table): TableVisual {
 
 // ---------------------------------------------------------------- update
 
-function discColor(v: number): Color4 {
-  return v === 1 ? PALETTE.yellow : PALETTE.red
-}
-
-function setDisc(e: Entity, v: number, glow: boolean): void {
-  Material.setPbrMaterial(e, {
-    albedoColor: discColor(v),
-    roughness: 0.35,
-    metallic: 0.1,
-    // a touch of self-illumination keeps discs vivid in shade; winners glow
-    emissiveColor: v === 1 ? EMISSIVE_YELLOW : EMISSIVE_RED,
-    emissiveIntensity: glow ? 2.5 : 0.25
-  })
-}
+const setDisc = applyDiscMaterial
 
 function signTextFor(t: Table): string {
   const b = boardOf(t)
