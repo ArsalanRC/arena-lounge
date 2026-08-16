@@ -46,6 +46,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Chess",
         "overview": "Chess is a two-player strategy game on an 8×8 board. Each player starts with 16 pieces; the goal is to deliver checkmate, attack the opposing king so it has no legal escape."
+      },
+      "crocsnap": {
+        "name": "Croc Snap",
+        "overview": "Croc Snap is a suspenseful party game for 2–4 players. A crocodile has 12 teeth, one of them triggers the snap! Take turns pressing teeth and hope you don't get bitten."
       }
     }
   },
@@ -81,6 +85,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Ajedrez",
         "overview": "El ajedrez es un juego de estrategia para dos jugadores en un tablero de 8×8. Cada jugador empieza con 16 piezas; el objetivo es dar jaque mate, atacar al rey rival sin que pueda escapar."
+      },
+      "crocsnap": {
+        "name": "Cocodrilo Snap",
+        "overview": "Croc Snap es un juego de fiesta lleno de suspense para 2–4 jugadores. Un cocodrilo tiene 12 dientes, ¡uno de ellos dispara el mordisco! Pulsa dientes por turnos y reza por no ser mordido."
       }
     }
   },
@@ -116,6 +124,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Xadrez",
         "overview": "Xadrez é um jogo de estratégia para dois jogadores em um tabuleiro 8×8. Cada jogador começa com 16 peças; o objetivo é dar xeque-mate, atacar o rei adversário sem escapatória."
+      },
+      "crocsnap": {
+        "name": "Croco Snap",
+        "overview": "Croc Snap é um jogo de festa de suspense para 2–4 jogadores. Um crocodilo tem 12 dentes, um deles aciona a mordida! Reveze-se pressionando dentes e torça para não ser mordido."
       }
     }
   },
@@ -151,6 +163,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Schach",
         "overview": "Schach ist ein Zweispieler-Strategiespiel auf einem 8×8-Brett. Jeder Spieler startet mit 16 Figuren; das Ziel ist Schachmatt, den gegnerischen König so anzugreifen, dass er keinen legalen Ausweg hat."
+      },
+      "crocsnap": {
+        "name": "Kroko Schnapp",
+        "overview": "Croc Snap ist ein spannendes Partyspiel für 2–4 Spieler. Ein Krokodil hat 12 Zähne, einer davon löst den Biss aus! Drückt abwechselnd Zähne und hofft, nicht gebissen zu werden."
       }
     }
   },
@@ -186,6 +202,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Échecs",
         "overview": "Les échecs sont un jeu de stratégie à deux joueurs sur un échiquier 8×8. Chaque joueur commence avec 16 pièces ; le but est le mat, attaquer le roi adverse sans issue possible."
+      },
+      "crocsnap": {
+        "name": "Croco Snap",
+        "overview": "Croc Snap est un jeu de fête à suspense pour 2–4 joueurs. Un crocodile a 12 dents, l'une déclenche la morsure ! Appuyez sur les dents à tour de rôle et priez pour ne pas être mordu."
       }
     }
   },
@@ -221,6 +241,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Scacchi",
         "overview": "Gli scacchi sono un gioco di strategia per due giocatori su una scacchiera 8×8. Ogni giocatore inizia con 16 pezzi; l'obiettivo è dare scaccomatto, attaccare il re avversario senza via di fuga."
+      },
+      "crocsnap": {
+        "name": "Cocco Snap",
+        "overview": "Croc Snap è un party game di suspense per 2–4 giocatori. Un coccodrillo ha 12 denti, uno di essi fa scattare il morso! A turno premete i denti e sperate di non essere morsi."
       }
     }
   },
@@ -256,6 +280,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Szachy",
         "overview": "Szachy to strategiczna gra dwuosobowa na planszy 8×8. Każdy gracz ma 16 figur; celem jest mat, zaatakowanie króla bez możliwości ucieczki."
+      },
+      "crocsnap": {
+        "name": "Krokodyl u dentysty",
+        "overview": "Croc Snap to pełna napięcia gra imprezowa dla 2–4 graczy. Krokodyl ma 12 zębów, jeden uruchamia ugryzienie! Naciskaj zęby i miej nadzieję."
       }
     }
   },
@@ -291,6 +319,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Satranç",
         "overview": "Satranç 8×8 tahtada iki oyunculu strateji oyunudur. Her oyuncunun 16 taşı vardır; amaç mat, rakip şahı kaçamayacak şekilde tehdit et."
+      },
+      "crocsnap": {
+        "name": "Timsah Dişçisi",
+        "overview": "Croc Snap 2–4 oyunculu gerilim dolu parti oyunudur. 12 dişten biri ısırığı tetikler! Dişlere bas ve ısırılmamayı um."
       }
     }
   },
@@ -326,6 +358,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Шахматы",
         "overview": "Шахматы, стратегическая игра на двоих на доске 8×8. У каждого игрока 16 фигур; цель, поставить мат, атаковать короля противника так, чтобы ему некуда было деться."
+      },
+      "crocsnap": {
+        "name": "Крокодил-дантист",
+        "overview": "Croc Snap, напряжённая вечеринковая игра для 2–4 игроков. У крокодила 12 зубов, один из них активирует укус! Нажимайте зубы и надейтесь, что вас не укусят."
       }
     }
   },
@@ -361,6 +397,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "国际象棋",
         "overview": "国际象棋是8×8棋盘上的双人策略游戏。每位玩家拥有16枚棋子，目标是将死对方的王。"
+      },
+      "crocsnap": {
+        "name": "鳄鱼咬咬",
+        "overview": "鳄鱼咬咬是2–4人惊险派对游戏。鳄鱼有12颗牙齿，其中1颗会触发咬合！轮流按牙齿，祈祷不被咬到吧。"
       }
     }
   },
@@ -396,6 +436,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "チェス",
         "overview": "チェスは8×8の盤上で行う2人用の戦略ゲーム。各プレイヤーは16個の駒でスタートし、相手のキングをチェックメイトすると勝ちです。"
+      },
+      "crocsnap": {
+        "name": "クロックスナップ",
+        "overview": "クロックスナップは2〜4人向けのスリル満点パーティーゲーム。ワニの12本の歯のうち1本がトリガー! 順番に歯を押して、噛まれないことを祈りましょう。"
       }
     }
   },
@@ -431,6 +475,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "शतरंज",
         "overview": "शतरंज दो खिलाड़ियों का 8×8 बोर्ड पर सामरिक खेल है। विरोधी राजा को चेकमेट करें।"
+      },
+      "crocsnap": {
+        "name": "क्रोक स्नैप",
+        "overview": "Croc Snap 2–4 खिलाड़ियों का रोमांचक पार्टी गेम है। 12 दांतों में से एक काटने को ट्रिगर करता है!"
       }
     }
   },
@@ -466,6 +514,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Catur",
         "overview": "Catur adalah permainan strategi dua pemain di papan 8×8. Setiap pemain memulai dengan 16 bidak; tujuannya adalah memberikan skakmat, menyerang raja lawan sehingga tidak ada jalan keluar legal."
+      },
+      "crocsnap": {
+        "name": "Gigit Buaya",
+        "overview": "Croc Snap adalah permainan pesta penuh ketegangan untuk 2–4 pemain. Seekor buaya memiliki 12 gigi, salah satunya memicu gigitan! Bergiliran menekan gigi dan berharap tidak digigit."
       }
     }
   },
@@ -501,6 +553,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Cờ Vua",
         "overview": "Cờ vua là trò chơi chiến thuật hai người trên bàn 8×8. Mỗi người bắt đầu với 16 quân; mục tiêu là chiếu hết, tấn công vua đối phương sao cho không có đường thoát hợp lệ."
+      },
+      "crocsnap": {
+        "name": "Cá Sấu Cắn",
+        "overview": "Croc Snap là trò chơi tiệc hồi hộp cho 2–4 người. Cá sấu có 12 răng, một trong số đó kích hoạt cắn! Luân phiên nhấn răng và hy vọng không bị cắn."
       }
     }
   },
@@ -536,6 +592,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Ahedres",
         "overview": "Ang Chess ay isang two-player strategy game sa 8×8 board. Ang bawat manlalaro ay nagsisimula ng 16 piyesa; ang layunin ay mag-deliver ng checkmate, atakihin ang hari ng kalaban na walang legal na escape."
+      },
+      "crocsnap": {
+        "name": "Kagat ng Buwaya",
+        "overview": "Ang Croc Snap ay isang nakaka-kaba na party game para sa 2–4 manlalaro. May 12 ngipin ang buwaya, isa sa mga ito ang trigger ng snap! Mag-turn na pindutin ang ngipin at sana hindi ka makagat."
       }
     }
   },
@@ -571,6 +631,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "দাবা",
         "overview": "দাবা ৮×৮ বোর্ডে কৌশল খেলা। প্রতিপক্ষ রাজাকে চেকমেট করুন।"
+      },
+      "crocsnap": {
+        "name": "ক্রোক স্ন্যাপ",
+        "overview": "ক্রক স্ন্যাপ ২–৪ খেলোয়াড়ের রোমাঞ্চকর পার্টি গেম। ১২ দাঁতে একটি কামড়!"
       }
     }
   },
@@ -606,6 +670,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "बुद्धिबळ",
         "overview": "बुद्धिबळ 8×8 बोर्डवर दोन खेळाडूंचा रणनीती खेळ."
+      },
+      "crocsnap": {
+        "name": "क्रोक स्नॅप",
+        "overview": "क्रोक स्नॅप 2–4 खेळाडूंचा रोमांचक पार्टी गेम."
       }
     }
   },
@@ -641,6 +709,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "சதுரங்கம்",
         "overview": "செஸ் 8×8 போர்டில் இரு வீரர்களின் உத்தி."
+      },
+      "crocsnap": {
+        "name": "குரோக் ஸ்னாப்",
+        "overview": "க்ராக் ஸ்னாப் 2–4 வீரர்களுக்கான பரபரப்பு விளையாட்டு."
       }
     }
   },
@@ -676,6 +748,10 @@ export const LOCALES: LocaleInfo[] = [
       "chess": {
         "name": "Chess",
         "overview": "Chess na two-player strategy game for 8×8 board. Each player start with 16 pieces; di goal na to deliver checkmate, attack di opponent king so e no get any legal escape."
+      },
+      "crocsnap": {
+        "name": "Croco Bite",
+        "overview": "Croc Snap na suspense party game for 2–4 people. Crocodile get 12 teeth, one of dem go trigger di snap! Take turns to press teeth and hope say e no go bite you."
       }
     }
   }

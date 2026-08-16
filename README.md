@@ -2,7 +2,7 @@
 
 A cosy game lounge for Decentraland, built for phones first. Walk in, pick a
 corner, take a seat, and play Connect Four, Dot Lines, Reversi, Tic Tac Toe,
-Match Pairs, Checkers or Chess against a friend or the house bot. Every table
+Match Pairs, Checkers, Chess or Croc Snap against a friend or the house bot. Every table
 is shared: whoever is in the World sees the same moves. A twisted tower rises
 over the plaza with a game room and a rooftop terrace, reached by elevator pads.
 
@@ -92,8 +92,8 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 ## Roadmap
 
 - [ ] Persistent leaderboard and streaks (Multiplayer Server + Storage)
-- [x] Seven games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess
-- [ ] Backgammon, Croc Snap, Ludo for the remaining game-room corners
+- [x] Eight games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap
+- [ ] Backgammon and Ludo for the remaining game-room corners
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena), lounge tips EN/DE/ES
 - [ ] Full lounge UI localisation

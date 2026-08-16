@@ -28,7 +28,8 @@ const EN: LoungeStrings = {
     tictactoe: 'Tap an empty square. Three in a row wins.',
     matchpairs: 'Tap two cards. A pair stays open and gives you another turn.',
     checkers: 'Tap one of your pieces, then a highlighted square. Jumps are mandatory.',
-    chess: 'Tap one of your pieces, then a highlighted square. Pawns that reach the last rank become queens.'
+    chess: 'Tap one of your pieces, then a highlighted square. Pawns that reach the last rank become queens.',
+    crocsnap: 'Tap any open tooth. One of them is the trigger: press it and you lose the round.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -45,7 +46,8 @@ const DE: LoungeStrings = {
     tictactoe: 'Tippe auf ein leeres Feld. Drei in einer Reihe gewinnen.',
     matchpairs: 'Tippe auf zwei Karten. Ein Paar bleibt offen, und du bist noch einmal dran.',
     checkers: 'Tippe auf einen deiner Steine und dann auf ein markiertes Feld. Schlagen ist Pflicht.',
-    chess: 'Tippe auf eine deiner Figuren und dann auf ein markiertes Feld. Ein Bauer auf der letzten Reihe wird zur Dame.'
+    chess: 'Tippe auf eine deiner Figuren und dann auf ein markiertes Feld. Ein Bauer auf der letzten Reihe wird zur Dame.',
+    crocsnap: 'Tippe auf einen freien Zahn. Einer davon ist der Auslöser: Wer ihn drückt, verliert die Runde.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -62,7 +64,8 @@ const ES: LoungeStrings = {
     tictactoe: 'Toca una casilla vacía. Tres en raya gana.',
     matchpairs: 'Toca dos cartas. Una pareja se queda abierta y vuelves a jugar.',
     checkers: 'Toca una de tus fichas y luego una casilla marcada. Capturar es obligatorio.',
-    chess: 'Toca una de tus piezas y luego una casilla marcada. Un peón que llega a la última fila se convierte en dama.'
+    chess: 'Toca una de tus piezas y luego una casilla marcada. Un peón que llega a la última fila se convierte en dama.',
+    crocsnap: 'Toca cualquier diente libre. Uno de ellos es el gatillo: si lo pulsas, pierdes la ronda.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',

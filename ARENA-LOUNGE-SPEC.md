@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 15:20 (Europe/Berlin), Chess
+Last update: 2026-08-16 15:45 (Europe/Berlin), Croc Snap
 
 ## 1. What this is
 
@@ -112,7 +112,12 @@ version works as well", 16 Aug 11:30):
   textures 25 of 33. Deployed bundle ~0.7 MB minified (`deploy` builds with
   --production; the dev bin/index.js is 7 MB with sourcemaps) + tower.glb
   0.65 MB + canopy.glb 25 KB + 16 PNGs.
-- Tests: 248 vitest tests over the seven pure engines. `pnpm build` strict type-check green.
+- Tests: 285 vitest tests over the eight pure engines. `pnpm build` strict type-check green.
+- Croc Snap (Table 9, game room south corner): pure-luck party round, 12
+  teeth + 1 hidden trigger (the index travels in the synced state, never
+  shown), engine from game-platform (37 tests), upright croc face disc
+  (images/croc-face.png) with tooth boxes that sink when pressed, red trigger
+  + "SNAP!" label, ring-of-teeth touch UI (64-unit buttons on phones).
 - Chess (Table 8, game room, seat A white): full FIDE engine from game-platform
   (47 tests) + 2 lounge tests for the time budget; the bot searches with
   iterative deepening under a 350 ms budget (depth 1 always answers, a fast
@@ -144,9 +149,10 @@ version works as well", 16 Aug 11:30):
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
    bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
    finger-sized boards for all six games, verified in the desktop emulation.
-5. Claude: (Chess done 15:20.) Backgammon / Croc Snap / Ludo (2-player) for
-   the other three game-room corners, or remove the "coming soon" corners
-   before the submission. Never ship a "coming soon" banner to the judges.
+5. Claude: (Chess 15:20, Croc Snap 15:45 done.) Backgammon and Ludo
+   (2-player) for the last two game-room corners, or remove the "coming soon"
+   corners before the submission. Never ship a "coming soon" banner to the
+   judges.
 6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
    (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
    PNG in the GLB), lighting accents, more garden.
@@ -260,6 +266,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 15:45 Croc Snap plugin (engine ported, 37 tests): upright croc face with 12 tooth boxes, SNAP! label, ring-of-teeth UI, catalog rows in 19 languages + tips EN/DE/ES; game room south corner live (Table 9)
 - 2026-08-16 15:20 Chess plugin (engine ported with 47 tests + 2 budget tests): iterative-deepening bot with a 350 ms budget, 12 generated piece sprites, 32-piece sliding pool with castling + en passant + promotion handling, check/result status, chess rows in the how-to-play catalog (19 languages) and lounge tips EN/DE/ES; game room Chess corner live (Table 8)
 - 2026-08-16 14:45 tower + floors + elevator: scene 3x3 parcels (lounge centred, garden ring, path), models/tower.glb (diagrid ribs, two annular slabs, railings, glowing rims, crown, `_collider` meshes) + models/canopy.glb from tools/gen-models.py, columns, elevator pads + floor panel + rideTo, FLOORS/ZONES per floor (game room corners for Chess / Backgammon / Croc Snap / Ludo as "coming soon"), rooftop terrace, y-aware table proximity + seat snap, spheres replaced (triangles 79k -> 50k), .dclignore trimmed, build:prod script, DEPLOY.md size note
 - 2026-08-16 14:25 phone controller bar: on phones the seated controller is a wide bottom bar (info | game controls | actions) with finger-sized boards (8x8 at 56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76); TableGame.Controls now takes `phone` + `fullBoard` (was `compact`), `hasStrip` marks games with a "Show board" toggle (Connect Four); spectator mini board desktop-only; help panel 1000 wide on phones; bot-strength control stacked in the phone column; Dot Lines undrawn-edge hints visible; `DEBUG_MOBILE_UI` flag + tools/dev/shot.sh fix
