@@ -18,7 +18,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const N = 8
-const IMG = { pixel: 'images/ui/pixel.png', ring: 'images/ui/ring.png', dot: 'images/ui/disc.png' }
+const IMG = { ring: 'images/ui/ring.png', dot: 'images/ui/disc.png' }
 const LIGHT = Color4.fromHexString('#e8d9bdff')
 const DARK = Color4.fromHexString('#6b4a35ff')
 
@@ -121,7 +121,7 @@ function Board(props: { state: CheckersGameState; ctx: GameContext; compact: boo
         <UiEntity
           key={`s${sq}`}
           uiTransform={{ width: cell, height: cell, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: bg }}
+          uiBackground={{ color: bg }}
           onMouseDown={() => {
             if (ctx.myTurn) tapSquare(ctx.root, state, sq, (a) => ctx.act(a))
           }}
@@ -145,7 +145,7 @@ function Board(props: { state: CheckersGameState; ctx: GameContext; compact: boo
     )
   }
   return (
-    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: Color4.fromHexString('#3a2a1eff') }}>
+    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ color: Color4.fromHexString('#3a2a1eff') }}>
       {rows}
     </UiEntity>
   )

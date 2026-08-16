@@ -15,7 +15,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { x: 'images/ui/mark-x.png', o: 'images/ui/mark-o.png', xTinted: 'images/ui/mark-x-yellow.png', oTinted: 'images/ui/mark-o-red.png', pixel: 'images/ui/pixel.png' }
+const IMG = { x: 'images/ui/mark-x.png', o: 'images/ui/mark-o.png' }
 
 interface Wire {
   b: string // 9 chars: X, O or .
@@ -68,7 +68,7 @@ function Board(props: { state: TTTGameState; ctx: GameContext; compact: boolean 
         <UiEntity
           key={`c${i}`}
           uiTransform={{ width: cell, height: cell, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: win.has(i) ? Color4.create(1, 1, 1, 0.22) : Color4.create(1, 1, 1, 0.08) }}
+          uiBackground={{ color: win.has(i) ? Color4.create(1, 1, 1, 0.22) : Color4.create(1, 1, 1, 0.08) }}
           onMouseDown={() => {
             if (ctx.myTurn && v === null) ctx.act({ cell: i } as TTTAction)
           }}
@@ -86,7 +86,7 @@ function Board(props: { state: TTTGameState; ctx: GameContext; compact: boolean 
     )
   }
   return (
-    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: Color4.fromHexString('#3a3230ff') }}>
+    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ color: Color4.fromHexString('#3a3230ff') }}>
       {rows}
     </UiEntity>
   )
@@ -110,7 +110,8 @@ export const ticTacToeGame: TableGame<TTTGameState, TTTAction> = {
   id: 'tictactoe',
   label: 'Tic Tac Toe',
   seatNames: ['X', 'O'],
-  seatSprites: [IMG.xTinted, IMG.oTinted],
+  seatSprites: [IMG.x, IMG.o],
+  seatSpriteTints: TTT_COLORS,
   seatColors: TTT_COLORS,
 
   newGame(opening) {

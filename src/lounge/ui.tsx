@@ -133,8 +133,8 @@ function Para(props: { value: string; size?: number; color?: Color4; margin?: Ma
   )
 }
 
-function Chip(props: { sprite: string; label: string; reverse?: boolean }) {
-  const disc = <UiEntity uiTransform={{ width: 26, height: 26, margin: props.reverse ? { left: 8 } : { right: 8 } }} uiBackground={{ texture: { src: props.sprite }, textureMode: 'stretch' }} />
+function Chip(props: { sprite: string; label: string; reverse?: boolean; tint?: Color4 }) {
+  const disc = <UiEntity uiTransform={{ width: 26, height: 26, margin: props.reverse ? { left: 8 } : { right: 8 } }} uiBackground={{ texture: { src: props.sprite }, textureMode: 'stretch', color: props.tint ?? WHITE }} />
   const label = <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: props.label, fontSize: 19, color: UI.text }} />
   return (
     <UiEntity uiTransform={{ width: 'auto', height: 30, flexDirection: 'row', alignItems: 'center' }}>
@@ -319,9 +319,9 @@ function Controller() {
   return (
     <Panel width={W} place={place} padding={14}>
       <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Chip sprite={sprites[seat - 1]} label="You" />
+        <Chip sprite={sprites[seat - 1]} label="You" tint={t.game.seatSpriteTints?.[seat - 1]} />
         <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
-        <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : opp.name} reverse />
+        <Chip sprite={sprites[otherSeat(seat) - 1]} label={opp.addr === '' ? '—' : opp.name} reverse tint={t.game.seatSpriteTints?.[otherSeat(seat) - 1]} />
       </UiEntity>
       <Text value={`${t.def.label} · ${t.game.label}`} size={T.small} color={UI.muted} margin={{ top: 2 }} />
       <Text value={status} size={T.status} color={statusColor} margin={{ top: 4, bottom: 6 }} />

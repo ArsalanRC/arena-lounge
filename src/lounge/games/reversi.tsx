@@ -21,7 +21,7 @@ const IMG = {
   dark: 'images/ui/disc-dark.png',
   light: 'images/ui/disc-light.png',
   ring: 'images/ui/ring.png',
-  pixel: 'images/ui/pixel.png',
+  
   disc: 'images/ui/disc.png'
 }
 const FELT = Color4.fromHexString('#2f6b46ff')
@@ -94,7 +94,7 @@ function Board(props: { state: ReversiGameState; ctx: GameContext; compact: bool
         <UiEntity
           key={`c${idx}`}
           uiTransform={{ width: cell, height: cell, margin: 1, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: FELT }}
+          uiBackground={{ color: FELT }}
           onMouseDown={() => {
             if (ctx.myTurn) ctx.act({ r, c } as ReversiAction)
           }}
@@ -117,7 +117,7 @@ function Board(props: { state: ReversiGameState; ctx: GameContext; compact: bool
     )
   }
   return (
-    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ texture: { src: IMG.pixel }, textureMode: 'stretch', color: FELT_LINE }}>
+    <UiEntity uiTransform={{ flexDirection: 'column', width: 'auto', height: 'auto', padding: 6 }} uiBackground={{ color: FELT_LINE }}>
       {rows}
     </UiEntity>
   )

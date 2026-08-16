@@ -29,7 +29,6 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
 ]
 
 const IMG = {
-  board: 'images/ui/board.png',
   button: 'images/ui/button.png',
   yellow: 'images/ui/disc-yellow.png',
   red: 'images/ui/disc-red.png',
@@ -153,7 +152,7 @@ function Board(props: { state: ConnectFourGameState; ctx: GameContext }) {
     )
   }
   return (
-    <UiEntity uiTransform={{ flexDirection: 'row', width: 'auto', height: 'auto', padding: 8 }} uiBackground={{ texture: { src: IMG.board }, textureMode: 'stretch' }}>
+    <UiEntity uiTransform={{ flexDirection: 'row', width: 'auto', height: 'auto', padding: 8 }} uiBackground={{ color: UI.boardBg }}>
       {columns}
     </UiEntity>
   )

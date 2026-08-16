@@ -351,7 +351,6 @@ def gen_ui_plain():
     def disc(x, y):
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
-    write_png('images/ui/pixel.png', 4, 4, lambda x, y: (1, 1, 1, 1))
 
 if __name__ == '__main__':
     gen_board_face()
@@ -374,6 +373,5 @@ if __name__ == '__main__':
     gen_ui_ring()
     gen_ui_panel('images/ui/panel.png', 256, 256, 26, '#17130f', 0.88, '#5a4a3c', 0.9)
     gen_ui_panel('images/ui/pill.png', 512, 128, 60, '#17130f', 0.86, '#5a4a3c', 0.9)
-    gen_ui_panel('images/ui/board.png', 256, 256, 22, '#1d4c5e', 1.0, '#0f2f3a', 1.0)
     gen_ui_button()
     gen_ui_plain()
