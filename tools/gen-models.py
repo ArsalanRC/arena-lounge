@@ -469,8 +469,91 @@ for i in range(25):
     arch.append((c, tan, (0.0, 0.0, 1.0)))
 box_strip(portal, arch, 0.5, 0.9)
 box_strip(portal_glow, [((c[0], c[1] - 0.32, c[2]), tan, rad) for (c, tan, rad) in arch], 0.12, 0.12)
-box_mesh(portal, (0, 8.6, gz), (5.4, 1.4, 0.3))       # marquee plate for the sign text
-box_mesh(portal_glow, (0, 7.85, gz), (5.6, 0.1, 0.34))
+# marquee: a curved dark plate above the arch (same plan curvature as the tower base), a thin
+# teal neon frame and the words ARENA LOUNGE as thick warm neon tubes, all baked geometry.
+# s = arc length along the sign (positive towards the viewer's right when standing on the path).
+R_SIGN = r_gap                # plate centre line sits on the portal radius, over the arch
+SIGN_HALF, SIGN_Y0, SIGN_Y1 = 4.1, 7.95, 9.95
+def sign_pt(sd, y, dr):
+    """World point at arc length sd, height y, dr metres outward from the plate centre line."""
+    ph = ENTRANCE_ANGLE - sd / R_SIGN     # minus: the client mirrors x, this keeps the words readable
+    r = R_SIGN + dr
+    return (r * math.cos(ph), y, r * math.sin(ph))
+def sign_out(sd):
+    ph = ENTRANCE_ANGLE - sd / R_SIGN
+    return (math.cos(ph), 0.0, math.sin(ph))
+def box8(mesh, c):
+    """Closed box from 8 corners: c[0..3] = one end quad (ccw seen from outside), c[4..7] = far end."""
+    mesh.quad(c[0], c[1], c[2], c[3]); mesh.quad(c[7], c[6], c[5], c[4])
+    mesh.quad(c[0], c[4], c[5], c[1]); mesh.quad(c[1], c[5], c[6], c[2])
+    mesh.quad(c[2], c[6], c[7], c[3]); mesh.quad(c[3], c[7], c[4], c[0])
+def tube(mesh, a, b, out, w, d, ext):
+    """Straight box tube from a to b: w across (in the sign plane), d deep (along out), ends extended by ext."""
+    dirv = sub(b, a); L = math.sqrt(sum(x * x for x in dirv)) or 1.0
+    dirv = mul(dirv, 1.0 / L)
+    n = cross(out, dirv); nl = math.sqrt(sum(x * x for x in n)) or 1.0; n = mul(n, 1.0 / nl)
+    a2, b2 = sub(a, mul(dirv, ext)), add(b, mul(dirv, ext))
+    nw, od = mul(n, w / 2), mul(out, d / 2)
+    end = lambda p: [add(sub(p, nw), od), add(add(p, nw), od), sub(add(p, nw), od), sub(sub(p, nw), od)]
+    ca, cb = end(a2), end(b2)
+    box8(mesh, [ca[0], ca[1], ca[2], ca[3], cb[0], cb[1], cb[2], cb[3]])
+def curved_tube(mesh, s0, s1, y0, y1, dr, w, d, segs=20):
+    for i in range(segs):
+        ta, tb = i / segs, (i + 1) / segs
+        a = sign_pt(s0 + (s1 - s0) * ta, y0 + (y1 - y0) * ta, dr)
+        b = sign_pt(s0 + (s1 - s0) * tb, y0 + (y1 - y0) * tb, dr)
+        tube(mesh, a, b, sign_out((s0 + s1) / 2 + (s1 - s0) * (ta + tb - 1) / 2), w, d, 0.004)
+def curved_slab(mesh, s0, s1, y0, y1, r0, r1, segs=24):
+    for i in range(segs):
+        sa, sb = s0 + (s1 - s0) * i / segs, s0 + (s1 - s0) * (i + 1) / segs
+        mesh.quad(sign_pt(sa, y0, r1), sign_pt(sb, y0, r1), sign_pt(sb, y1, r1), sign_pt(sa, y1, r1))   # front (outward)
+        mesh.quad(sign_pt(sb, y0, r0), sign_pt(sa, y0, r0), sign_pt(sa, y1, r0), sign_pt(sb, y1, r0))   # back
+        mesh.quad(sign_pt(sa, y1, r1), sign_pt(sb, y1, r1), sign_pt(sb, y1, r0), sign_pt(sa, y1, r0))   # top
+        mesh.quad(sign_pt(sb, y0, r1), sign_pt(sa, y0, r1), sign_pt(sa, y0, r0), sign_pt(sb, y0, r0))   # bottom
+    for (sd, flip) in ((s0, False), (s1, True)):
+        q = [sign_pt(sd, y0, r1), sign_pt(sd, y1, r1), sign_pt(sd, y1, r0), sign_pt(sd, y0, r0)]
+        if flip: q = q[::-1]
+        mesh.quad(*q)
+marquee, marquee_frame, neon = Mesh(), Mesh(), Mesh()
+curved_slab(marquee, -SIGN_HALF, SIGN_HALF, SIGN_Y0, SIGN_Y1, -0.13, 0.13)
+# teal neon frame just in front of the plate face
+for y in (SIGN_Y0 + 0.06, SIGN_Y1 - 0.06):
+    curved_tube(marquee_frame, -SIGN_HALF - 0.05, SIGN_HALF + 0.05, y, y, 0.20, 0.09, 0.09, 28)
+for sd in (-SIGN_HALF - 0.05, SIGN_HALF + 0.05):
+    curved_tube(marquee_frame, sd, sd, SIGN_Y0 + 0.06, SIGN_Y1 - 0.06, 0.20, 0.09, 0.09, 1)
+# posts from the pylon collars up to the plate ends
+for x in (-3.9, 3.9):
+    sd = x
+    for k in range(6):
+        ya, yb = 5.7 + (SIGN_Y0 + 0.2 - 5.7) * k / 6, 5.7 + (SIGN_Y0 + 0.2 - 5.7) * (k + 1) / 6
+        tube(portal, sign_pt(sd, ya, -0.05), sign_pt(sd, yb, -0.05), sign_out(sd), 0.18, 0.4, 0.0)
+# stroke glyphs on a unit cell (x right, y up), tubes of thickness TUBE_W in the sign plane
+def ell(th, cx=0.5, cy=0.5, rx=0.5, ry=0.5):
+    return (cx + rx * math.cos(math.radians(th)), cy + ry * math.sin(math.radians(th)))
+GLYPHS = {
+    'A': [[(0, 0), (0.5, 1), (1, 0)], [(0.22, 0.4), (0.78, 0.4)]],
+    'R': [[(0, 0), (0, 1)], [(0, 1), (0.66, 1), (0.88, 0.93), (1, 0.8), (1, 0.66), (0.88, 0.55), (0.66, 0.5), (0, 0.5)], [(0.55, 0.5), (1, 0)]],
+    'E': [[(0, 0), (0, 1)], [(0, 1), (0.95, 1)], [(0, 0.5), (0.8, 0.5)], [(0, 0), (0.95, 0)]],
+    'N': [[(0, 0), (0, 1), (1, 0), (1, 1)]],
+    'L': [[(0, 1), (0, 0), (0.95, 0)]],
+    'O': [[ell(90 + 360 * i / 20) for i in range(21)]],
+    'U': [[(0, 1), (0, 0.3), (0.05, 0.16), (0.15, 0.06), (0.3, 0.005), (0.5, 0), (0.7, 0.005), (0.85, 0.06), (0.95, 0.16), (1, 0.3), (1, 1)]],
+    'G': [[ell(40 + 245 * i / 14) for i in range(15)] + [(0.9, 0.06), (0.98, 0.18), (0.98, 0.45), (0.55, 0.45)]],
+}
+LETTER_W, LETTER_H, ADVANCE, SPACE_W, TUBE_W, TUBE_D = 0.5, 0.95, 0.63, 0.36, 0.14, 0.15
+def neon_text(mesh, text, y_base, dr):
+    total = sum(SPACE_W if ch == ' ' else ADVANCE for ch in text) - (ADVANCE - LETTER_W)
+    sd = -total / 2
+    for ch in text:
+        if ch == ' ':
+            sd += SPACE_W; continue
+        for stroke in GLYPHS[ch]:
+            for (u0, v0), (u1, v1) in zip(stroke, stroke[1:]):
+                a = sign_pt(sd + u0 * LETTER_W, y_base + v0 * LETTER_H, dr)
+                b = sign_pt(sd + u1 * LETTER_W, y_base + v1 * LETTER_H, dr)
+                tube(mesh, a, b, sign_out(sd + (u0 + u1) / 2 * LETTER_W), TUBE_W, TUBE_D, TUBE_W / 2)
+        sd += ADVANCE
+neon_text(neon, 'ARENA LOUNGE', (SIGN_Y0 + SIGN_Y1) / 2 - LETTER_H / 2, 0.13 + TUBE_D / 2 + 0.02)
 
 # string lights: catenaries between the seven ground columns around the plaza (r 11.4)
 lights = Mesh()
@@ -558,10 +641,11 @@ DECOR_MATERIALS = [
     {"name": "warmLights", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.9, 0.7, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [1.0, 0.8, 0.5]},
     {"name": "boardDark", "pbrMetallicRoughness": {"baseColorFactor": [0.09, 0.08, 0.08, 1], "metallicFactor": 0.1, "roughnessFactor": 0.8}},
     COLLIDER,
+    {"name": "neonWarm", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.95, 0.85, 1], "metallicFactor": 0.0, "roughnessFactor": 0.3}, "emissiveFactor": [0.9, 0.78, 0.55]},
 ]
 write_glb('models/decor.glb', [
     ("facade", facade, 1), ("facade_rail", facade_rail, 0), ("facade_glow", facade_glow, 2),
-    ("portal", portal, 0), ("portal_glow", portal_glow, 2), ("lights", lights, 3),
+    ("portal", portal, 0), ("portal_glow", portal_glow, 2), ("lights", lights, 3), ("marquee", marquee, 4), ("marquee_frame", marquee_frame, 2), ("neon", neon, 6),
     ("facade_collider", facade_coll, 5),
 ], DECOR_MATERIALS)
 write_glb('models/board.glb', [("plate", board, 0), ("frame", board_frame, 1)], [DECOR_MATERIALS[4], DECOR_MATERIALS[0]])
