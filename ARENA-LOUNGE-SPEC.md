@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 13:35 (Europe/Berlin)
+Last update: 2026-08-16 14:05 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -33,7 +33,7 @@ Last update: 2026-08-16 13:35 (Europe/Berlin)
 ## 3. Names, links, accounts
 
 - Working title: **Arena Lounge** (rename possible; World name follows the NAME bought)
-- Repo: https://github.com/ArsalanRC/arena-lounge (public, MIT), local `~/PR-PROJECT/arena-lounge`. Work goes through branches + PRs; `gh` needs the ArsalanRC token: run `eval "$(direnv export bash)"` from `~/PR-PROJECT/game-platform` first (its .envrc holds GH_TOKEN), then cd here
+- Repo: https://github.com/ArsalanRC/arena-lounge (**private until the submission**, MIT), local `~/PR-PROJECT/arena-lounge`. Landing page: https://arsalanrc.github.io/arena-lounge/ (served from the portfolio repo folder `arena-lounge/`). Work goes through branches + PRs; `gh` needs the ArsalanRC token: run `eval "$(direnv export bash)"` from `~/PR-PROJECT/game-platform` first (its .envrc holds GH_TOKEN), then cd here
 - World name placeholder in scene.json: `arenalounge.dcl.eth` (NAME not bought yet, see docs/DEPLOY.md)
 - Decentraland account: logged into Creator Hub + desktop Explorer as ArsalanRC (address 0x3451...5e9f seen in preview)
 - Related repo: game-platform (`~/PR-PROJECT/game-platform`, org fgamesforfun-star): 28 pure-TS game engines with tests, 23 locales of UI + instructions. Connect Four engine copied from there verbatim.
@@ -153,7 +153,8 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
-- 2026-08-16 13:35 ARSALAN: "don't publish on GitHub yet, wait" -> publishing HOLD. No pushes/PRs until he says so. Open question to him: make the (already public) repo private now, or leave as is. Profile README card is merged/live; portfolio card edited locally in the scratchpad clone, uncommitted; missing plinth-market.de.jpg found and prepared there too.
+- 2026-08-16 14:05 ARSALAN: repo made PRIVATE until submission ("code not usable by everyone yet"), the rest is fine. Pages moved into the portfolio repo (same URL), profile card points at the page. Decisions taken (Claude, at his request): six game corners around one plaza (no elevator for the buildathon); games = Connect Four, Dot Lines, Reversi + Tic Tac Toe, Match Pairs, Checkers. Work order: UI/popup cleanup + per-game how-to-play tabs, presentable plaza, then the three games.
+- 2026-08-16 13:35 ARSALAN: "don't publish on GitHub yet, wait" -> publishing HOLD (lifted 14:05 for the profile/portfolio; the code repo stays private). No pushes/PRs until he says so. Open question to him: make the (already public) repo private now, or leave as is. Profile README card is merged/live; portfolio card edited locally in the scratchpad clone, uncommitted; missing plinth-market.de.jpg found and prepared there too.
 - 2026-08-16 13:20 bilingual GitHub Pages landing page (docs/index.html, EN/DE, animated frame), Pages enabled from main:/docs
 - 2026-08-16 13:00 one hit-area collider per board (was one per cell); entity count 590 -> 525 with four tables (textures 19 of 23, the next soft cap to watch)
 - 2026-08-16 12:40 Reversi plugin (engine ported, 31 tests): tap-a-square UI with legal hints, felt board, front+back disc sprites; per-game seat colours; four tables in an arc (Dot Lines, Connect Four x2, Reversi)
@@ -162,7 +163,18 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:55 Dot Lines plugin (engine ported with 26 tests): two-tap connect-the-dots input, mirrored UI for the far seat, upright double-sided board on Table 3
 - 2026-08-16 11:50 tables made game-agnostic: TableBoard carries gameId + engine state JSON; games plug in via src/lounge/games/types.ts (rules, bot, 3D view, controls); Connect Four is the first plugin (behaviour unchanged)
 
-## 10. The house: draft plan (for Arsalan to approve or change)
+## 9b. Layout and game list (decided 16 Aug, 14:05)
+
+Six game corners around a round plaza on the existing 2x2 parcels. Spawn
+south, plaza (kiosk + welcome sign) in the middle, corners in a ring:
+each corner has its own rug colour, a banner pole with the game name and
+planters as soft dividers; tables face the plaza. Games for the buildathon:
+Connect Four (2 tables), Dot Lines, Reversi, Tic Tac Toe, Match Pairs,
+Checkers (1 table each). Later: Chess, Backgammon, Ludo, Croc Snap on the
+house floors. Entity budget: collapse Reversi / Dot Lines double planes into
+single thin alpha-tested boxes first.
+
+## 10. The house: draft plan (for later, after the buildathon)
 
 Goal (Arsalan, 16 Aug): a building where each floor is a game (or several),
 an elevator between floors, many games over time, instructions in many
