@@ -27,7 +27,7 @@ import {
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { BUILT_GAMES, ELEVATOR, FLOORS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
+import { BUILT_GAMES, ELEVATORS, FLOORS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
 import { GAME_NAMES } from './games/registry'
 import { local } from './tables'
 
@@ -165,20 +165,48 @@ function zoneBanner(z: ZoneDef): void {
   label(Vector3.create(pos.x, y + 3.75, pos.z), built ? GAME_NAMES[z.gameId] : `${GAME_NAMES[z.gameId]}\ncoming soon`, built ? 2.2 : 1.6, Color4.White(), 8)
 }
 
-/** Glowing round pad + post: standing on it opens the elevator panel (see tables.ts / ui.tsx). */
-function elevatorPad(f: FloorDef): void {
-  const y = f.y
-  const pad = engine.addEntity()
-  Transform.create(pad, { position: Vector3.create(ELEVATOR.x, y + 0.02, ELEVATOR.z), scale: Vector3.create(2.2, 0.04, 2.2) })
-  MeshRenderer.setCylinder(pad, 0.5, 0.5)
-  Material.setPbrMaterial(pad, { albedoColor: Color4.fromHexString('#7fd0e0ff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 1.2, roughness: 0.4, metallic: 0.1 })
-  cylinder(Vector3.create(ELEVATOR.x, y + 1.1, ELEVATOR.z - 1.3), Vector3.create(0.14, 2.2, 0.14), PALETTE.woodDark, true)
-  const cube = engine.addEntity()
-  Transform.create(cube, { position: Vector3.create(ELEVATOR.x, y + 2.35, ELEVATOR.z - 1.3), rotation: Quaternion.fromEulerDegrees(0, 45, 0), scale: Vector3.create(0.4, 0.4, 0.4) })
-  MeshRenderer.setBox(cube)
-  Material.setPbrMaterial(cube, { albedoColor: PALETTE.frame, emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 0.8, roughness: 0.3, metallic: 0.2 })
-  label(Vector3.create(ELEVATOR.x, y + 2.95, ELEVATOR.z - 1.3), 'Elevator', 1.4, Color4.White(), 4)
-  label(Vector3.create(ELEVATOR.x, y + 2.35, ELEVATOR.z - 1.3), '▲▼', 1.4, Color4.White(), 2)
+/**
+ * Elevator shaft: four slim posts and translucent glass on the sides away
+ * from the plaza run from the ground to above the rooftop, so the shaft reads
+ * as one elevator from anywhere in the lounge; on every floor a glowing pad
+ * (standing on it opens the floor panel, see tables.ts / ui.tsx), a light
+ * ring and an ELEVATOR sign facing the plaza.
+ */
+function elevatorShaft(pad: Vector3): void {
+  const top = FLOORS[FLOORS.length - 1].y + 4.2
+  const half = 1.25
+  const yaw = yawToward(pad, PLAZA) // -Z of the shaft frame points at the plaza
+  const root = engine.addEntity()
+  Transform.create(root, { position: Vector3.create(pad.x, 0, pad.z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
+  for (const [x, z] of [[-half, -half], [half, -half], [-half, half], [half, half]]) {
+    solid(Vector3.create(x, top / 2, z), Vector3.create(0.14, top, 0.14), PALETTE.column, { parent: root })
+  }
+  const glass = Color4.create(0.7, 0.9, 1, 0.22)
+  const pane = (pos: Vector3, scale: Vector3) => {
+    const e = engine.addEntity()
+    Transform.create(e, { parent: root, position: pos, scale })
+    MeshRenderer.setBox(e)
+    Material.setPbrMaterial(e, { albedoColor: glass, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_BLEND, roughness: 0.1, metallic: 0.2, castShadows: false })
+  }
+  // glass on the back and the two sides; the plaza side stays open
+  pane(Vector3.create(0, top / 2, half), Vector3.create(half * 2, top, 0.04))
+  pane(Vector3.create(-half, top / 2, 0), Vector3.create(0.04, top, half * 2))
+  pane(Vector3.create(half, top / 2, 0), Vector3.create(0.04, top, half * 2))
+  solid(Vector3.create(0, top + 0.1, 0), Vector3.create(half * 2 + 0.3, 0.2, half * 2 + 0.3), PALETTE.column, { parent: root })
+  for (const f of FLOORS) {
+    const y = f.y
+    const disc = engine.addEntity()
+    Transform.create(disc, { parent: root, position: Vector3.create(0, y + 0.02, 0), scale: Vector3.create(2.2, 0.04, 2.2) })
+    MeshRenderer.setCylinder(disc, 0.5, 0.5)
+    Material.setPbrMaterial(disc, { albedoColor: Color4.fromHexString('#7fd0e0ff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 1.2, roughness: 0.4, metallic: 0.1 })
+    // light ring at door height and the sign above the opening, both facing the plaza
+    const ring = engine.addEntity()
+    Transform.create(ring, { parent: root, position: Vector3.create(0, y + 2.6, -half), scale: Vector3.create(half * 2 + 0.2, 0.08, 0.08) })
+    MeshRenderer.setBox(ring)
+    Material.setPbrMaterial(ring, { albedoColor: Color4.fromHexString('#9ff0ffff'), emissiveColor: Color3.fromHexString('#3fc1d9'), emissiveIntensity: 2, roughness: 0.3, metallic: 0 })
+    label(Vector3.create(pad.x, y + 3.05, pad.z), 'ELEVATOR', 2.0, Color4.White(), 6)
+    label(Vector3.create(pad.x, y + 2.35, pad.z), 'Lounge · Game room · Rooftop', 0.9, PALETTE.cream, 6)
+  }
 }
 
 /** A post with a glowing "?" cube: tap to open How to play. */
@@ -278,6 +306,7 @@ export function buildLounge(): void {
     const mid = Vector3.scale(Vector3.add(a, b), 0.5)
     const away = Vector3.normalize(Vector3.subtract(mid, PLAZA))
     const p = Vector3.add(mid, Vector3.scale(away, 1.2))
+    if (ELEVATORS.some((e) => Vector3.distance(Vector3.create(e.x, 0, e.z), p) < 2.6)) continue
     planter(p.x, p.z)
   }
   planter(LOUNGE_MIN + 2.6, LOUNGE_MIN + 2.6)
@@ -317,7 +346,7 @@ function buildTower(): void {
   for (const deg of [160, 200, 259, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
   for (const deg of [45, 225, 315]) column(deg, 9.9, 8, 16, 0.5) // none in the SE quadrant: that is the elevator landing
 
-  for (const f of FLOORS) elevatorPad(f)
+  for (const pad of ELEVATORS) elevatorShaft(pad)
 
   // game room (floor 1): lamps between the corners, planters at the oculus edge
   const y1 = FLOORS[1].y
@@ -338,7 +367,7 @@ function buildTower(): void {
     const t = (deg * Math.PI) / 180
     bench(Vector3.create(PLAZA.x + Math.sin(t) * 6.4, y2, PLAZA.z + Math.cos(t) * 6.4), roofCentre)
   }
-  for (const deg of [60, 130, 210, 300]) {
+  for (const deg of [60, 130, 210, 280]) {
     const t = (deg * Math.PI) / 180
     lamp(PLAZA.x + Math.sin(t) * 9.2, PLAZA.z + Math.cos(t) * 9.2, y2)
   }

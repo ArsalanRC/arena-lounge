@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 15:45 (Europe/Berlin), Croc Snap
+Last update: 2026-08-16 16:15 (Europe/Berlin), two elevator shafts
 
 ## 1. What this is
 
@@ -77,11 +77,14 @@ version works as well", 16 Aug 11:30):
   Game room: four corners (Chess, Backgammon, Croc Snap, Ludo) with "coming
   soon" banners until their plugins exist (BUILT_GAMES). Rooftop: benches
   around the oculus, lamps, planters, "leaderboard later" sign.
-- Elevator: glowing pads at (29.5, y, 18.5) on every floor; standing on one
-  opens the floor panel (Lounge / Game room / Rooftop / Close), a tap calls
-  movePlayerTo onto that floor's landing facing the plaza; the panel re-arms
-  when the player steps off the pad. Tables on other floors are "far" for the
-  proximity card; sitting snaps to the table's floor height.
+- Elevators: two glass shafts (SE beside the entrance at 29.5/18.5, NW at
+  16.6/30.5), four posts + translucent panes from the ground to above the
+  rooftop, open towards the plaza, glowing pad + light ring + ELEVATOR sign
+  on every floor; standing on a pad opens the floor panel (Lounge / Game room
+  / Rooftop / Close), a tap calls movePlayerTo onto that floor just outside
+  the shaft, facing the plaza; the panel re-arms when the player steps off.
+  Tables on other floors are "far" for the proximity card; sitting snaps to
+  the table's floor height.
 - Connect Four per table: see-through frame (alpha-tested planes), 42 pooled
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
   token (tap = play the house bot), floating sign with live status.
@@ -192,6 +195,12 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
   budget, the ground-floor lounge unchanged, a generated diagrid tower over the
   plaza with a game room + rooftop, elevator = pad + teleport panel. Screenshots
   in docs/screenshots/tower-*.jpg for his reaction.
+- 16 Aug ~16:00 (Arsalan, on the tower screenshots): "looks great ... i love
+  the design"; asked for two elevators that are clearly elevators (done
+  16:15: glass shafts), and which other games can be added (answer given in
+  chat: Backgammon, Ludo 2-player, Super TTT, Snakes & Ladders, Sea Strike,
+  Dice Royale as a duel; card games only with hidden-hand caveats; solo games
+  as side arcades at most). Order to be confirmed by him.
 - 16 Aug: game boards on phones are the controller (finger-sized cells); the
   "Show board" toggle only exists for Connect Four (its strip). Confirmed by
   Arsalan's phone test ("show/hide board doesn't do much for some games").
@@ -266,6 +275,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 16:15 two elevator shafts (glass, posts, light rings, ELEVATOR signs on every floor), rides land just outside the shaft the player used; README + docs/SUBMISSION.md refreshed (PR 23); landing page + portfolio card updated (portfolio PR 27, screenshots tower-overview + arrival)
 - 2026-08-16 15:45 Croc Snap plugin (engine ported, 37 tests): upright croc face with 12 tooth boxes, SNAP! label, ring-of-teeth UI, catalog rows in 19 languages + tips EN/DE/ES; game room south corner live (Table 9)
 - 2026-08-16 15:20 Chess plugin (engine ported with 47 tests + 2 budget tests): iterative-deepening bot with a 350 ms budget, 12 generated piece sprites, 32-piece sliding pool with castling + en passant + promotion handling, check/result status, chess rows in the how-to-play catalog (19 languages) and lounge tips EN/DE/ES; game room Chess corner live (Table 8)
 - 2026-08-16 14:45 tower + floors + elevator: scene 3x3 parcels (lounge centred, garden ring, path), models/tower.glb (diagrid ribs, two annular slabs, railings, glowing rims, crown, `_collider` meshes) + models/canopy.glb from tools/gen-models.py, columns, elevator pads + floor panel + rideTo, FLOORS/ZONES per floor (game room corners for Chess / Backgammon / Croc Snap / Ludo as "coming soon"), rooftop terrace, y-aware table proximity + seat snap, spheres replaced (triangles 79k -> 50k), .dclignore trimmed, build:prod script, DEPLOY.md size note

@@ -38,10 +38,14 @@ export const FLOORS: FloorDef[] = [
   { id: 2, name: 'Rooftop', y: 16 }
 ]
 
-/** Elevator pad column (same x/z on every floor), east of the spawn. */
-export const ELEVATOR = Vector3.create(29.5, 0, 18.5)
+/**
+ * Elevator shafts (same x/z on every floor): one beside the entrance
+ * (south-east of the plaza), one at the far side (north-west), both between
+ * corners on every floor. Standing on a pad opens the floor panel.
+ */
+export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 18.5), Vector3.create(16.6, 0, 30.5)]
 /** Standing within this distance of a pad opens the floor panel. */
-export const ELEVATOR_RADIUS = 1.4
+export const ELEVATOR_RADIUS = 1.3
 
 export interface TableDef {
   /** 0-based table index, also used to derive the network sync id. */
