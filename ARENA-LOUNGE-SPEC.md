@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 19:21 (Europe/Berlin), curved neon marquee over the entrance, 20:00 sky
+Last update: 2026-08-16 19:28 (Europe/Berlin), curved neon marquee over the entrance, 20:00 sky, submission draft refreshed
 
 ## 1. What this is
 
@@ -258,8 +258,9 @@ version works as well", 16 Aug 11:30):
 7. Claude: (done 15:37) lounge chrome in EN/DE/ES/PT/FR. Still open: native
    review of the imported rule overviews in the other languages, and a
    picker entry outside the help panel if testers ask for it.
-8. Claude: README + submission text refresh (seven games, tower, floors),
-   phone screenshots into README and the landing page.
+8. Claude: (done 19:28) README + submission text refresh (fourteen games,
+   four floors, measured sizes). Still open: phone screenshots into README
+   and the landing page once Arsalan sends them.
 9. Later: Multiplayer Server for a persistent leaderboard on the rooftop,
    tournaments (see sections 6 and 10).
 
@@ -392,6 +393,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 19:28 docs: submission draft refreshed to the built state (14 games / 15 tables / four floors, elevators, random sides, neon marquee, night look, generated assets; measured 516 entities, 59k triangles, 16 textures, production script 0.9 MB / 0.25 MB gzipped); portfolio page got the neon entrance shot as first figure + OG image and Four in a Row wording
 - 2026-08-16 19:21 curved neon marquee (Arsalan: "the name at the entrance ... very nice and clean and evident", then "curved, matching the curvature of the building ... neon signs, thick letters and glowing"): baked geometry in decor.glb (curved dark plate on the portal radius, teal neon frame, warm neon tube letters from stroke glyphs, posts to the pylon collars); billboarded TextShape sign and the duplicate name on the inner gateway removed; sky moved to 20:00 because the 21:00 moon drew a blocky black artefact behind the marquee when seen from inside; entrance screenshot refreshed
 - 2026-08-16 18:35 fourth floor + two games: rooftop moved to 24 m (new slab inside the crown), the 16 m slab is the Sky room with Sea Strike (N) and a Dice Royale duel (S), sofas E/W; shafts to 28 m; Sea Strike engine (40 tests) with random fleets and a two-grid public 3D board; Dice Royale duel wrapper (32 tests) with die-face sprites; strings in five languages, catalog rows in 19; 14 games / 15 tables; sea grid as a texture (36 line boxes fewer), upper-floor lamp posts dropped (string lights + collars light them); idle 512 entities / 529 renderers (the phone shows amber above 500 while idle; each running table adds 10 to 90, so expect a red line during busy hours; cosmetic)
 - 2026-08-16 18:05 night lighting: fixed 21:00 skybox (scene.json + SkyboxTime), beacon lattice on the rib crossings and crown, column collars, string lights on every floor, bar light strips, seven point lights; README hero screenshots at night
