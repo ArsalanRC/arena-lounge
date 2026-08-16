@@ -8,11 +8,13 @@
     "build": "sdk-commands build",
     "upgrade-sdk": "pnpm add -D @dcl/sdk@latest @dcl/sdk-commands@latest",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "start:mobile": "sdk-commands start --mobile --port 8001",
+    "start:mcp": "sdk-commands start --mcp"
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.26.0",
-    "@dcl/sdk": "latest",
+    "@dcl/sdk": "7.26.0",
     "@dcl/sdk-commands": "7.26.0",
     "vitest": "^4.1.10"
   },

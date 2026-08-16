@@ -9,10 +9,10 @@ importers:
   .:
     devDependencies:
       '@dcl/js-runtime':
-        specifier: latest
+        specifier: 7.26.0
         version: 7.26.0
       '@dcl/sdk':
-        specifier: latest
+        specifier: 7.26.0
         version: 7.26.0(@well-known-components/interfaces@1.5.2)
       '@dcl/sdk-commands':
         specifier: 7.26.0
