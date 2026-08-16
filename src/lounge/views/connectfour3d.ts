@@ -6,26 +6,12 @@
  * Geometry is authored in table-local metres on top of the shared table
  * (see table3d.ts for TABLE_TOP_Y); the frame stands on the table top.
  */
-import {
-  ColliderLayer,
-  EasingFunction,
-  Entity,
-  InputAction,
-  Material,
-  MaterialTransparencyMode,
-  MeshCollider,
-  MeshRenderer,
-  Transform,
-  Tween,
-  VisibilityComponent,
-  engine,
-  pointerEventsSystem
-} from '@dcl/sdk/ecs'
+import { EasingFunction, Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { COLS, ROWS, type ConnectFourGameState } from '../../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, box } from './shared'
+import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 const BOARD_W = 1.2
 const BOARD_H = 1.04
@@ -93,21 +79,6 @@ function makeDisc(parent: Entity): Entity {
   return e
 }
 
-function makeColumnCollider(parent: Entity, col: number, onAction: (a: C4Action) => void): void {
-  const e = engine.addEntity()
-  const x = -BOARD_W / 2 + CELL_PITCH * (0.75 + col)
-  Transform.create(e, {
-    parent,
-    position: Vector3.create(x, C4_BOARD_CENTER_Y, 0),
-    scale: Vector3.create(CELL_PITCH * 0.95, BOARD_H, 0.16)
-  })
-  MeshCollider.setBox(e, ColliderLayer.CL_POINTER)
-  pointerEventsSystem.onPointerDown(
-    { entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'Drop here', maxDistance: 6, showHighlight: false } },
-    () => onAction({ col })
-  )
-}
-
 function cellValue(state: ConnectFourGameState, row: number, col: number): number {
   const v = state.board[row][col]
   return v === 'yellow' ? 1 : v === 'red' ? 2 : 0
@@ -127,7 +98,10 @@ export function createConnectFourView(root: Entity, onAction: (a: C4Action) => v
 
   const discs: Entity[] = []
   for (let i = 0; i < CELL_COUNT; i++) discs.push(makeDisc(root))
-  for (let c = 0; c < COLS; c++) makeColumnCollider(root, c, onAction)
+  // one click area for the whole frame; the hit x picks the column
+  boardHitArea(root, Vector3.create(0, C4_BOARD_CENTER_Y, 0), Vector3.create(BOARD_W, BOARD_H, 0.16), 'Drop here', (local) => {
+    onAction({ col: clampInt((local.x + BOARD_W / 2 - CELL_PITCH * 0.25) / CELL_PITCH, 0, COLS - 1) })
+  })
 
   const rendered = new Array<number>(CELL_COUNT).fill(0)
   let renderedWinKey = ''

@@ -4,24 +4,12 @@
  * desktop players can click a square. Seat B sees the board mirrored (they
  * stand behind it), which the UI mirrors as well.
  */
-import {
-  ColliderLayer,
-  Entity,
-  InputAction,
-  Material,
-  MaterialTransparencyMode,
-  MeshCollider,
-  MeshRenderer,
-  Transform,
-  VisibilityComponent,
-  engine,
-  pointerEventsSystem
-} from '@dcl/sdk/ecs'
+import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import type { ReversiGameState } from '../../engine/reversi'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
-import { TABLE_TOP_Y, box } from './shared'
+import { TABLE_TOP_Y, boardHitArea, box, clampInt } from './shared'
 
 export interface ReversiAction {
   r: number
@@ -86,15 +74,13 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
         pair.push(e)
       }
       discs.push([pair[0], pair[1]])
-      // click target for desktop
-      const hit = engine.addEntity()
-      Transform.create(hit, { parent: root, position: cellLocal(r, c), scale: Vector3.create(CELL * 0.95, CELL * 0.95, HALF_T * 2 + 0.06) })
-      MeshCollider.setBox(hit, ColliderLayer.CL_POINTER)
-      pointerEventsSystem.onPointerDown(
-        { entity: hit, opts: { button: InputAction.IA_POINTER, hoverText: 'Place disc', maxDistance: 6, showHighlight: false } },
-        () => onAction({ r, c })
-      )
     }
+  // one click area for the whole board; the hit point picks the square
+  boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Place disc', (local) => {
+    const c = clampInt((local.x + BOARD / 2) / CELL, 0, N - 1)
+    const r = clampInt((CENTER_Y + BOARD / 2 - local.y) / CELL, 0, N - 1)
+    onAction({ r, c })
+  })
 
   const rendered = new Array<number>(N * N).fill(0)
   let lastIdx = -1
