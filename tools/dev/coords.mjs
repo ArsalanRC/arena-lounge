@@ -8,7 +8,7 @@
  *   game: c4 | dots | reversi | ttt | pairs | checkers  (default c4)
  */
 const [zx, zz, game = 'c4'] = process.argv.slice(2).map((v, i) => (i < 2 ? Number(v) : v))
-const PLAZA = [16, 17.5]
+const PLAZA = [24, 25.5]
 const yaw = Math.atan2(-(PLAZA[0] - zx), -(PLAZA[1] - zz)) * 180 / Math.PI
 const rot = (x, z) => { const t = yaw * Math.PI / 180; return [x * Math.cos(t) + z * Math.sin(t), -x * Math.sin(t) + z * Math.cos(t)] }
 const w = (x, y, z) => { const [rx, rz] = rot(x, z); return `${(zx + rx).toFixed(2)},${y.toFixed(2)},${(zz + rz).toFixed(2)}` }

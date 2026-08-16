@@ -25,13 +25,18 @@ import {
   AUTO_STAND_AFTER_MS,
   AUTO_STAND_DISTANCE,
   BOT_THINK_MS,
+  ELEVATOR,
+  ELEVATOR_RADIUS,
+  FLOORS,
   HEARTBEAT_MS,
   NEAR_TABLE_DISTANCE,
+  PLAZA,
   SEAT_PAD_OFFSET,
   SEAT_STALE_MS,
   SYNC_TABLE_BASE,
   TABLES,
   TURN_LIMIT_MS,
+  type FloorDef,
   type TableDef
 } from './config'
 import { getGame } from './games/registry'
@@ -91,7 +96,12 @@ export const local = {
   /** Set when the CRDT room never connected; local play is still allowed. */
   offline: false,
   startedAt: 0,
-  toast: { text: '', until: 0 }
+  toast: { text: '', until: 0 },
+  /** Elevator: panel open while the player stands on a pad; the floor they are on. */
+  elevatorOpen: false,
+  floor: 0,
+  /** Set after a ride so the panel does not reopen until the player steps off the pad. */
+  elevatorArmed: true
 }
 
 // ---------------------------------------------------------------- creation
@@ -399,11 +409,38 @@ function snapToSeat(t: Table, seat: Seat): void {
   // The client measures the look direction from the avatar's base (y = 0),
   // not from the eyes: a target at 1.6 m height at 1.8 m distance tilts the
   // camera 42° up. Aiming at floor height gives a level view of the board.
-  const target = Vector3.create(t.def.position.x, 0, t.def.position.z)
+  const y = t.def.position.y
+  const target = Vector3.create(t.def.position.x, y, t.def.position.z)
   const swallow = () => {
     /* moving the player is a nicety; ignore if the client refuses */
   }
-  movePlayerTo({ newRelativePosition: { x: pos.x, y: 0, z: pos.z }, cameraTarget: target, avatarTarget: target }).catch(swallow)
+  movePlayerTo({ newRelativePosition: { x: pos.x, y, z: pos.z }, cameraTarget: target, avatarTarget: target }).catch(swallow)
+}
+
+// ---------------------------------------------------------------- elevator
+
+/** Floor the player is standing on (nearest floor height at or below them). */
+export function floorAt(y: number): FloorDef {
+  let best = FLOORS[0]
+  for (const f of FLOORS) if (y >= f.y - 1.5 && f.y >= best.y) best = f
+  return best
+}
+
+/** Teleport onto a floor's landing next to its elevator pad, facing the plaza. */
+export function rideTo(f: FloorDef): void {
+  local.elevatorOpen = false
+  local.elevatorArmed = false
+  const landing = { x: ELEVATOR.x, y: f.y, z: ELEVATOR.z + 2.4 }
+  const target = Vector3.create(PLAZA.x, f.y, PLAZA.z)
+  movePlayerTo({ newRelativePosition: landing, cameraTarget: target, avatarTarget: target }).catch(() => {
+    /* ignore if the client refuses */
+  })
+}
+
+function distanceToPad(p: Vector3): number {
+  const dx = p.x - ELEVATOR.x
+  const dz = p.z - ELEVATOR.z
+  return Math.sqrt(dx * dx + dz * dz)
 }
 
 function playerPosition(): Vector3 | null {
@@ -411,7 +448,9 @@ function playerPosition(): Vector3 | null {
   return tr ? tr.position : null
 }
 
+/** Horizontal distance; tables on another floor count as far away. */
 function distanceToTable(t: Table, p: Vector3): number {
+  if (Math.abs(p.y - t.def.position.y) > 3) return Infinity
   const dx = p.x - t.def.position.x
   const dz = p.z - t.def.position.z
   return Math.sqrt(dx * dx + dz * dz)
@@ -459,6 +498,14 @@ function proximitySystem(dt: number): void {
   local.nearDistance = bestD
   local.nearTableId = bestD <= NEAR_TABLE_DISTANCE ? best : -1
   if (local.dismissedTableId >= 0 && local.dismissedTableId !== local.nearTableId) local.dismissedTableId = -1
+  // elevator pads: stepping on one opens the floor panel, stepping off closes it
+  local.floor = floorAt(p.y).id
+  const onPad = distanceToPad(p) <= ELEVATOR_RADIUS && Math.abs(p.y - FLOORS[local.floor].y) < 2
+  if (onPad && local.elevatorArmed && !findMySeat()) local.elevatorOpen = true
+  if (!onPad) {
+    local.elevatorOpen = false
+    local.elevatorArmed = true
+  }
 }
 
 let heartbeatTimer = 0

@@ -27,5 +27,9 @@ export const GAME_NAMES: Record<GameId, string> = {
   reversi: 'Reversi',
   tictactoe: 'Tic Tac Toe',
   matchpairs: 'Match Pairs',
-  checkers: 'Checkers'
+  checkers: 'Checkers',
+  chess: 'Chess',
+  backgammon: 'Backgammon',
+  crocsnap: 'Croc Snap',
+  ludo: 'Ludo'
 }

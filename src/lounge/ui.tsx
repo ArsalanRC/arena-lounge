@@ -11,6 +11,7 @@
  *  - Toast   top centre below the hint, tinted, short-lived feedback
  *  - Card    near a table: seat buttons, or the live board when both seats
  *            are taken (spectating)
+ *  - Elevator  on a pad: floor picker (Lounge / Game room / Rooftop)
  *  - Controller  seated: the game's own controls + status; a right-docked
  *            column on desktop, a three-column bar along the bottom on phones
  *  - Help    "How to play": one tab per game, rules overview in the chosen
@@ -25,7 +26,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
-import { DEBUG_MOBILE_UI, TURN_LIMIT_MS, UI } from './config'
+import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
@@ -44,6 +45,7 @@ import {
   mySeatAt,
   otherSeat,
   rematch,
+  rideTo,
   seatOf,
   sit,
   sitWithBot,
@@ -91,6 +93,7 @@ function textOn(c: Color4): Color4 {
 // ---------------------------------------------------------------- atoms
 
 function Btn(props: {
+  key?: string
   label: string
   onClick: () => void
   color?: Color4
@@ -211,6 +214,7 @@ const rightMiddle = (width: number, halfHeight: number): UiTransformProps => ({ 
 // ---------------------------------------------------------------- hint + toast
 
 function visibleTableCard(): Table | undefined {
+  if (local.elevatorOpen) return undefined
   const t = local.nearTableId >= 0 ? getTable(local.nearTableId) : undefined
   if (!t || !me.ready || mySeatAt(t) || local.dismissedTableId === t.def.id) return undefined
   return t
@@ -415,6 +419,34 @@ function Controller() {
   )
 }
 
+// ---------------------------------------------------------------- elevator
+
+/** Floor picker, shown while the player stands on an elevator pad. */
+function ElevatorPanel() {
+  if (!local.elevatorOpen) return null
+  const W = 460
+  return (
+    <Panel width={W} place={bottomCentre(W, 36)}>
+      <Text value="Elevator · Where to?" size={T.title} />
+      <Text value="Tap a floor. Step off the pad to stay." size={T.small} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
+      {FLOORS.map((f) => (
+        <Btn
+          key={`f${f.id}`}
+          label={f.id === local.floor ? `${f.name} · you are here` : f.name}
+          quiet={f.id === local.floor}
+          onClick={() => {
+            if (f.id !== local.floor) rideTo(f)
+          }}
+          width={300}
+        />
+      ))}
+      <Row height={56} margin={{ top: 4 }}>
+        <Btn label="Close" quiet onClick={() => ((local.elevatorOpen = false), (local.elevatorArmed = false))} width={130} />
+      </Row>
+    </Panel>
+  )
+}
+
 // ---------------------------------------------------------------- how to play
 
 /** Game whose rules the help should open on: the table you sit at, else the nearest, else the last choice. */
@@ -497,6 +529,7 @@ const LoungeUi = () => (
     <Hint />
     <Toast />
     <TableCard />
+    <ElevatorPanel />
     <Controller />
     <HelpPanel />
   </UiEntity>

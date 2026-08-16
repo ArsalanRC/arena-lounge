@@ -22,3 +22,15 @@ src
 cursor.config
 cursorignore
 .github
+tools
+docs
+skills
+agent
+data
+main.crdt
+main1.crdt
+pnpm-lock.yaml
+pnpm-workspace.yaml
+vitest.config.mts
+skills-lock.json
+ARENA-LOUNGE-SPEC.md

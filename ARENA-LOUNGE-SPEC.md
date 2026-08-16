@@ -19,11 +19,12 @@ honest: only verified facts under "State".
 
 Rules Arsalan set on 16 Aug (keep them): code stays private until the
 DoraHacks submission; the landing page + profile/portfolio entries are fine
-and stay public; nothing gets published beyond that without asking; the
-lounge stays one floor (six corners) for the buildathon, the multi-floor
-house is for later.
+and stay public; nothing gets published beyond that without asking. The
+"one floor only" rule from 14:05 was lifted by him at ~14:30 (see decisions):
+the lounge now has the tower with a game room and a rooftop, and he wants
+more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 14:25 (Europe/Berlin), phone controller bar
+Last update: 2026-08-16 14:45 (Europe/Berlin), tower + floors + elevator
 
 ## 1. What this is
 
@@ -63,9 +64,24 @@ Done and tested in the desktop Explorer through the explorer MCP harness, plus
 one manual test by Arsalan on desktop and one on the phone ("the mobile
 version works as well", 16 Aug 11:30):
 
-- 2x2 parcel World scene, spawn south, gateway with the welcome sign, round
-  plaza (tree, benches, lamps), six game corners around it (rug tint + banner
-  pole each; unbuilt games show "coming soon"), tables derived from ZONES.
+- 3x3 parcel World scene (48 m): garden ring with low-poly trees and a path,
+  the fenced 32 m parquet lounge in the middle (spawn south at 24,18), gateway
+  with the welcome sign, round plaza (tree, benches, lamps), six game corners
+  around it (rug tint + banner pole each), tables derived from ZONES.
+- The tower (models/tower.glb from tools/gen-models.py, one entity): a diagrid
+  of 24 copper ribs on opposite helices (radius 15.4 at the ground, 10.5 at
+  the crown, 110 degrees of twist each way, 24 m tall), two annular slabs with
+  an oculus over the plaza tree (game room y=8, rooftop y=16) with railings,
+  posts and glowing rims, invisible `_collider` meshes for slabs + railings;
+  seven ground columns (two flank the entrance) and three game-room columns.
+  Game room: four corners (Chess, Backgammon, Croc Snap, Ludo) with "coming
+  soon" banners until their plugins exist (BUILT_GAMES). Rooftop: benches
+  around the oculus, lamps, planters, "leaderboard later" sign.
+- Elevator: glowing pads at (29.5, y, 18.5) on every floor; standing on one
+  opens the floor panel (Lounge / Game room / Rooftop / Close), a tap calls
+  movePlayerTo onto that floor's landing facing the plaza; the panel re-arms
+  when the player steps off the pad. Tables on other floors are "far" for the
+  proximity card; sitting snaps to the table's floor height.
 - Connect Four per table: see-through frame (alpha-tested planes), 42 pooled
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
   token (tap = play the house bot), floating sign with live status.
@@ -90,11 +106,12 @@ version works as well", 16 Aug 11:30):
 - First-person camera only on the local player's own seat pad; sitting snaps
   the avatar to the pad facing the board (yaw re-issued after the switch).
 - Sounds: synthesised WAVs (drop, win chime, your-move ding, sit click, lose).
-- Perf (7 tables, six games): 642 entities (80% of the 800 soft cap for 4
-  parcels), 28k triangles (71%), explorer reports 26 "textures" vs a soft cap
-  of 23 (the metric counts runtime texture instances, not files; the files are
-  16 PNGs, mostly 128px sprites, so memory is small). Headroom is fine for
-  the buildathon; more tables would need a bigger parcel footprint.
+- Perf (9 parcels, 7 tables, tower, garden): 779 entities of 1800 (43%),
+  50k triangles of 90k (56%; a primitive sphere costs ~770 triangles, so leaf
+  balls are the 320-triangle models/canopy.glb and lanterns are cubes),
+  textures 25 of 33. Deployed bundle ~0.7 MB minified (`deploy` builds with
+  --production; the dev bin/index.js is 7 MB with sourcemaps) + tower.glb
+  0.65 MB + canopy.glb 25 KB + 16 PNGs.
 - Tests: 199 vitest tests over the six pure engines. `pnpm build` strict type-check green.
 - How to play: "?" buttons + info kiosk at spawn open a panel with the rules
   overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
@@ -117,11 +134,18 @@ version works as well", 16 Aug 11:30):
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
    bar). Done 16 Aug 14:25 without screenshots: the phone controller bar with
    finger-sized boards for all six games, verified in the desktop emulation.
-5. Claude: lounge chrome strings in DE/ES/PT/FR (help panel tips exist in
+5. Claude: Chess as the seventh game (game-platform engine, 47 tests) on the
+   game room's Chess corner; then Backgammon / Croc Snap / Ludo (2-player) for
+   the other three corners, or remove the "coming soon" corners before the
+   submission. Never ship a "coming soon" banner to the judges.
+6. Claude: exterior polish from Arsalan's reaction to the tower screenshots
+   (docs/screenshots/tower-*.jpg): rib colour, textured slabs (UV + embedded
+   PNG in the GLB), lighting accents, more garden.
+7. Claude: lounge chrome strings in DE/ES/PT/FR (help panel tips exist in
    EN/DE/ES); native review of imported overviews.
-6. Claude: README + submission text refresh (six games, corners), phone
-   screenshots into README and the landing page.
-7. Later: Multiplayer Server for a persistent leaderboard, the house floors,
+8. Claude: README + submission text refresh (seven games, tower, floors),
+   phone screenshots into README and the landing page.
+9. Later: Multiplayer Server for a persistent leaderboard on the rooftop,
    tournaments (see sections 6 and 10).
 
 Not done: buy NAME, deploy, DoraHacks form, GitHub Pages
@@ -144,6 +168,18 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
 - 16 Aug (Arsalan): after mechanics are clean, build a "house": floors with
   games, an elevator; many games; instructions in many languages; leaderboards
   and tournaments (maybe prizes) later. See roadmap.
+- 16 Aug ~14:30 (Arsalan, after testing the phone build: "works fine, looks
+  good"): add more games (Chess and others), make it a building with more
+  floors, work on the exterior, "a crazy design, twirly building", asked
+  whether the rules allow it. Rules check on the DoraHacks page: no restriction
+  on buildings or design; scored criteria include Creativity/Originality and
+  Performance on mobile. Decision (Claude, at his request): 3x3 parcels for the
+  budget, the ground-floor lounge unchanged, a generated diagrid tower over the
+  plaza with a game room + rooftop, elevator = pad + teleport panel. Screenshots
+  in docs/screenshots/tower-*.jpg for his reaction.
+- 16 Aug: game boards on phones are the controller (finger-sized cells); the
+  "Show board" toggle only exists for Connect Four (its strip). Confirmed by
+  Arsalan's phone test ("show/hide board doesn't do much for some games").
 
 ## 6. Roadmap (ordered)
 
@@ -215,6 +251,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 14:45 tower + floors + elevator: scene 3x3 parcels (lounge centred, garden ring, path), models/tower.glb (diagrid ribs, two annular slabs, railings, glowing rims, crown, `_collider` meshes) + models/canopy.glb from tools/gen-models.py, columns, elevator pads + floor panel + rideTo, FLOORS/ZONES per floor (game room corners for Chess / Backgammon / Croc Snap / Ludo as "coming soon"), rooftop terrace, y-aware table proximity + seat snap, spheres replaced (triangles 79k -> 50k), .dclignore trimmed, build:prod script, DEPLOY.md size note
 - 2026-08-16 14:25 phone controller bar: on phones the seated controller is a wide bottom bar (info | game controls | actions) with finger-sized boards (8x8 at 56 units, Dot Lines pitch 60, TTT 96, Pairs 74, Connect Four strip 70x76); TableGame.Controls now takes `phone` + `fullBoard` (was `compact`), `hasStrip` marks games with a "Show board" toggle (Connect Four); spectator mini board desktop-only; help panel 1000 wide on phones; bot-strength control stacked in the phone column; Dot Lines undrawn-edge hints visible; `DEBUG_MOBILE_UI` flag + tools/dev/shot.sh fix
 - 2026-08-16 10:35 scaffold, engine port, sync model, first playable build
 - 2026-08-16 11:05 textures, UI sprites, bar tables, robot token, seat camera
@@ -253,7 +290,7 @@ Checkers (1 table each). Later: Chess, Backgammon, Ludo, Croc Snap on the
 house floors. Entity budget: collapse Reversi / Dot Lines double planes into
 single thin alpha-tested boxes first.
 
-## 10. The house: draft plan (for later, after the buildathon)
+## 10. The house: draft plan (superseded 16 Aug 14:45: the tower with game room + rooftop is built, see State; kept for the leaderboard/tournament ideas)
 
 Goal (Arsalan, 16 Aug): a building where each floor is a game (or several),
 an elevator between floors, many games over time, instructions in many
