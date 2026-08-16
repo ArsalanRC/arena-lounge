@@ -4,7 +4,7 @@
  * mirrors too (see games/dotlines.tsx). Dots are tappable in 3D as well:
  * tap one dot, then a neighbour, to draw the edge between them.
  */
-import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
+import { Entity, Material, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color4, Vector3 } from '@dcl/sdk/math'
 import type { DotLinesGameState } from '../../engine/dotlines'
 import { PALETTE } from '../config'
@@ -26,7 +26,7 @@ const HALF_T = 0.02
 
 /** 0/1 = seat colours (unused for now), 2 = neutral dark line. */
 const LINE_COLORS: Color4[] = [PALETTE.yellow, PALETTE.red, Color4.fromHexString('#2b2320ff')]
-const BOX_TINTS: Color4[] = [Color4.create(0.96, 0.77, 0.1, 0.55), Color4.create(0.89, 0.27, 0.24, 0.55)]
+const BOX_TINTS: Color4[] = [Color4.fromHexString('#f0d27aff'), Color4.fromHexString('#e89a90ff')]
 
 function dotLocal(r: number, c: number): Vector3 {
   const x = -BOARD / 2 + PITCH * (0.5 + c)
@@ -41,17 +41,12 @@ function backingPlane(parent: Entity, z: number): void {
   Material.setPbrMaterial(e, { albedoColor: PALETTE.cream, roughness: 0.95, metallic: 0, castShadows: false })
 }
 
-function fillPlane(parent: Entity, at: Vector3, z: number): Entity {
+/** One thin box per claimed square, poking out of both faces of the board. */
+function fillBox(parent: Entity, at: Vector3): Entity {
   const e = engine.addEntity()
-  Transform.create(e, { parent, position: Vector3.create(at.x, at.y, z), scale: Vector3.create(PITCH * 0.86, PITCH * 0.86, 1) })
-  MeshRenderer.setPlane(e)
-  Material.setPbrMaterial(e, {
-    albedoColor: BOX_TINTS[0],
-    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_BLEND,
-    roughness: 1,
-    metallic: 0,
-    castShadows: false
-  })
+  Transform.create(e, { parent, position: Vector3.create(at.x, at.y, 0), scale: Vector3.create(PITCH * 0.86, PITCH * 0.86, HALF_T * 2 + 0.006) })
+  MeshRenderer.setBox(e)
+  Material.setPbrMaterial(e, { albedoColor: BOX_TINTS[0], roughness: 1, metallic: 0, castShadows: false })
   VisibilityComponent.create(e, { visible: false })
   return e
 }
@@ -148,14 +143,13 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
       vLines[r].push(e)
     }
   }
-  // box fills, front and back
-  const fills: Array<[Entity, Entity]>[] = []
+  // box fills
+  const fills: Entity[][] = []
   for (let r = 0; r < ROWS; r++) {
     fills.push([])
     for (let c = 0; c < COLS; c++) {
       const a = dotLocal(r, c)
-      const centre = Vector3.create(a.x + PITCH / 2, a.y - PITCH / 2, 0)
-      fills[r].push([fillPlane(root, centre, -HALF_T - 0.002), fillPlane(root, centre, HALF_T + 0.002)])
+      fills[r].push(fillBox(root, Vector3.create(a.x + PITCH / 2, a.y - PITCH / 2, 0)))
     }
   }
 
@@ -185,7 +179,7 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
     for (let r = 0; r < ROWS; r++)
       for (let c = 0; c < COLS; c++)
         if (owned[r][c] >= 0) {
-          for (const e of fills[r][c]) VisibilityComponent.getMutable(e).visible = false
+          VisibilityComponent.getMutable(fills[r][c]).visible = false
           owned[r][c] = -1
         }
     setSelection(root, null)
@@ -219,17 +213,9 @@ export function createDotLinesView(root: Entity, onAction: (a: DotAction) => voi
           const ownerIdx = o === null ? -1 : o
           if (ownerIdx !== owned[r][c]) {
             owned[r][c] = ownerIdx
-            for (const e of fills[r][c]) {
-              VisibilityComponent.getMutable(e).visible = ownerIdx >= 0
-              if (ownerIdx >= 0)
-                Material.setPbrMaterial(e, {
-                  albedoColor: BOX_TINTS[ownerIdx],
-                  transparencyMode: MaterialTransparencyMode.MTM_ALPHA_BLEND,
-                  roughness: 1,
-                  metallic: 0,
-                  castShadows: false
-                })
-            }
+            const e = fills[r][c]
+            VisibilityComponent.getMutable(e).visible = ownerIdx >= 0
+            if (ownerIdx >= 0) Material.setPbrMaterial(e, { albedoColor: BOX_TINTS[ownerIdx], roughness: 1, metallic: 0, castShadows: false })
           }
         }
     }

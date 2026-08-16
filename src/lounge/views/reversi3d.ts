@@ -58,22 +58,18 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
   box(root, Vector3.create(0, CENTER_Y - BOARD / 2 - rim / 2, 0), Vector3.create(BOARD, rim, depth), PALETTE.woodDark)
   box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD + 0.2, 0.06, 0.26), PALETTE.woodDark)
 
-  // two sprites per cell (front and back face): the felt planes are opaque,
-  // so unlike Connect Four nothing can be seen *through* the board
-  const discs: Array<[Entity, Entity]> = []
+  // one thin box per cell: the alpha-tested disc sprite shows on the front
+  // and back faces (the felt planes are opaque, so nothing shows *through*
+  // the board), and the sides are transparent. One entity instead of two.
+  const discs: Entity[] = []
   for (let r = 0; r < N; r++)
     for (let c = 0; c < N; c++) {
-      const pair: Entity[] = []
-      for (const z of [-(HALF_T + 0.004), HALF_T + 0.004]) {
-        const e = engine.addEntity()
-        const at = cellLocal(r, c)
-        Transform.create(e, { parent: root, position: Vector3.create(at.x, at.y, z), scale: Vector3.create(DISC, DISC, 1) })
-        MeshRenderer.setPlane(e)
-        discMaterial(e, 1, false)
-        VisibilityComponent.create(e, { visible: false })
-        pair.push(e)
-      }
-      discs.push([pair[0], pair[1]])
+      const e = engine.addEntity()
+      Transform.create(e, { parent: root, position: cellLocal(r, c), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.008) })
+      MeshRenderer.setBox(e)
+      discMaterial(e, 1, false)
+      VisibilityComponent.create(e, { visible: false })
+      discs.push(e)
     }
   // one click area for the whole board; the hit point picks the square
   boardHitArea(root, Vector3.create(0, CENTER_Y, 0), Vector3.create(BOARD, BOARD, HALF_T * 2 + 0.06), 'Place disc', (local) => {
@@ -86,12 +82,11 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
   let lastIdx = -1
 
   const setCell = (i: number, v: number, glow: boolean): void => {
-    for (const e of discs[i]) {
-      if (v === 0) VisibilityComponent.getMutable(e).visible = false
-      else {
-        discMaterial(e, v, glow)
-        VisibilityComponent.getMutable(e).visible = true
-      }
+    const e = discs[i]
+    if (v === 0) VisibilityComponent.getMutable(e).visible = false
+    else {
+      discMaterial(e, v, glow)
+      VisibilityComponent.getMutable(e).visible = true
     }
   }
 

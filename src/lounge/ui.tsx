@@ -376,7 +376,7 @@ function HelpPanel() {
   const game = getGame(gameId)
   const info = localeInfo(local.lang)
   const str = stringsFor(local.lang)
-  const rules = info.games[gameId] ?? info.games.connectfour
+  const rules = info.games[gameId] ?? info.games.connectfour ?? { name: game.label, overview: '' }
   const mobile = isMobile()
   const width = mobile ? 780 : 720
   return (

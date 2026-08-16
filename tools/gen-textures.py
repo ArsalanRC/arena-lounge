@@ -157,7 +157,8 @@ def gen_floor():
 
 def gen_rug():
     W = H = 512
-    c1, c2, c3 = hex_rgb('#2b3a5c'), hex_rgb('#4a5f8a'), hex_rgb('#1a2338')
+    # neutral: zones tint this via albedoColor, so keep it light and low-contrast
+    c1, c2, c3 = hex_rgb('#cfc4b4'), hex_rgb('#e6dccb'), hex_rgb('#a89c8a')
     def px(x, y):
         dx, dy = x + 0.5 - W / 2, y + 0.5 - H / 2
         d = math.hypot(dx, dy) / (W / 2)     # 0 centre .. 1 edge

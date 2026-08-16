@@ -4,12 +4,22 @@ import { connectFourGame } from './connectfour'
 import { dotLinesGame } from './dotlines'
 import { reversiGame } from './reversi'
 
-const GAMES: Record<GameId, TableGame> = {
+const GAMES: Partial<Record<GameId, TableGame>> = {
   connectfour: connectFourGame as TableGame,
   dotlines: dotLinesGame as TableGame,
   reversi: reversiGame as TableGame
 }
 
 export function getGame(id: string): TableGame {
-  return GAMES[(id as GameId) in GAMES ? (id as GameId) : 'connectfour']
+  return GAMES[id as GameId] ?? (connectFourGame as TableGame)
+}
+
+/** Display name for a game id even before its plugin exists (zone banners). */
+export const GAME_NAMES: Record<GameId, string> = {
+  connectfour: 'Connect Four',
+  dotlines: 'Dot Lines',
+  reversi: 'Reversi',
+  tictactoe: 'Tic Tac Toe',
+  matchpairs: 'Match Pairs',
+  checkers: 'Checkers'
 }

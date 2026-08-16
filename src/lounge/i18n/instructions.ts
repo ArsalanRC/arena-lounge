@@ -10,7 +10,7 @@ export interface LocaleInfo {
   /** Language name in its own language, for the picker. */
   name: string
   rtl: boolean
-  games: Record<GameId, { name: string; overview: string }>
+  games: Partial<Record<GameId, { name: string; overview: string }>>
 }
 
 export const LOCALES: LocaleInfo[] = [
@@ -30,6 +30,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi is the classic 8×8 disc-flip strategy game. Place your disc on an empty square that flanks at least one straight line of enemy discs with your own colour at the far end. All flanked discs flip to your colour. Player with the most discs when neither side can move wins."
+      },
+      "tictactoe": {
+        "name": "Tic Tac Toe",
+        "overview": "Tic Tac Toe is a classic two-player game played on a 3×3 grid. Players take turns placing their mark, X or O, aiming to get three in a row before their opponent."
+      },
+      "matchpairs": {
+        "name": "Match Pairs",
+        "overview": "Flip cards two at a time to find matching pairs. When you find a match the pair is yours and you flip again immediately. When you miss, both cards flip back and the turn passes. Game ends when every pair is claimed, most pairs wins. Solo: challenge yourself to clear the board in fewer moves."
+      },
+      "checkers": {
+        "name": "Checkers",
+        "overview": "Checkers (American Draughts) is a two-player strategy game on the dark squares of an 8×8 board. Each side starts with 12 men; the goal is to capture every opposing piece or block the opponent so they have no legal move."
       }
     }
   },
@@ -49,6 +61,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi es el clásico juego de estrategia de voltear discos en un tablero 8×8. Coloca tu disco en una casilla vacía que flanquee al menos una línea recta de discos enemigos con uno tuyo al otro extremo. Todos los discos flanqueados se voltean a tu color. Gana el jugador con más discos cuando ninguno pueda mover."
+      },
+      "tictactoe": {
+        "name": "Tres en raya",
+        "overview": "Tres en Raya es un juego clásico de dos jugadores en una cuadrícula de 3×3. Los jugadores alternan colocando X u O, intentando alinear tres antes que el rival."
+      },
+      "matchpairs": {
+        "name": "Busca parejas",
+        "overview": "Voltea cartas de dos en dos para encontrar pares iguales. Si encuentras un par, es tuyo y vuelves a voltear inmediatamente. Si fallas, ambas cartas se vuelven a girar y pasa el turno. La partida termina cuando todos los pares están reclamados, gana quien tenga más. En solitario: intenta limpiar el tablero en menos movimientos."
+      },
+      "checkers": {
+        "name": "Damas",
+        "overview": "Las damas (American Draughts) son un juego para dos jugadores en las casillas oscuras de un tablero 8×8. Cada lado empieza con 12 piezas; el objetivo es capturar todas las del rival o dejarlo sin jugadas legales."
       }
     }
   },
@@ -68,6 +92,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi é o clássico jogo de virar discos em tabuleiro 8×8. Coloque seu disco em uma casa vazia que flanqueie pelo menos uma linha reta de discos inimigos com seu próprio disco na outra ponta. Todos os discos flanqueados viram para sua cor. O jogador com mais discos quando ninguém puder jogar vence."
+      },
+      "tictactoe": {
+        "name": "Jogo da velha",
+        "overview": "Tic Tac Toe é um jogo clássico para dois jogadores em uma grade 3×3. Os jogadores se revezam colocando sua marca, X ou O, tentando alinhar três antes do oponente."
+      },
+      "matchpairs": {
+        "name": "Jogo da memória",
+        "overview": "Vire cartas duas de cada vez para encontrar pares. Quando encontrar um par, ele é seu e você vira novamente. Quando errar, ambas as cartas voltam e o turno passa. O jogo termina quando todos os pares forem encontrados, quem tiver mais pares vence. Solo: desafie-se a limpar o tabuleiro em menos movimentos."
+      },
+      "checkers": {
+        "name": "Damas",
+        "overview": "Damas (American Draughts) é jogado nas casas escuras de um tabuleiro 8×8. Cada lado começa com 12 peças; o objetivo é capturar todas as peças adversárias ou bloquear o oponente."
       }
     }
   },
@@ -87,6 +123,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi ist das klassische 8×8-Scheiben-Umdreh-Strategiespiel. Setze deine Scheibe auf ein leeres Feld, das mindestens eine gerade Linie gegnerischer Scheiben mit deiner eigenen Farbe am anderen Ende einschließt. Alle eingeschlossenen Scheiben werden umgedreht. Wer die meisten Scheiben hat, wenn keine Seite mehr ziehen kann, gewinnt."
+      },
+      "tictactoe": {
+        "name": "Tic Tac Toe",
+        "overview": "Tic Tac Toe ist ein klassisches Zweispielerspiel auf einem 3×3-Raster. Spieler setzen abwechselnd ihr Zeichen, X oder O, und versuchen, drei in einer Reihe zu bekommen."
+      },
+      "matchpairs": {
+        "name": "Memo-Spiel",
+        "overview": "Decke jeweils zwei Karten auf, um passende Paare zu finden. Bei einem Treffer gehört das Paar dir und du deckst sofort nochmal auf. Bei einem Fehlversuch werden beide Karten nach kurzer Pause wieder umgedreht und der Zug geht weiter. Das Spiel endet, wenn alle Paare gefunden sind, die meisten Paare gewinnen. Solo: Versuche, das Brett in möglichst wenigen Zügen zu räumen."
+      },
+      "checkers": {
+        "name": "Dame",
+        "overview": "Dame (American Draughts) wird auf den dunklen Feldern eines 8×8-Bretts gespielt. Jede Seite startet mit 12 Steinen; Ziel ist es, alle gegnerischen Steine zu schlagen oder den Gegner so zu blockieren, dass er keinen legalen Zug hat."
       }
     }
   },
@@ -106,6 +154,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi est le classique jeu de stratégie de retournement de disques sur un plateau 8×8. Placez votre disque sur une case vide qui flanque au moins une ligne droite de disques ennemis avec un des vôtres à l'autre bout. Tous les disques flanqués se retournent à votre couleur. Le joueur avec le plus de disques quand aucun ne peut jouer gagne."
+      },
+      "tictactoe": {
+        "name": "Morpion",
+        "overview": "Le Morpion est un jeu classique à deux joueurs sur une grille 3×3. Les joueurs alternent en plaçant X ou O pour aligner trois symboles avant l'adversaire."
+      },
+      "matchpairs": {
+        "name": "Jeu de mémoire",
+        "overview": "Retournez deux cartes à la fois pour trouver des paires identiques. Si vous trouvez une paire, elle est à vous et vous rejouez immédiatement. Si vous vous trompez, les deux cartes se retournent et le tour passe. La partie se termine quand toutes les paires sont prises, celui qui en a le plus gagne. En solo : essayez de vider le plateau en moins de coups."
+      },
+      "checkers": {
+        "name": "Jeu de dames",
+        "overview": "Les dames (variante américaine) se jouent à deux sur les cases sombres d'un plateau 8×8. Chaque camp commence avec 12 pions ; le but est de capturer tous les pions adverses ou de bloquer l'adversaire sans coup légal."
       }
     }
   },
@@ -125,6 +185,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi è il classico gioco di dischi da girare su tabellone 8×8. Piazza il tuo disco su una casella vuota che fiancheggi almeno una linea retta di dischi nemici con il tuo colore all'estremità. Tutti i dischi fiancheggiati si girano al tuo colore. Il giocatore con più dischi quando nessuno può muovere vince."
+      },
+      "tictactoe": {
+        "name": "Tris",
+        "overview": "Tic Tac Toe è un classico a due giocatori su una griglia 3×3. I giocatori si alternano piazzando il loro simbolo, X o O, cercando di allinearne tre prima dell'avversario."
+      },
+      "matchpairs": {
+        "name": "Gioco di memoria",
+        "overview": "Gira le carte due alla volta per trovare coppie. Quando trovi una coppia è tua e giri di nuovo. Quando sbagli, entrambe le carte si rigirano e il turno passa. La partita finisce quando tutte le coppie sono trovate, chi ne ha di più vince. Solitario: sfida te stesso a pulire il tabellone in meno mosse."
+      },
+      "checkers": {
+        "name": "Dama",
+        "overview": "La dama (American Draughts) si gioca sulle caselle scure di una scacchiera 8×8. Ogni lato inizia con 12 pezzi; l'obiettivo è catturare tutti i pezzi avversari o bloccare l'avversario."
       }
     }
   },
@@ -144,6 +216,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi to strategiczna gra z odwracaniem dysków na planszy 8×8. Otocz dyski przeciwnika swoimi, aby je odwrócić. Kto ma więcej dysków, gdy nikt nie może grać, wygrywa."
+      },
+      "tictactoe": {
+        "name": "Kółko i krzyżyk",
+        "overview": "Kółko i krzyżyk to klasyczna gra dwuosobowa na siatce 3×3. Gracze na zmianę stawiają X lub O, starając się ustawić trzy w rzędzie."
+      },
+      "matchpairs": {
+        "name": "Dobierz pary",
+        "overview": "Odwracaj karty po dwie, szukając par. Znalazłeś parę, twoja i dodatkowy ruch. Nie pasuje, karty wracają. Wygrywa ten z większą liczbą par. Solo: mniej ruchów = lepiej."
+      },
+      "checkers": {
+        "name": "Warcaby",
+        "overview": "Warcaby (American Draughts) to gra dwuosobowa na ciemnych polach planszy 8×8. Każda strona ma 12 pionków; celem jest zbicie wszystkich pionków przeciwnika lub zablokowanie go."
       }
     }
   },
@@ -163,6 +247,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi 8×8 disk çevirme strateji oyunudur. Rakip diskleri kendi renginle çevreleyerek çevir. Kimse oynayamadığında en çok disk kazanır."
+      },
+      "tictactoe": {
+        "name": "SOS Oyunu",
+        "overview": "XOX, 3×3 ızgarada oynanan klasik iki kişilik oyundur. Oyuncular sırayla X veya O işaretini koyar, üç hizaya getiren kazanır."
+      },
+      "matchpairs": {
+        "name": "Eş Bul",
+        "overview": "Eşleşen çiftleri bulmak için kartları ikişer çevir. Eşleşme bulursan çiftin olur ve tekrar çevirirsin. Eşleşmezse kapanır ve sıra geçer. En çok çifti toplayan kazanır. Solo: az hamle = iyi."
+      },
+      "checkers": {
+        "name": "Dama",
+        "overview": "Dama (Amerikan kuralları) 8×8 tahtanın koyu karelerinde iki oyunculudur. Her taraf 12 taşla başlar; tüm rakip taşları almayı veya hareket edemez hale getirmeyi hedefle."
       }
     }
   },
@@ -182,6 +278,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Реверси",
         "overview": "Реверси, стратегия с переворотом дисков на поле 8×8. Зажмите ряд вражеских дисков вашим цветом. Побеждает тот, у кого больше дисков, когда никто не может ходить."
+      },
+      "tictactoe": {
+        "name": "Крестики-нолики",
+        "overview": "Крестики-нолики, классическая игра на двоих на сетке 3×3. Игроки по очереди ставят свой знак, X или O, стремясь собрать три в ряд раньше соперника."
+      },
+      "matchpairs": {
+        "name": "Найди пару",
+        "overview": "Переворачивайте карты по две для поиска пар. Нашли пару, ваша и ещё ход. Не совпало, карты закрываются. Побеждает тот, у кого больше пар. Соло: меньше ходов, лучше."
+      },
+      "checkers": {
+        "name": "Шашки",
+        "overview": "Шашки (американский вариант), игра на двоих на тёмных клетках доски 8×8. У каждой стороны 12 шашек; цель, захватить все шашки противника или заблокировать его."
       }
     }
   },
@@ -201,6 +309,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "黑白棋",
         "overview": "黑白棋是经典的8×8翻转棋策略游戏。在空格上放置棋子，用你的颜色夹住对方的一条直线棋子，被夹住的棋子全部翻转。双方都无法落子时棋子多的一方获胜。"
+      },
+      "tictactoe": {
+        "name": "井字棋",
+        "overview": "井字棋是经典的双人3×3格子游戏。交替放置X或O标记，率先连成三子者获胜。"
+      },
+      "matchpairs": {
+        "name": "配对翻牌",
+        "overview": "每次翻两张牌寻找匹配的对。找到匹配则获得该对并立即再翻。未匹配则牌翻回背面，轮到下一位。所有对被找到后游戏结束, 获得最多对的玩家获胜。单人模式：挑战用更少步数清空棋盘。"
+      },
+      "checkers": {
+        "name": "西洋跳棋",
+        "overview": "西洋跳棋（美式）在8×8棋盘的深色格子上进行。每位玩家12枚棋子，目标是吃掉对方所有棋子或使对方无法走棋。"
       }
     }
   },
@@ -220,6 +340,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "リバーシ",
         "overview": "リバーシは8×8のディスク反転戦略ゲーム。空きマスにディスクを置き、自分のディスクで相手のディスクを一直線に挟むと反転。どちらも打てなくなった時にディスクが多い方が勝ち。"
+      },
+      "tictactoe": {
+        "name": "三目並べ",
+        "overview": "三目並べは3×3のグリッドで遊ぶ古典的な2人用ゲーム。XまたはOを交互に置き、先に3つ並べた方が勝ちです。"
+      },
+      "matchpairs": {
+        "name": "マッチペア",
+        "overview": "カードを2枚ずつめくってペアを探す。一致すればそのペアを獲得し、もう一度めくれる。不一致なら裏に戻してターン交代。全ペアが取られたらゲーム終了, 最多ペアの人が勝ち。ソロ: 少ない手数でクリアを目指そう。"
+      },
+      "checkers": {
+        "name": "チェッカー",
+        "overview": "チェッカー（アメリカン・ドラフツ）は8×8の暗い色のマスで2人が対戦。各プレイヤーは12個の駒でスタートし、相手の駒を全て取るか動けなくすると勝ちです。"
       }
     }
   },
@@ -239,6 +371,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "रिवर्सी",
         "overview": "8×8 बोर्ड पर गोटियां घेरकर पलटें। ज़्यादा गोटियां जीतती हैं।"
+      },
+      "tictactoe": {
+        "name": "टिक-टैक-टो",
+        "overview": "टिक टैक टो 3×3 ग्रिड का क्लासिक खेल है। पहले तीन चिह्न एक पंक्ति में लगाने वाला जीतता है।"
+      },
+      "matchpairs": {
+        "name": "जोड़ी मिलाओ",
+        "overview": "दो पत्ते पलटें, मिलान खोजें। ज़्यादा जोड़ियां बनाएं।"
+      },
+      "checkers": {
+        "name": "चेकर्स",
+        "overview": "चेकर्स (American Draughts) 8×8 बोर्ड के गहरे वर्गों पर दो खिलाड़ियों का खेल है।"
       }
     }
   },
@@ -258,6 +402,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Reversi",
         "overview": "Reversi adalah permainan strategi balik-cakram 8×8 klasik. Tempatkan cakrammu di kotak kosong yang mengapit setidaknya satu garis lurus cakram musuh dengan warnamu di ujung jauh. Semua cakram yang terjepit berubah ke warnamu. Pemain dengan cakram terbanyak saat kedua sisi tidak bisa bergerak menang."
+      },
+      "tictactoe": {
+        "name": "Tic Tac Toe",
+        "overview": "Tic Tac Toe adalah permainan klasik dua pemain di kisi 3×3. Pemain bergiliran menempatkan tanda, X atau O, bertujuan mendapatkan tiga sejajar sebelum lawan."
+      },
+      "matchpairs": {
+        "name": "Cocok Pasangan",
+        "overview": "Balik kartu dua sekaligus untuk menemukan pasangan yang cocok. Saat menemukan kecocokan, pasangan itu milikmu dan kamu balik lagi segera. Saat meleset, kedua kartu kembali tertutup dan giliran pindah. Permainan berakhir saat semua pasangan diklaim, pasangan terbanyak menang. Solo: tantang dirimu menyelesaikan papan dalam langkah lebih sedikit."
+      },
+      "checkers": {
+        "name": "Dam",
+        "overview": "Dam (American Draughts) adalah permainan strategi dua pemain di kotak gelap papan 8×8. Setiap sisi memulai dengan 12 bidak; tujuannya adalah menangkap semua bidak lawan atau memblokir lawan sehingga tidak punya langkah legal."
       }
     }
   },
@@ -277,6 +433,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Lật Cờ",
         "overview": "Reversi là trò chiến thuật lật đĩa 8×8 kinh điển. Đặt đĩa lên ô trống kẹp ít nhất một đường thẳng đĩa địch với đĩa của bạn ở đầu kia. Tất cả đĩa bị kẹp đổi màu. Người nhiều đĩa hơn khi cả hai không thể đi nữa thắng."
+      },
+      "tictactoe": {
+        "name": "Cờ Ca-rô 3x3",
+        "overview": "Tic Tac Toe là trò chơi cổ điển hai người trên lưới 3×3. Người chơi luân phiên đặt dấu, X hoặc O, nhắm đến ba dấu liên tiếp trước đối thủ."
+      },
+      "matchpairs": {
+        "name": "Ghép Đôi",
+        "overview": "Lật hai lá bài mỗi lần để tìm cặp khớp. Tìm được cặp, cặp thuộc về bạn và bạn lật tiếp. Không khớp, cả hai úp lại và chuyển lượt. Kết thúc khi mọi cặp được nhận, nhiều cặp hơn thắng. Solo: thách thức bản thân hoàn thành ít nước hơn."
+      },
+      "checkers": {
+        "name": "Cờ Đam",
+        "overview": "Checkers (Cờ đam Mỹ) là trò chơi chiến thuật hai người trên ô tối của bàn 8×8. Mỗi bên bắt đầu với 12 quân; mục tiêu là bắt hết quân đối phương hoặc chặn để họ không có nước hợp lệ."
       }
     }
   },
@@ -296,6 +464,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Baligtad",
         "overview": "Ang Reversi ay ang klasikong 8×8 disc-flip strategy game. Ilagay ang disc mo sa isang bakanteng square na naka-flank ng kahit isang linya ng kalaban na disc kasama ang sarili mong kulay sa dulo. Lahat ng na-flank na disc ay nag-flip sa kulay mo. Ang manlalaro na may pinakamaraming disc kapag wala nang makagalaw ang panalo."
+      },
+      "tictactoe": {
+        "name": "Tik-Tak-To",
+        "overview": "Ang Tic Tac Toe ay isang klasikong laro ng dalawang manlalaro sa 3×3 grid. Maglagay ng X o O, unang makakuha ng tatlong magkakasunod ang panalo."
+      },
+      "matchpairs": {
+        "name": "Magkapares",
+        "overview": "Mag-flip ng dalawang cards nang sabay para makahanap ng magkatugmang pairs. Kapag nakakita ng match, ang pair ay sa iyo at mag-flip ka ulit agad. Kapag hindi tugma, pareho bumabalik at lumilipat ang turn. Nagtatapos kapag lahat ng pair ay na-claim, pinakamaraming pairs ang panalo. Solo: subukan mong i-clear ang board sa mas kaunting moves."
+      },
+      "checkers": {
+        "name": "Dama",
+        "overview": "Ang Checkers (American Draughts) ay isang two-player strategy game sa mga dark squares ng 8×8 board. Ang bawat panig ay nagsisimula ng 12 men; ang layunin ay mahuli lahat ng piyesa ng kalaban o i-block sila na walang legal na galaw."
       }
     }
   },
@@ -315,6 +495,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "রিভার্সি",
         "overview": "৮×৮ বোর্ডে ডিস্ক ফ্ল্যাঙ্ক করে উল্টান।"
+      },
+      "tictactoe": {
+        "name": "ক্রস-জিরো",
+        "overview": "টিক ট্যাক টো ৩×৩ গ্রিডে ক্লাসিক। তিন এক সারিতে আগে রাখুন।"
+      },
+      "matchpairs": {
+        "name": "জোড়া মেলাও",
+        "overview": "দুটি পাতা উল্টান, মিল খুঁজুন। বেশি জোড়া জিতবে।"
+      },
+      "checkers": {
+        "name": "চেকার্স",
+        "overview": "চেকার্স ৮×৮ বোর্ডে কৌশল খেলা।"
       }
     }
   },
@@ -334,6 +526,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "रिव्हर्सी",
         "overview": "8×8 बोर्डवर गोट्या घेरून उलटवा."
+      },
+      "tictactoe": {
+        "name": "फुल्ली-क्रॉस",
+        "overview": "टिक टॅक टो 3×3 ग्रिडवरचा क्लासिक. तीन एका ओळीत आधी ठेवा."
+      },
+      "matchpairs": {
+        "name": "जोडी जुळवा",
+        "overview": "दोन पत्ते उलटवा, जोड्या शोधा."
+      },
+      "checkers": {
+        "name": "चेकर्स",
+        "overview": "चेकर्स 8×8 बोर्डवर दोन खेळाडूंचा खेळ."
       }
     }
   },
@@ -353,6 +557,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "ரிவர்சி",
         "overview": "8×8 போர்டில் எதிரி வட்டுகளை புரட்டுங்கள்."
+      },
+      "tictactoe": {
+        "name": "டிக்-டாக்-டோ",
+        "overview": "டிக் டாக் டோ 3×3 கட்டத்தில் கிளாசிக் விளையாட்டு."
+      },
+      "matchpairs": {
+        "name": "ஜோடி சேர்",
+        "overview": "இரண்டு கார்டுகள் புரட்டி ஜோடி கண்டுபிடியுங்கள்."
+      },
+      "checkers": {
+        "name": "செக்கர்ஸ்",
+        "overview": "செக்கர்ஸ் 8×8 போர்டில் இரு வீரர்களின் விளையாட்டு."
       }
     }
   },
@@ -372,6 +588,18 @@ export const LOCALES: LocaleInfo[] = [
       "reversi": {
         "name": "Flip Game",
         "overview": "Reversi na di classic 8×8 disc-flip strategy game. Place your disc for empty square wey flank at least one straight line of enemy discs with your own colour for di far end. All flanked discs flip to your colour. Player with most discs when nobody fit move win."
+      },
+      "tictactoe": {
+        "name": "X and O",
+        "overview": "Tic Tac Toe na classic two-player game for 3×3 grid. Players take turns to put their mark, X or O, try to get three for a row before di opponent."
+      },
+      "matchpairs": {
+        "name": "Match Pair",
+        "overview": "Flip two cards at a time to find matching pairs. When you find match, di pair na yours and you flip again immediately. When you miss, both cards flip back and turn pass. Game end when every pair don claim, most pairs win. Solo: challenge yourself to clear board for fewer moves."
+      },
+      "checkers": {
+        "name": "Draught",
+        "overview": "Checkers (American Draughts) na two-player strategy game for di dark squares of 8×8 board. Each side start with 12 men; di goal na to capture every opponent piece or block dem so dem no get legal move."
       }
     }
   }

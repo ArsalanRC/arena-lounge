@@ -27,15 +27,70 @@ export interface TableDef {
   position: Vector3
   /** Rotation around Y in degrees; 0 = board faces -Z (towards spawn). */
   rotationY: number
+  /** Zone the table belongs to (rug tint, banner). */
+  zone: number
 }
 
-/** Four tables in a shallow arc north of the spawn point (flagship game in the middle). */
-export const TABLES: TableDef[] = [
-  { id: 0, gameId: 'dotlines', label: 'Table 1', position: Vector3.create(7.6, 0, 20.4), rotationY: 48 },
-  { id: 1, gameId: 'connectfour', label: 'Table 2', position: Vector3.create(13.1, 0, 18.2), rotationY: 16 },
-  { id: 2, gameId: 'connectfour', label: 'Table 3', position: Vector3.create(18.9, 0, 18.2), rotationY: -16 },
-  { id: 3, gameId: 'reversi', label: 'Table 4', position: Vector3.create(24.4, 0, 20.4), rotationY: -48 }
+/** Centre of the round plaza the corners face; the kiosk and sign live south of it. */
+export const PLAZA = Vector3.create(16, 0, 17.5)
+
+export interface ZoneDef {
+  id: number
+  gameId: GameId
+  /** Zone centre on the ring around the plaza. */
+  position: Vector3
+  /** Rug tint (multiplies the neutral rug texture). */
+  rug: Color4
+  /** Banner colour. */
+  banner: Color4
+  /** Number of tables in the corner (side by side along the tangent). */
+  tables: number
+}
+
+/**
+ * Six corners around the plaza, entrance (spawn) to the south. Empty corners
+ * are reserved for games that are not built yet: they get their rug and
+ * banner only once a table exists.
+ */
+export const ZONES: ZoneDef[] = [
+  { id: 0, gameId: 'connectfour', position: Vector3.create(7.5, 0, 12), rug: Color4.fromHexString('#3f8fa3ff'), banner: Color4.fromHexString('#1f4e5fff'), tables: 2 },
+  { id: 1, gameId: 'dotlines', position: Vector3.create(5.5, 0, 19.5), rug: Color4.fromHexString('#d9c08aff'), banner: Color4.fromHexString('#a5843dff'), tables: 1 },
+  { id: 2, gameId: 'matchpairs', position: Vector3.create(10.5, 0, 26), rug: Color4.fromHexString('#a68bd6ff'), banner: Color4.fromHexString('#6b4fa3ff'), tables: 1 },
+  { id: 3, gameId: 'checkers', position: Vector3.create(21.5, 0, 26), rug: Color4.fromHexString('#c46b6bff'), banner: Color4.fromHexString('#7a2e2eff'), tables: 1 },
+  { id: 4, gameId: 'reversi', position: Vector3.create(26.5, 0, 19.5), rug: Color4.fromHexString('#6fae7cff'), banner: Color4.fromHexString('#2f6b46ff'), tables: 1 },
+  { id: 5, gameId: 'tictactoe', position: Vector3.create(24.5, 0, 12), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1 }
 ]
+
+/** Games that have a plugin today; zones for other games stay empty until then. */
+export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi']
+
+/** Yaw (degrees) so that a table's front (-Z) points at `target`. */
+export function yawToward(from: Vector3, target: Vector3): number {
+  return (Math.atan2(-(target.x - from.x), -(target.z - from.z)) * 180) / Math.PI
+}
+
+function buildTables(): TableDef[] {
+  const out: TableDef[] = []
+  let n = 0
+  for (const z of ZONES) {
+    if (!BUILT_GAMES.includes(z.gameId)) continue
+    const yaw = yawToward(z.position, PLAZA)
+    // tangent direction (perpendicular to the line towards the plaza) for side-by-side tables
+    const t = (yaw * Math.PI) / 180
+    const tx = Math.cos(t)
+    const tz = -Math.sin(t)
+    for (let i = 0; i < z.tables; i++) {
+      const off = (i - (z.tables - 1) / 2) * 3.4
+      const pos = Vector3.create(z.position.x + tx * off, 0, z.position.z + tz * off)
+      out.push({ id: n, gameId: z.gameId, label: `Table ${n + 1}`, position: pos, rotationY: yawToward(pos, PLAZA), zone: z.id })
+      n++
+    }
+  }
+  return out
+}
+
+/** Tables actually present in the scene (derived from ZONES + BUILT_GAMES). */
+export const TABLES: TableDef[] = buildTables()
 
 /** Base network sync id for table entities (table i uses SYNC_TABLE_BASE + i). */
 export const SYNC_TABLE_BASE = 100

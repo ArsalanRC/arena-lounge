@@ -7,7 +7,7 @@ Run from the repo root:  python3 tools/extract-instructions.py [path-to-game-pla
 import json, os, sys, glob
 
 src = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/PR-PROJECT/game-platform/messages')
-GAMES = ['connectfour', 'dotlines', 'reversi']
+GAMES = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers']
 NATIVE = {
   'en': 'English', 'de': 'Deutsch', 'es': 'Español', 'pt': 'Português', 'fr': 'Français', 'it': 'Italiano',
   'pl': 'Polski', 'tr': 'Türkçe', 'ru': 'Русский', 'ar': 'العربية', 'fa': 'فارسی', 'ur': 'اردو', 'hi': 'हिन्दी',
@@ -49,7 +49,7 @@ ts = ['/**',
       '  /** Language name in its own language, for the picker. */',
       '  name: string',
       '  rtl: boolean',
-      '  games: Record<GameId, { name: string; overview: string }>',
+      '  games: Partial<Record<GameId, { name: string; overview: string }>>',
       '}',
       '',
       'export const LOCALES: LocaleInfo[] = ' + json.dumps(out, ensure_ascii=False, indent=2),
