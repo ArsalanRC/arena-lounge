@@ -392,3 +392,144 @@ for y in (0, 8, 16):
     prism(sh_pads, 0, 0, 1.1, y + 0.005, y + 0.04, 24)
     box_mesh(sh_rings, (0, y + 2.6, -half), (half * 2 + 0.2, 0.08, 0.08))
 write_glb('models/shaft.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [COLUMN, GLASS, GLOW_CYAN, GLOW_CYAN, COLLIDER])
+
+# ------------------------------------------------------------------ decor (static, one entity at the plaza)
+# Glass facade around the ground floor (conical band just inside the ribs) with
+# the entrance gap, the entrance portal (pylons + arched canopy + glow strip),
+# string lights between the plaza columns, and the directory board. Baked at
+# world positions relative to the plaza centre; the scene places one entity.
+def rib_radius(y):
+    return R_BASE + (R_TOP - R_BASE) * (y / H)
+
+# The scene's south (towards the spawn) is glTF -z; the client keeps the sign of z
+# for imported models, so a gap centred on angle -90 deg (0, y, -r) faces the entrance.
+ENTRANCE_ANGLE = -math.pi / 2
+GAP_HALF = math.radians(13)
+
+facade, facade_coll = Mesh(), Mesh()
+Y0, Y1 = 1.0, 7.55
+LEVELS = 4
+for k in range(LEVELS):
+    ya = Y0 + (Y1 - Y0) * k / LEVELS
+    yb = Y0 + (Y1 - Y0) * (k + 1) / LEVELS
+    ra, rb = rib_radius(ya) - 0.35, rib_radius(yb) - 0.35
+    for i in range(CIRC_SEGS):
+        a0, a1 = 2 * math.pi * i / CIRC_SEGS, 2 * math.pi * (i + 1) / CIRC_SEGS
+        mid = (a0 + a1) / 2
+        d = math.atan2(math.sin(mid - ENTRANCE_ANGLE), math.cos(mid - ENTRANCE_ANGLE))
+        if abs(d) < GAP_HALF:
+            continue
+        p00 = (ra * math.cos(a0), ya, ra * math.sin(a0)); p01 = (ra * math.cos(a1), ya, ra * math.sin(a1))
+        p10 = (rb * math.cos(a0), yb, rb * math.sin(a0)); p11 = (rb * math.cos(a1), yb, rb * math.sin(a1))
+        facade.quad(p00, p10, p11, p01)
+        facade_coll.quad(p00, p10, p11, p01)
+        facade_coll.quad(p01, p11, p10, p00)
+# top and bottom rails of the facade (copper), and a glowing strip along the top edge
+facade_rail, facade_glow = Mesh(), Mesh()
+def partial_ring(mesh, y, r, w, h, skip_gap):
+    frames = []
+    for i in range(CIRC_SEGS + 1):
+        th = 2 * math.pi * i / CIRC_SEGS
+        c = (r * math.cos(th), y, r * math.sin(th)); tan = (-math.sin(th), 0.0, math.cos(th)); rad = (math.cos(th), 0.0, math.sin(th))
+        frames.append((c, tan, rad))
+    # split into runs that avoid the gap
+    run = []
+    for f in frames:
+        th = math.atan2(f[0][2], f[0][0])
+        d = math.atan2(math.sin(th - ENTRANCE_ANGLE), math.cos(th - ENTRANCE_ANGLE))
+        if skip_gap and abs(d) < GAP_HALF + 0.02:
+            if len(run) > 1: box_strip(mesh, run, w, h)
+            run = []
+        else:
+            run.append(f)
+    if len(run) > 1: box_strip(mesh, run, w, h)
+partial_ring(facade_rail, Y0, rib_radius(Y0) - 0.35, 0.16, 0.16, True)
+partial_ring(facade_rail, Y1, rib_radius(Y1) - 0.35, 0.16, 0.16, True)
+partial_ring(facade_glow, Y1 + 0.14, rib_radius(Y1) - 0.35, 0.10, 0.10, True)
+
+# entrance portal at the gap: two pylons, an arched canopy, glow strip under the canopy
+portal, portal_glow = Mesh(), Mesh()
+r_gap = rib_radius(0) - 0.35
+gx = r_gap * math.sin(GAP_HALF) + 0.9   # half distance between pylons
+gz = -r_gap                              # portal line (south)
+for x in (-gx, gx):
+    box_mesh(portal, (x, 2.75, gz), (0.9, 5.5, 0.9))
+    box_mesh(portal, (x, 5.6, gz), (1.2, 0.2, 1.2))
+# arch: box strip along a half ellipse from pylon to pylon
+arch = []
+for i in range(25):
+    t = i / 24
+    a = math.pi * (1 - t)
+    x = gx * math.cos(a)
+    y = 5.6 + 2.2 * math.sin(a)
+    c = (x, y, gz); tan = (math.sin(a), -math.cos(a) * 2.2 / gx, 0.0)
+    L = math.hypot(tan[0], tan[1]) or 1
+    tan = (tan[0] / L, tan[1] / L, 0.0)
+    arch.append((c, tan, (0.0, 0.0, 1.0)))
+box_strip(portal, arch, 0.5, 0.9)
+box_strip(portal_glow, [((c[0], c[1] - 0.32, c[2]), tan, rad) for (c, tan, rad) in arch], 0.12, 0.12)
+box_mesh(portal, (0, 8.6, gz), (5.4, 1.4, 0.3))       # marquee plate for the sign text
+box_mesh(portal_glow, (0, 7.85, gz), (5.6, 0.1, 0.34))
+
+# string lights: catenaries between the seven ground columns around the plaza (r 11.4)
+lights = Mesh()
+col_angles = [160, 200, 259, 304, 0, 56, 101]
+def col_pos(deg):
+    t = math.radians(deg)
+    # scene: x = sin, z = cos (config.ts ring()); glTF keeps x and z
+    return (11.4 * math.sin(t), 11.4 * math.cos(t))
+pairs = [(200, 259), (259, 304), (304, 0), (0, 56), (56, 101), (101, 160)]
+for (a, b) in pairs:
+    (x0, z0), (x1, z1) = col_pos(a), col_pos(b)
+    for i in range(1, 12):
+        t = i / 12
+        sag = 0.9 * math.sin(math.pi * t)
+        box_mesh(lights, (x0 + (x1 - x0) * t, 7.0 - sag, z0 + (z1 - z0) * t), (0.12, 0.12, 0.12))
+# a second string ring lower around the plaza tree at r 5.4
+for i in range(24):
+    a = 2 * math.pi * i / 24
+    box_mesh(lights, (5.4 * math.cos(a), 3.6 + 0.25 * math.sin(a * 6), 5.4 * math.sin(a)), (0.11, 0.11, 0.11))
+
+# directory board near the gateway (text is a TextShape in the scene): dark plate + copper frame
+board, board_frame = Mesh(), Mesh()
+box_mesh(board, (0, 0, 0), (2.6, 1.9, 0.08))
+box_mesh(board_frame, (0, 0.98, 0), (2.8, 0.1, 0.16))
+box_mesh(board_frame, (0, -0.98, 0), (2.8, 0.1, 0.16))
+box_mesh(board_frame, (-1.35, 0, 0), (0.1, 2.0, 0.16))
+box_mesh(board_frame, (1.35, 0, 0), (0.1, 2.0, 0.16))
+prism(board_frame, 0, 0, 0.06, -2.2, -1.0, 8)
+
+DECOR_MATERIALS = [
+    {"name": "copper", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.44, 0.20, 1], "metallicFactor": 0.7, "roughnessFactor": 0.35}},
+    GLASS,
+    {"name": "glowTeal", "pbrMetallicRoughness": {"baseColorFactor": [0.55, 0.9, 0.95, 1], "metallicFactor": 0.1, "roughnessFactor": 0.4}, "emissiveFactor": [0.3, 0.85, 0.95]},
+    {"name": "warmLights", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.9, 0.7, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [1.0, 0.8, 0.5]},
+    {"name": "boardDark", "pbrMetallicRoughness": {"baseColorFactor": [0.09, 0.08, 0.08, 1], "metallicFactor": 0.1, "roughnessFactor": 0.8}},
+    COLLIDER,
+]
+write_glb('models/decor.glb', [
+    ("facade", facade, 1), ("facade_rail", facade_rail, 0), ("facade_glow", facade_glow, 2),
+    ("portal", portal, 0), ("portal_glow", portal_glow, 2), ("lights", lights, 3),
+    ("facade_collider", facade_coll, 5),
+], DECOR_MATERIALS)
+write_glb('models/board.glb', [("plate", board, 0), ("frame", board_frame, 1)], [DECOR_MATERIALS[4], DECOR_MATERIALS[0]])
+
+# lounge furniture props: sofa (2 meshes) and bar counter with stools (2 meshes)
+sofa_base, sofa_cushion = Mesh(), Mesh()
+box_mesh(sofa_base, (0, 0.22, 0), (2.0, 0.44, 0.9))
+box_mesh(sofa_base, (0, 0.55, 0.36), (2.0, 0.7, 0.2))
+box_mesh(sofa_base, (-0.92, 0.42, 0), (0.16, 0.5, 0.9))
+box_mesh(sofa_base, (0.92, 0.42, 0), (0.16, 0.5, 0.9))
+box_mesh(sofa_cushion, (-0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
+box_mesh(sofa_cushion, (0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
+write_glb('models/sofa.glb', [("base", sofa_base, 0), ("cushions", sofa_cushion, 1)], [
+    {"name": "sofaBase", "pbrMetallicRoughness": {"baseColorFactor": [0.16, 0.36, 0.42, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}},
+    {"name": "cushion", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.68, 0.45, 1], "metallicFactor": 0.0, "roughnessFactor": 0.95}},
+])
+bar_wood, bar_top = Mesh(), Mesh()
+box_mesh(bar_wood, (0, 0.55, 0), (3.6, 1.1, 0.6))
+box_mesh(bar_top, (0, 1.13, 0), (3.8, 0.06, 0.8))
+for x in (-1.2, 0, 1.2):
+    prism(bar_wood, x, -1.0, 0.05, 0, 0.7, 8)
+    prism(bar_top, x, -1.0, 0.24, 0.7, 0.78, 12)
+write_glb('models/bar.glb', [("wood", bar_wood, 0), ("top", bar_top, 1)], [WOOD_DARK, {"name": "barTop", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.44, 0.20, 1], "metallicFactor": 0.6, "roughnessFactor": 0.35}}])
