@@ -78,9 +78,11 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 ## Roadmap
 
 - [ ] Persistent leaderboard and streaks (Multiplayer Server + Storage)
-- [ ] Second game type at the third table (Dot Lines or Ludo from the same engine family)
-- [ ] Sound effects (drop, win) and a win celebration
-- [ ] Localised UI (EN/DE/ES)
+- [x] Second game type: Dot Lines (dots and boxes) at Table 3
+- [ ] More games from the same engine family (Reversi, Checkers, Ludo)
+- [x] Sound effects (drop, win chime, your-move ding)
+- [x] How-to-play panel in 19 languages (rules from Game Arena), lounge tips EN/DE/ES
+- [ ] Full lounge UI localisation
 
 ## Credits
 

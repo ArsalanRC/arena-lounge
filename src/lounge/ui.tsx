@@ -22,6 +22,7 @@ import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
 import { TURN_LIMIT_MS, UI } from './config'
 import type { GameContext } from './games/types'
+import { LOCALES, localeInfo, stringsFor } from './i18n'
 import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
 import {
   act,
@@ -78,7 +79,7 @@ function Btn(props: {
     <UiEntity
       uiTransform={{
         width: props.width ?? 'auto',
-        minWidth: 130,
+        minWidth: typeof props.width === 'number' && props.width < 130 ? props.width : 130,
         height: 56,
         margin: props.margin ?? 5,
         padding: { left: 18, right: 18 },
@@ -200,6 +201,7 @@ function TableCard() {
       {bothTaken && state !== null && <t.game.Controls state={state} ctx={contextFor(t)} compact={false} />}
       {bothTaken && (
         <Row>
+          <Btn label="?" color={UI.panelSoft} onClick={() => (local.helpOpen = true)} width={56} />
           <Btn label="Not now" color={UI.panelSoft} textColor={UI.muted} onClick={() => (local.dismissedTableId = t.def.id)} width={135} />
         </Row>
       )}
@@ -211,7 +213,8 @@ function TableCard() {
       )}
       {!bothTaken && (
         <Row>
-          {a.addr === '' && s.addr === '' && <Btn label="Play the house bot" color={UI.panelSoft} onClick={() => sitWithBot(t)} width={275} />}
+          {a.addr === '' && s.addr === '' && <Btn label="Play the house bot" color={UI.panelSoft} onClick={() => sitWithBot(t)} width={230} />}
+          <Btn label="?" color={UI.panelSoft} onClick={() => (local.helpOpen = true)} width={56} />
           <Btn label="Not now" color={UI.panelSoft} textColor={UI.muted} onClick={() => (local.dismissedTableId = t.def.id)} width={135} />
         </Row>
       )}
@@ -287,7 +290,67 @@ function Controller() {
         {b.status === Status.Finished && opp.addr !== '' && <Btn label="Play again" onClick={() => rematch(t)} />}
         {opp.bot && b.status !== Status.Playing && <Btn label="Dismiss bot" color={UI.panelSoft} onClick={() => dismissBot(t)} />}
         {mobile && <Btn label={local.showMiniBoard ? 'Hide board' : 'Show board'} color={UI.panelSoft} onClick={() => (local.showMiniBoard = !local.showMiniBoard)} />}
+        <Btn label="?" color={UI.panelSoft} onClick={() => (local.helpOpen = true)} width={56} />
         <Btn label="Stand up" color={UI.danger} onClick={() => stand(t)} />
+      </UiEntity>
+    </UiEntity>
+  )
+}
+
+// ---------------------------------------------------------------- how to play
+
+/** Which game the help should describe: the table you sit at, else the nearest. */
+function helpTable(): Table | undefined {
+  const mine = findMySeat()
+  if (mine) return mine.table
+  return local.nearTableId >= 0 ? getTable(local.nearTableId) : getTable(0)
+}
+
+function HelpPanel() {
+  if (!local.helpOpen) return null
+  const t = helpTable()
+  if (!t) return null
+  const info = localeInfo(local.lang)
+  const str = stringsFor(local.lang)
+  const game = info.games[t.game.id]
+  const mobile = isMobile()
+  const width = mobile ? 760 : 700
+  return (
+    <UiEntity
+      uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+      uiBackground={{ color: Color4.create(0, 0, 0, 0.45) }}
+      onMouseDown={() => (local.helpOpen = false)}
+    >
+      <UiEntity
+        uiTransform={{ width, height: 'auto', padding: 20, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
+        uiBackground={{ texture: { src: IMG.panel }, textureMode: 'stretch' }}
+        onMouseDown={() => {
+          /* swallow clicks inside the panel */
+        }}
+      >
+        <Text value={`${str.howToPlay} · ${game.name}`} size={26} />
+        <UiEntity
+          uiTransform={{ width: '100%', height: 'auto', margin: { top: 10, bottom: 6 } }}
+          uiText={{ value: game.overview, fontSize: 19, color: UI.text, textAlign: info.rtl ? 'top-right' : 'top-left' }}
+        />
+        <UiEntity uiTransform={{ width: '100%', height: 'auto', margin: { top: 4 } }} uiText={{ value: `• ${str.howToSit}`, fontSize: 18, color: UI.muted, textAlign: info.rtl ? 'top-right' : 'top-left' }} />
+        <UiEntity uiTransform={{ width: '100%', height: 'auto', margin: { top: 4 } }} uiText={{ value: `• ${str.move[t.game.id]}`, fontSize: 18, color: UI.muted, textAlign: info.rtl ? 'top-right' : 'top-left' }} />
+        <UiEntity uiTransform={{ width: '100%', height: 'auto', margin: { top: 4, bottom: 8 } }} uiText={{ value: `• ${str.timer}`, fontSize: 18, color: UI.muted, textAlign: info.rtl ? 'top-right' : 'top-left' }} />
+        <Text value={str.language} size={17} color={UI.muted} margin={{ top: 4 }} />
+        <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {LOCALES.map((l) => (
+            <UiEntity
+              key={l.code}
+              uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 40, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+              uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: local.lang === l.code ? UI.accent : UI.panelSoft }}
+              uiText={{ value: l.name, fontSize: 16, color: UI.text, textAlign: 'middle-center' }}
+              onMouseDown={() => (local.lang = l.code)}
+            />
+          ))}
+        </UiEntity>
+        <Row margin={{ top: 8 }}>
+          <Btn label={str.gotIt} onClick={() => (local.helpOpen = false)} width={180} />
+        </Row>
       </UiEntity>
     </UiEntity>
   )
@@ -300,5 +363,6 @@ const LoungeUi = () => (
     <Banner />
     <TableCard />
     <Controller />
+    <HelpPanel />
   </UiEntity>
 )

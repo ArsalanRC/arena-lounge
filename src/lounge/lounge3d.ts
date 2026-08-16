@@ -5,8 +5,10 @@
 import {
   Billboard,
   BillboardMode,
+  ColliderLayer,
   Entity,
   Font,
+  InputAction,
   Material,
   MeshCollider,
   MeshRenderer,
@@ -14,10 +16,12 @@ import {
   TextShape,
   TextureWrapMode,
   Transform,
-  engine
+  engine,
+  pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { PALETTE, SCENE_SIZE, SPAWN } from './config'
+import { local } from './tables'
 
 function solid(pos: Vector3, scale: Vector3, color: Color4, opts: { collide?: boolean; rotY?: number; parent?: Entity } = {}): Entity {
   const e = engine.addEntity()
@@ -77,6 +81,52 @@ function lamp(x: number, z: number): void {
   })
 }
 
+/** A post with a glowing "?" cube next to the spawn: tap to open How to play. */
+function infoKiosk(x: number, z: number): void {
+  cylinder(Vector3.create(x, 0.6, z), Vector3.create(0.14, 1.2, 0.14), PALETTE.woodDark, true)
+  const cube = engine.addEntity()
+  Transform.create(cube, { position: Vector3.create(x, 1.45, z), rotation: Quaternion.fromEulerDegrees(0, 45, 0), scale: Vector3.create(0.42, 0.42, 0.42) })
+  MeshRenderer.setBox(cube)
+  MeshCollider.setBox(cube, ColliderLayer.CL_POINTER)
+  Material.setPbrMaterial(cube, {
+    albedoColor: PALETTE.frame,
+    emissiveColor: Color3.fromHexString('#3fc1d9'),
+    emissiveIntensity: 0.8,
+    roughness: 0.3,
+    metallic: 0.2
+  })
+  const label = engine.addEntity()
+  Transform.create(label, { position: Vector3.create(x, 1.45, z) })
+  TextShape.create(label, {
+    text: '?',
+    fontSize: 4,
+    font: Font.F_SANS_SERIF,
+    textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
+    textColor: Color4.White(),
+    outlineWidth: 0.1,
+    outlineColor: Color3.Black()
+  })
+  Billboard.create(label, { billboardMode: BillboardMode.BM_Y })
+  const hint = engine.addEntity()
+  Transform.create(hint, { position: Vector3.create(x, 2.0, z) })
+  TextShape.create(hint, {
+    text: 'How to play',
+    fontSize: 1.4,
+    font: Font.F_SANS_SERIF,
+    textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
+    textColor: Color4.White(),
+    outlineWidth: 0.12,
+    outlineColor: Color3.Black()
+  })
+  Billboard.create(hint, { billboardMode: BillboardMode.BM_Y })
+  pointerEventsSystem.onPointerDown(
+    { entity: cube, opts: { button: InputAction.IA_POINTER, hoverText: 'How to play', maxDistance: 10 } },
+    () => {
+      local.helpOpen = true
+    }
+  )
+}
+
 export function buildLounge(): void {
   const half = SCENE_SIZE / 2
 
@@ -119,6 +169,9 @@ export function buildLounge(): void {
   lamp(26.5, 24)
   lamp(5.5, 12)
   lamp(26.5, 12)
+
+  // info kiosk beside the spawn path
+  infoKiosk(SPAWN.x - 3.2, SPAWN.z + 1.5)
 
   // welcome sign facing the spawn point
   const sign = engine.addEntity()

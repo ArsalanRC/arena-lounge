@@ -1,0 +1,65 @@
+/**
+ * Minimal i18n for the lounge: localised rule overviews for every game come
+ * from Game Arena (23 languages, see instructions.ts); the few lounge-specific
+ * help sentences are written natively per language below and fall back to
+ * English for languages not covered yet.
+ */
+import type { GameId } from '../games/types'
+import { LOCALES, type LocaleInfo } from './instructions'
+
+export { LOCALES }
+
+export interface LoungeStrings {
+  howToPlay: string
+  howToSit: string
+  move: Record<GameId, string>
+  timer: string
+  language: string
+  gotIt: string
+}
+
+const EN: LoungeStrings = {
+  howToPlay: 'How to play',
+  howToSit: 'Walk up to a table and tap "Sit as Yellow" or "Sit as Red". Alone? Tap "Play the house bot".',
+  move: {
+    connectfour: 'Tap a column to drop your disc.',
+    dotlines: 'Tap a dot, then a neighbouring dot, to draw the line between them. Closing a box gives you another turn.'
+  },
+  timer: 'You have 60 seconds per move. Stand up whenever you like.',
+  language: 'Language',
+  gotIt: 'Got it'
+}
+
+const DE: LoungeStrings = {
+  howToPlay: 'So wird gespielt',
+  howToSit: 'Geh zu einem Tisch und tippe auf "Sit as Yellow" oder "Sit as Red". Allein? Tippe auf "Play the house bot".',
+  move: {
+    connectfour: 'Tippe auf eine Spalte, um deinen Stein fallen zu lassen.',
+    dotlines: 'Tippe auf einen Punkt und dann auf einen Nachbarpunkt, um die Linie dazwischen zu zeichnen. Wer ein Kästchen schließt, ist noch einmal dran.'
+  },
+  timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
+  language: 'Sprache',
+  gotIt: 'Alles klar'
+}
+
+const ES: LoungeStrings = {
+  howToPlay: 'Cómo se juega',
+  howToSit: 'Acércate a una mesa y toca "Sit as Yellow" o "Sit as Red". ¿Solo? Toca "Play the house bot".',
+  move: {
+    connectfour: 'Toca una columna para soltar tu ficha.',
+    dotlines: 'Toca un punto y luego un punto vecino para dibujar la línea entre ellos. Si cierras una caja, vuelves a jugar.'
+  },
+  timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
+  language: 'Idioma',
+  gotIt: 'Entendido'
+}
+
+const STRINGS: Record<string, LoungeStrings> = { en: EN, de: DE, es: ES }
+
+export function stringsFor(code: string): LoungeStrings {
+  return STRINGS[code] ?? EN
+}
+
+export function localeInfo(code: string): LocaleInfo {
+  return LOCALES.find((l) => l.code === code) ?? LOCALES[0]
+}
