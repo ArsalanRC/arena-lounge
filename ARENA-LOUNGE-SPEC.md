@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 11:40 (Europe/Berlin)
+Last update: 2026-08-16 11:45 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -33,7 +33,7 @@ Last update: 2026-08-16 11:40 (Europe/Berlin)
 ## 3. Names, links, accounts
 
 - Working title: **Arena Lounge** (rename possible; World name follows the NAME bought)
-- Repo path: `~/PR-PROJECT/arena-lounge` (git, branch main). **Not pushed yet.** Target: public repo under **ArsalanRC** (default; org fgamesforfun-star is the alternative, decision pending)
+- Repo: https://github.com/ArsalanRC/arena-lounge (public, MIT), local `~/PR-PROJECT/arena-lounge`. Work goes through branches + PRs; `gh` needs the ArsalanRC token: run `eval "$(direnv export bash)"` from `~/PR-PROJECT/game-platform` first (its .envrc holds GH_TOKEN), then cd here
 - World name placeholder in scene.json: `arenalounge.dcl.eth` (NAME not bought yet, see docs/DEPLOY.md)
 - Decentraland account: logged into Creator Hub + desktop Explorer as ArsalanRC (address 0x3451...5e9f seen in preview)
 - Related repo: game-platform (`~/PR-PROJECT/game-platform`, org fgamesforfun-star): 28 pure-TS game engines with tests, 23 locales of UI + instructions. Connect Four engine copied from there verbatim.
@@ -67,7 +67,7 @@ version works as well", 16 Aug 11:30):
 - Tests: 30 vitest tests on the pure engine. `pnpm build` strict type-check green.
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
 
-Not done: push to GitHub, buy NAME, deploy, DoraHacks form, GitHub Pages
+Not done: buy NAME, deploy, DoraHacks form, GitHub Pages
 landing page (Arsalan's standing repo ritual), phone screenshots for the README.
 
 ## 5. Decisions log
@@ -143,3 +143,4 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:33 DEPLOY.md, SUBMISSION.md
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
+- 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
