@@ -109,7 +109,7 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 
 - [x] Fourteen games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe, Snakes & Ladders, Sea Strike, Dice Royale duel
 - [ ] Card games (hidden hands) if wanted: Color Clash, Card Lines
-- [x] The tower: game room, sky room and rooftop terrace, elevator pads, night lighting (fixed 21:00 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights)
+- [x] The tower: game room, sky room and rooftop terrace, elevator pads, night lighting (fixed 20:00 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights), curved neon marquee over the entrance
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena)
 - [x] Lounge UI (cards, controller, toasts, signs, hints) in EN / DE / ES / PT / FR, other languages fall back to English
