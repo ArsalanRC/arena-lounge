@@ -1,0 +1,21 @@
+# dependencies / build output
+node_modules
+bin/
+main.crdt
+main1.crdt
+package-lock.json
+yarn.lock
+
+# AI skill packs are restored with `npx skills experimental_install`
+.claude/skills/
+
+# local env / secrets
+.env
+.env.*
+
+# OS / editor noise
+.DS_Store
+**/.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

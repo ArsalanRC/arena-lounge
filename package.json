@@ -1,0 +1,31 @@
+{
+  "name": "arena-lounge",
+  "version": "1.0.0",
+  "description": "Arena Lounge: a mobile-first social game lounge for Decentraland (Friendzone Mobile Buildathon 2026)",
+  "scripts": {
+    "start": "sdk-commands start",
+    "deploy": "sdk-commands deploy",
+    "build": "sdk-commands build",
+    "upgrade-sdk": "pnpm add -D @dcl/sdk@latest @dcl/sdk-commands@latest",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@dcl/js-runtime": "7.26.0",
+    "@dcl/sdk": "latest",
+    "@dcl/sdk-commands": "7.26.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 120,
+    "trailingComma": "none"
+  },
+  "license": "MIT",
+  "private": true
+}

@@ -1,0 +1,7 @@
+# Decentraland's SDK expects a flat node_modules (it resolves '../ecs' relative
+# to @dcl/js-runtime), so we keep pnpm but use the hoisted linker.
+nodeLinker: hoisted
+allowBuilds:
+  esbuild: true
+  '@dcl/sdk-commands': false
+  protobufjs: false

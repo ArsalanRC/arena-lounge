@@ -1,0 +1,68 @@
+{
+  "ecs7": true,
+  "runtimeVersion": "7",
+  "display": {
+    "title": "Arena Lounge",
+    "description": "A cosy game lounge built for phones: walk up to a table, take a seat, play Connect Four against a friend or the house bot. Mobile-first social hangout for the Friendzone Buildathon.",
+    "navmapThumbnail": "images/scene-thumbnail.png",
+    "favicon": "favicon_asset"
+  },
+  "owner": "Arsalan Khadim",
+  "contact": {
+    "name": "ArsalanRC",
+    "email": ""
+  },
+  "main": "bin/index.js",
+  "tags": [
+    "game",
+    "social",
+    "multiplayer",
+    "mobile",
+    "connect four",
+    "lounge"
+  ],
+  "scene": {
+    "parcels": [
+      "0,0",
+      "1,0",
+      "0,1",
+      "1,1"
+    ],
+    "base": "0,0"
+  },
+  "spawnPoints": [
+    {
+      "name": "lounge-entrance",
+      "default": true,
+      "position": {
+        "x": [
+          15,
+          17
+        ],
+        "y": [
+          0,
+          0
+        ],
+        "z": [
+          9,
+          11
+        ]
+      },
+      "cameraTarget": {
+        "x": 16,
+        "y": 1.5,
+        "z": 21
+      }
+    }
+  ],
+  "featureToggles": {
+    "voiceChat": "enabled",
+    "portableExperiences": "enabled"
+  },
+  "requiredPermissions": [
+    "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE"
+  ],
+  "worldConfiguration": {
+    "name": "arenalounge.dcl.eth"
+  }
+}
