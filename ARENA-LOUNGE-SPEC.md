@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 15:05 (Europe/Berlin)
+Last update: 2026-08-16 15:25 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -154,6 +154,7 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 15:25 Tic Tac Toe plugin (engine ported, 32 tests): 3x3 upright board with X/O sprite boxes, 3x3 touch grid; coral corner (Table 5)
 - 2026-08-16 15:05 plaza layout live: six corners (ZONES in config, tables derived), tinted rugs, banner poles ("coming soon" for unbuilt games), plaza tree, benches, gateway with lanterns, kiosk; Reversi discs and Dot Lines fills as single thin boxes (entities 568 -> 479)
 - 2026-08-16 14:30 UI cleanup: separate Hint and Toast, Panel/Row/Segmented atoms, consistent card + controller, How-to-play with one tab per hosted game and the language grid behind a toggle
 - 2026-08-16 14:05 ARSALAN: repo made PRIVATE until submission ("code not usable by everyone yet"), the rest is fine. Pages moved into the portfolio repo (same URL), profile card points at the page. Decisions taken (Claude, at his request): six game corners around one plaza (no elevator for the buildathon); games = Connect Four, Dot Lines, Reversi + Tic Tac Toe, Match Pairs, Checkers. Work order: UI/popup cleanup + per-game how-to-play tabs, presentable plaza, then the three games.
