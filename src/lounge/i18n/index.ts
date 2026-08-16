@@ -105,6 +105,7 @@ export interface LoungeStrings {
     drawRepetition: string
     youPlay: (mark: string) => string
     tapEmpty: string
+    anyBoard: string
     pairs: string
     noMatch: string
     findTwin: string
@@ -147,7 +148,8 @@ const EN: LoungeStrings = {
     chess: 'Tap one of your pieces, then a highlighted square. Pawns that reach the last rank become queens.',
     crocsnap: 'Tap any open tooth. One of them is the trigger: press it and you lose the round.',
     backgammon: 'Tap "Roll the dice", then a checker and a marked point (or Off to bear off). Each die is one move.',
-    ludo: 'Tap "Roll the die", then one of the piece buttons. A six leaves the yard and rolls again; land on a rival to send it home.'
+    ludo: 'Tap "Roll the die", then one of the piece buttons. A six leaves the yard and rolls again; land on a rival to send it home.',
+    supertictactoe: 'Tap a square in the highlighted board. The square you pick sends your rival to the board with that position; win three boards in a row.'
   },
   timer: 'You have 60 seconds per move. Stand up whenever you like.',
   language: 'Language',
@@ -226,6 +228,7 @@ const EN: LoungeStrings = {
     drawRepetition: 'Draw by repetition',
     youPlay: (mark) => `You play ${mark}`,
     tapEmpty: 'Tap an empty square',
+    anyBoard: 'Any open board: tap a square',
     pairs: 'Pairs',
     noMatch: 'No match, flipping back…',
     findTwin: 'Find its twin',
@@ -268,7 +271,8 @@ const DE: LoungeStrings = {
     chess: 'Tippe auf eine deiner Figuren und dann auf ein markiertes Feld. Ein Bauer auf der letzten Reihe wird zur Dame.',
     crocsnap: 'Tippe auf einen freien Zahn. Einer davon ist der Auslöser: Wer ihn drückt, verliert die Runde.',
     backgammon: 'Tippe auf "Würfeln", dann auf einen Stein und ein markiertes Feld (oder Raus zum Herauswürfeln). Jeder Würfel ist ein Zug.',
-    ludo: 'Tippe auf "Würfeln" und dann auf einen der Figuren-Buttons. Mit einer Sechs kommst du raus und würfelst noch einmal; wer auf einem Gegner landet, schickt ihn zurück.'
+    ludo: 'Tippe auf "Würfeln" und dann auf einen der Figuren-Buttons. Mit einer Sechs kommst du raus und würfelst noch einmal; wer auf einem Gegner landet, schickt ihn zurück.',
+    supertictactoe: 'Tippe auf ein Feld im markierten Brett. Dein Feld schickt den Gegner in das Brett mit derselben Position; wer drei Bretter in einer Reihe gewinnt, gewinnt.'
   },
   timer: 'Du hast 60 Sekunden pro Zug. Aufstehen kannst du jederzeit.',
   language: 'Sprache',
@@ -347,6 +351,7 @@ const DE: LoungeStrings = {
     drawRepetition: 'Remis durch Stellungswiederholung',
     youPlay: (mark) => `Du spielst ${mark}`,
     tapEmpty: 'Tippe auf ein leeres Feld',
+    anyBoard: 'Freie Wahl: tippe auf ein Feld in einem offenen Brett',
     pairs: 'Paare',
     noMatch: 'Kein Paar, wird umgedreht…',
     findTwin: 'Finde das Gegenstück',
@@ -389,7 +394,8 @@ const ES: LoungeStrings = {
     chess: 'Toca una de tus piezas y luego una casilla marcada. Un peón que llega a la última fila se convierte en dama.',
     crocsnap: 'Toca cualquier diente libre. Uno de ellos es el gatillo: si lo pulsas, pierdes la ronda.',
     backgammon: 'Toca "Tirar los dados", luego una ficha y un punto marcado (o Fuera para sacarla). Cada dado es un movimiento.',
-    ludo: 'Toca "Tirar el dado" y luego uno de los botones de ficha. Con un seis sales del patio y vuelves a tirar; si caes sobre un rival, lo mandas a casa.'
+    ludo: 'Toca "Tirar el dado" y luego uno de los botones de ficha. Con un seis sales del patio y vuelves a tirar; si caes sobre un rival, lo mandas a casa.',
+    supertictactoe: 'Toca una casilla del tablero marcado. Tu casilla manda al rival al tablero de esa posición; gana quien hace tres tableros en raya.'
   },
   timer: 'Tienes 60 segundos por jugada. Puedes levantarte cuando quieras.',
   language: 'Idioma',
@@ -468,6 +474,7 @@ const ES: LoungeStrings = {
     drawRepetition: 'Tablas por repetición',
     youPlay: (mark) => `Juegas con ${mark}`,
     tapEmpty: 'Toca una casilla vacía',
+    anyBoard: 'Tablero libre: toca una casilla en cualquier tablero abierto',
     pairs: 'Parejas',
     noMatch: 'No coinciden, se dan la vuelta…',
     findTwin: 'Encuentra su pareja',
@@ -510,7 +517,8 @@ const PT: LoungeStrings = {
     chess: 'Toque numa das suas peças e depois numa casa marcada. Um peão que chega à última fila vira dama.',
     crocsnap: 'Toque em qualquer dente livre. Um deles é o gatilho: aperte e você perde a rodada.',
     backgammon: 'Toque em "Lançar os dados", depois numa peça e num ponto marcado (ou Fora para retirar). Cada dado é um movimento.',
-    ludo: 'Toque em "Lançar o dado" e depois num dos botões de peça. Um seis tira a peça da base e joga de novo; caia sobre um rival para mandá-lo de volta.'
+    ludo: 'Toque em "Lançar o dado" e depois num dos botões de peça. Um seis tira a peça da base e joga de novo; caia sobre um rival para mandá-lo de volta.',
+    supertictactoe: 'Toque numa casa do tabuleiro marcado. A sua casa manda o rival para o tabuleiro dessa posição; vence quem faz três tabuleiros em linha.'
   },
   timer: 'Você tem 60 segundos por jogada. Levante-se quando quiser.',
   language: 'Idioma',
@@ -589,6 +597,7 @@ const PT: LoungeStrings = {
     drawRepetition: 'Empate por repetição',
     youPlay: (mark) => `Você joga com ${mark}`,
     tapEmpty: 'Toque numa casa vazia',
+    anyBoard: 'Escolha livre: toque numa casa de qualquer tabuleiro aberto',
     pairs: 'Pares',
     noMatch: 'Não combinam, virando de volta…',
     findTwin: 'Ache o par',
@@ -631,7 +640,8 @@ const FR: LoungeStrings = {
     chess: 'Touche une de tes pièces, puis une case marquée. Un pion qui atteint la dernière rangée devient dame.',
     crocsnap: 'Touche une dent libre. L\'une d\'elles est le déclencheur : appuie dessus et tu perds la manche.',
     backgammon: 'Touche « Lancer les dés », puis un pion et un point marqué (ou Sortie pour le sortir). Chaque dé est un coup.',
-    ludo: 'Touche « Lancer le dé », puis un des boutons de pion. Un six fait sortir un pion et tu relances ; tomber sur un adversaire le renvoie à sa base.'
+    ludo: 'Touche « Lancer le dé », puis un des boutons de pion. Un six fait sortir un pion et tu relances ; tomber sur un adversaire le renvoie à sa base.',
+    supertictactoe: 'Touche une case de la grille en surbrillance. Ta case envoie l\'adversaire dans la grille de même position ; gagne trois grilles alignées.'
   },
   timer: 'Tu as 60 secondes par coup. Lève-toi quand tu veux.',
   language: 'Langue',
@@ -710,6 +720,7 @@ const FR: LoungeStrings = {
     drawRepetition: 'Nulle par répétition',
     youPlay: (mark) => `Tu joues ${mark}`,
     tapEmpty: 'Touche une case vide',
+    anyBoard: 'Choix libre : touche une case dans une grille ouverte',
     pairs: 'Paires',
     noMatch: 'Pas de paire, retournement…',
     findTwin: 'Trouve sa jumelle',

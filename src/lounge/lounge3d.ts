@@ -360,13 +360,13 @@ function buildTower(): void {
   }
   // ground: between the corners, two flanking the entrance path; game room: between its corners
   for (const deg of [160, 200, 259, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
-  for (const deg of [45, 225, 315]) column(deg, 9.9, 8, 16, 0.5) // none in the SE quadrant: that is the elevator landing
+  for (const deg of [112, 158, 202, 338]) column(deg, 9.9, 8, 16, 0.5) // between the game-room corners and clear of both elevators
 
   for (const pad of ELEVATORS) elevatorShaft(pad)
 
   // game room (floor 1): lamps between the corners, planters at the oculus edge
   const y1 = FLOORS[1].y
-  for (const deg of [45, 165, 225, 315]) {
+  for (const deg of [112, 158, 248, 292]) {
     const t = (deg * Math.PI) / 180
     lamp(PLAZA.x + Math.sin(t) * 7.4, PLAZA.z + Math.cos(t) * 7.4, y1)
   }

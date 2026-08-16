@@ -58,6 +58,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Ludo",
         "overview": "Ludo is a strategy board game for 2–4 players. Race your 4 pieces from the yard, around the board, and into your home column to win."
+      },
+      "supertictactoe": {
+        "name": "Super Tic Tac Toe",
+        "overview": "Super Tic Tac Toe is a strategic variant played on a 3×3 meta-grid of 3×3 boards. Win three sub-boards in a row to win the game."
+      },
+      "snakesladders": {
+        "name": "Snakes & Ladders",
+        "overview": "Snakes & Ladders is a classic board game for 2–4 players. Roll the dice, move your piece forward, and race to square 100. Land on a ladder to climb up, but watch out for snakes that slide you down!"
       }
     }
   },
@@ -105,6 +113,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Parchís",
         "overview": "Ludo es un juego de estrategia para 2–4 jugadores. Lleva tus 4 fichas desde el patio, alrededor del tablero, hasta la columna final para ganar."
+      },
+      "supertictactoe": {
+        "name": "Super Tres en raya",
+        "overview": "Super Tres en Raya es una variante estratégica en una meta-cuadrícula de 3×3 formada por tableros de 3×3. Gana tres sub-tableros en línea para ganar la partida."
+      },
+      "snakesladders": {
+        "name": "Serpientes y escaleras",
+        "overview": "Serpientes y Escaleras es un juego clásico para 2–4 jugadores. Tira el dado, avanza y corre hacia la casilla 100. ¡Sube por escaleras y cuidado con las serpientes!"
       }
     }
   },
@@ -152,6 +168,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Ludo",
         "overview": "Ludo é um jogo de estratégia para 2–4 jogadores. Leve suas 4 peças do pátio, ao redor do tabuleiro, até a coluna final para vencer."
+      },
+      "supertictactoe": {
+        "name": "Super Jogo da velha",
+        "overview": "Super Tic Tac Toe é uma variante estratégica jogada em uma meta-grade 3×3 de tabuleiros 3×3. Vença três sub-tabuleiros em linha para ganhar o jogo."
+      },
+      "snakesladders": {
+        "name": "Cobras e escadas",
+        "overview": "Snakes & Ladders é um jogo clássico para 2–4 jogadores. Role os dados, mova sua peça e corra até a casa 100. Pare em uma escada para subir, mas cuidado com as cobras que te fazem descer!"
       }
     }
   },
@@ -199,6 +223,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Mensch ärgere Dich nicht",
         "overview": "Ludo ist ein Strategiespiel für 2–4 Spieler. Bring deine 4 Figuren vom Hof über das Brett ins Ziel, um zu gewinnen."
+      },
+      "supertictactoe": {
+        "name": "Super Tic Tac Toe",
+        "overview": "Super Tic Tac Toe ist eine strategische Variante auf einem 3×3-Metaraster aus 3×3-Feldern. Gewinne drei Unterfelder in einer Reihe, um das Spiel zu gewinnen."
+      },
+      "snakesladders": {
+        "name": "Schlangen & Leitern",
+        "overview": "Snakes & Ladders ist ein klassisches Brettspiel für 2–4 Spieler. Würfle, bewege deine Figur und wettrenne zu Feld 100. Lande auf einer Leiter, um hochzuklettern, aber Vorsicht vor Schlangen, die dich runterrutschen lassen!"
       }
     }
   },
@@ -246,6 +278,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Petits chevaux",
         "overview": "Le Ludo est un jeu de stratégie pour 2 à 4 joueurs. Faites courir vos 4 pions depuis la cour, autour du plateau, jusqu'à votre colonne finale pour gagner."
+      },
+      "supertictactoe": {
+        "name": "Super Morpion",
+        "overview": "Le Super Morpion est une variante stratégique jouée sur une méta-grille 3×3 de grilles 3×3. Gagnez trois sous-grilles alignées pour remporter la partie."
+      },
+      "snakesladders": {
+        "name": "Serpents & échelles",
+        "overview": "Serpents et Échelles est un jeu classique pour 2 à 4 joueurs. Lancez le dé, avancez et foncez vers la case 100. Grimpez les échelles et méfiez-vous des serpents !"
       }
     }
   },
@@ -293,6 +333,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Non t'arrabbiare",
         "overview": "Ludo è un gioco di strategia per 2–4 giocatori. Porta le tue 4 pedine dal recinto, attorno al tabellone, fino alla colonna finale per vincere."
+      },
+      "supertictactoe": {
+        "name": "Super Tris",
+        "overview": "Super Tic Tac Toe è una variante strategica giocata su una meta-griglia 3×3 di tabelle 3×3. Vinci tre sotto-tabelle in fila per vincere la partita."
+      },
+      "snakesladders": {
+        "name": "Scale e serpenti",
+        "overview": "Snakes & Ladders è un classico per 2–4 giocatori. Lancia i dadi, muovi la tua pedina e corri alla casella 100. Fermati su una scala per salire, ma attento ai serpenti che ti fanno scendere!"
       }
     }
   },
@@ -340,6 +388,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Chińczyk",
         "overview": "Chińczyk to strategiczna gra planszowa dla 2–4 graczy. Przeprowadź 4 pionki ze stajni po torze i do kolumny mety, aby wygrać."
+      },
+      "supertictactoe": {
+        "name": "Super kółko i krzyżyk",
+        "overview": "Super Kółko i Krzyżyk to strategiczna wersja na meta-siatce 3×3 z plansz 3×3. Wygraj trzy plansze w rzędzie."
+      },
+      "snakesladders": {
+        "name": "Węże i drabiny",
+        "overview": "Węże i Drabiny to klasyczna gra dla 2–4 graczy. Rzuć kostką i ścigaj się do pola 100. Drabiny podnoszą, węże zsuwają!"
       }
     }
   },
@@ -387,6 +443,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Kızma Birader",
         "overview": "Ludo 2–4 oyunculu bir strateji oyunudur. 4 taşını avludan parkurda ilerlet ve ev sütununa ulaştırarak kazan."
+      },
+      "supertictactoe": {
+        "name": "Süper SOS",
+        "overview": "Süper XOX, 3×3 alt tahtalarından oluşan 3×3 meta-ızgarada oynanan stratejik bir versiyondur. Üç alt tahtayı hizalayan kazanır."
+      },
+      "snakesladders": {
+        "name": "Yılan Merdiven",
+        "overview": "Yılan ve Merdiven 2–4 oyunculu klasik oyundur. Zar at, ilerle ve 100. kareye yarış. Merdivenler çıkarır, yılanlar düşürür!"
       }
     }
   },
@@ -434,6 +498,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Лудо",
         "overview": "Лудо, стратегическая настольная игра для 2–4 игроков. Проведите 4 фишки из двора по дорожке и в домашнюю колонну, чтобы победить."
+      },
+      "supertictactoe": {
+        "name": "Супер крестики-нолики",
+        "overview": "Супер-крестики-нолики, стратегическая вариация на мета-сетке 3×3 из досок 3×3. Выиграйте три поля подряд, чтобы победить."
+      },
+      "snakesladders": {
+        "name": "Змеи и лестницы",
+        "overview": "Змеи и лестницы, классическая настольная игра для 2–4 игроков. Бросайте кости, двигайтесь вперёд и мчитесь к клетке 100. Лестницы поднимают, змеи спускают!"
       }
     }
   },
@@ -481,6 +553,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "飞行棋",
         "overview": "飞行棋是2–4人策略棋盘游戏。将4颗棋子从起点区出发，绕棋盘一周进入终点列，率先完成的玩家获胜。"
+      },
+      "supertictactoe": {
+        "name": "超级井字棋",
+        "overview": "超级井字棋是一种策略变体，在3×3元格中嵌套3×3子棋盘。赢得三个子棋盘连成一线即获胜。"
+      },
+      "snakesladders": {
+        "name": "蛇梯棋",
+        "overview": "蛇梯棋是经典2–4人棋盘游戏。掷骰子移动棋子，目标到达100格。踩到梯子底部往上爬，踩到蛇头往下滑！"
       }
     }
   },
@@ -528,6 +608,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "ルドー",
         "overview": "ルドーは2〜4人向けの戦略ボードゲーム。4つのコマをヤードからボードを一周してホームコラムに入れ、最初にゴールした人が勝ちです。"
+      },
+      "supertictactoe": {
+        "name": "スーパー三目並べ",
+        "overview": "スーパー三目並べは3×3のメタグリッド上に3×3のサブボードを配した戦略的バリエーション。サブボードを3つ並べると勝ちです。"
+      },
+      "snakesladders": {
+        "name": "蛇と梯子",
+        "overview": "蛇と梯子は2〜4人用の古典的ボードゲーム。サイコロを振ってコマを進め、100マスを目指します。はしごに止まれば上に登り、蛇の頭に止まると下に滑ります!"
       }
     }
   },
@@ -575,6 +663,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "लूडो",
         "overview": "लूडो 2–4 खिलाड़ियों का रणनीति बोर्ड गेम है। अपनी 4 गोटियों को होम कॉलम तक पहुंचाएं।"
+      },
+      "supertictactoe": {
+        "name": "सुपर टिक-टैक-टो",
+        "overview": "सुपर टिक टैक टो 3×3 मेटा-ग्रिड पर खेला जाने वाला सामरिक रूपांतर है।"
+      },
+      "snakesladders": {
+        "name": "सांप-सीढ़ी",
+        "overview": "सांप और सीढ़ी 2–4 खिलाड़ियों का क्लासिक बोर्ड गेम है। 100 वर्ग तक पहुंचें।"
       }
     }
   },
@@ -622,6 +718,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Ludo",
         "overview": "Ludo adalah permainan papan strategi untuk 2–4 pemain. Lomba 4 bidakmu dari halaman, mengelilingi papan, dan masuk ke kolom rumah untuk menang."
+      },
+      "supertictactoe": {
+        "name": "Super Tic Tac Toe",
+        "overview": "Super Tic Tac Toe adalah varian strategis yang dimainkan di meta-grid 3×3 dari papan 3×3. Menangkan tiga sub-papan sejajar untuk memenangkan permainan."
+      },
+      "snakesladders": {
+        "name": "Ular Tangga",
+        "overview": "Ular Tangga adalah permainan papan klasik untuk 2–4 pemain. Lempar dadu, gerakkan bidak ke depan, dan berpacu ke kotak 100. Mendarat di tangga untuk naik, tapi hati-hati ular yang menurunkanmu!"
       }
     }
   },
@@ -669,6 +773,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Cờ Cá Ngựa",
         "overview": "Ludo là trò chơi bàn cờ chiến thuật cho 2–4 người. Đua 4 quân từ sân, quanh bàn cờ, và vào cột đích để thắng."
+      },
+      "supertictactoe": {
+        "name": "Siêu Cờ Ca-rô",
+        "overview": "Super Tic Tac Toe là biến thể chiến thuật trên lưới meta 3×3 gồm các bảng 3×3. Thắng ba bảng con liên tiếp để thắng."
+      },
+      "snakesladders": {
+        "name": "Rắn & Thang",
+        "overview": "Rắn & Thang là trò bàn cờ cổ điển cho 2–4 người. Tung xúc xắc, di chuyển quân, và đua đến ô 100. Dừng ở chân thang để leo lên, nhưng coi chừng rắn kéo bạn xuống!"
       }
     }
   },
@@ -716,6 +828,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Ludo",
         "overview": "Ang Ludo ay isang strategic board game para sa 2–4 manlalaro. I-race ang 4 piyesa mo mula sa yard, paikot sa board, at papasok sa home column para manalo."
+      },
+      "supertictactoe": {
+        "name": "Super Tik-Tak-To",
+        "overview": "Ang Super Tic Tac Toe ay isang strategic variant na nilalaro sa 3×3 meta-grid ng 3×3 boards. Manalo ng tatlong sub-board na magkakasunod para manalo."
+      },
+      "snakesladders": {
+        "name": "Ahas at Hagdan",
+        "overview": "Ang Snakes & Ladders ay isang klasikong board game para sa 2–4 manlalaro. I-roll ang dice, igalaw ang piyesa, at mag-unahan papuntang square 100. Tumapak sa hagdan para umakyat, pero mag-ingat sa mga ahas na magpapababa sa iyo!"
       }
     }
   },
@@ -763,6 +883,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "লুডু",
         "overview": "লুডু ২–৪ খেলোয়াড়ের কৌশল বোর্ড গেম। ৪ গুটি হোম কলামে পৌঁছান।"
+      },
+      "supertictactoe": {
+        "name": "সুপার ক্রস-জিরো",
+        "overview": "সুপার টিক ট্যাক টো ৩×৩ মেটা-গ্রিডে কৌশলী রূপান্তর।"
+      },
+      "snakesladders": {
+        "name": "সাপ-সিঁড়ি",
+        "overview": "সাপ ও মই ২–৪ খেলোয়াড়ের ক্লাসিক। ১০০ ঘরে পৌঁছান।"
       }
     }
   },
@@ -810,6 +938,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "लूडो",
         "overview": "लूडो 2–4 खेळाडूंचा रणनीती बोर्ड गेम. 4 गोट्या होम कॉलममध्ये पोहोचवा."
+      },
+      "supertictactoe": {
+        "name": "सुपर फुल्ली-क्रॉस",
+        "overview": "सुपर टिक टॅक टो 3×3 मेटा-ग्रिडवर सामरिक रूपांतर."
+      },
+      "snakesladders": {
+        "name": "साप-शिडी",
+        "overview": "साप-शिड्या 2–4 खेळाडूंचा क्लासिक बोर्ड गेम."
       }
     }
   },
@@ -857,6 +993,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "லூடோ",
         "overview": "லூடோ 2–4 வீரர்களுக்கான உத்தி போர்டு விளையாட்டு."
+      },
+      "supertictactoe": {
+        "name": "சூப்பர் டிக்-டாக்-டோ",
+        "overview": "சூப்பர் டிக் டாக் டோ 3×3 மெட்டா-கட்டத்தில் உத்தி."
+      },
+      "snakesladders": {
+        "name": "பாம்பும் ஏணியும்",
+        "overview": "பாம்பும் ஏணியும் 2–4 வீரர்களுக்கான கிளாசிக்."
       }
     }
   },
@@ -904,6 +1048,14 @@ export const LOCALES: LocaleInfo[] = [
       "ludo": {
         "name": "Ludo",
         "overview": "Ludo na strategy board game for 2–4 people. Race your 4 pieces from di yard, round di board, enter your home column to win."
+      },
+      "supertictactoe": {
+        "name": "Big X and O",
+        "overview": "Super Tic Tac Toe na strategic variant wey dem play for 3×3 meta-grid of 3×3 boards. Win three sub-boards for a row to win di game."
+      },
+      "snakesladders": {
+        "name": "Snake an Ladder",
+        "overview": "Snakes & Ladders na classic board game for 2–4 players. Roll dice, move your piece forward, race go square 100. Land for ladder make you climb up, but watch out for snake wey go slide you down!"
       }
     }
   }

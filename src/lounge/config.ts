@@ -101,11 +101,13 @@ export const ZONES: ZoneDef[] = [
   { id: 6, gameId: 'chess', position: ring(0, 9, 1), rug: Color4.fromHexString('#8f5d8aff'), banner: Color4.fromHexString('#5a2f57ff'), tables: 1, floor: 1 },
   { id: 7, gameId: 'backgammon', position: ring(90, 9, 1), rug: Color4.fromHexString('#a6743fff'), banner: Color4.fromHexString('#6b4423ff'), tables: 1, floor: 1 },
   { id: 8, gameId: 'crocsnap', position: ring(180, 9, 1), rug: Color4.fromHexString('#4f9d6bff'), banner: Color4.fromHexString('#2c5e3fff'), tables: 1, floor: 1 },
-  { id: 9, gameId: 'ludo', position: ring(270, 9, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 }
+  { id: 9, gameId: 'ludo', position: ring(270, 9, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 },
+  { id: 10, gameId: 'supertictactoe', position: ring(45, 9, 1), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 1 },
+  { id: 11, gameId: 'snakesladders', position: ring(225, 9, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 1, floor: 1 }
 ]
 
 /** Games that have a plugin today; zones for other games stay empty until then. */
-export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap', 'backgammon', 'ludo']
+export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap', 'backgammon', 'ludo', 'supertictactoe']
 
 /** Yaw (degrees) so that a table's front (-Z) points at `target`. */
 export function yawToward(from: Vector3, target: Vector3): number {
