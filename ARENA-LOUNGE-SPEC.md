@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 11:55 (Europe/Berlin)
+Last update: 2026-08-16 12:05 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -83,9 +83,8 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
   js-runtime; strict pnpm layout breaks it). Never `pnpm start -p`.
 - 16 Aug: UI is the controller, 3D table is the show (mobile pointer input
   needs crosshair aiming; screen UI is tapped directly).
-- 16 Aug: tables at bar height + first person while seated, because
-  `movePlayerTo` cameraTarget pitch is unreliable in first person; level view
-  sees the board centred.
+- 16 Aug: tables at bar height + first person while seated; level view sees
+  the board centred (cameraTarget aimed at floor height, see gotchas).
 - 16 Aug: discs are sprite planes, not cylinders (triangle budget).
 - 16 Aug (Arsalan): after mechanics are clean, build a "house": floors with
   games, an elevator; many games; instructions in many languages; leaderboards
@@ -127,8 +126,9 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 
 - React-ECS: text with `height: 'auto'` ignores textAlign; nested auto-height
   wrappers eat panel padding. Give explicit heights.
-- `movePlayerTo` after a first-person switch: re-issue avatarTarget once
-  (~450 ms later); do not rely on cameraTarget pitch.
+- `movePlayerTo` measures cameraTarget/avatarTarget from the avatar's base
+  (feet), not the eyes: aim at y = 0 for a level first-person view; a target
+  at 1.6 m height tilts the camera ~42° up. One call is enough.
 - Explorer MCP has no UI-tap tool; anything that must be testable headlessly
   needs a 3D affordance (that is why the robot token exists).
 - `sdk-commands start` rewrites package.json trailing newline; harmless.
@@ -146,5 +146,6 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 12:05 seat camera fixed for rotated tables (aim at floor height; client measures from the feet)
 - 2026-08-16 11:55 Dot Lines plugin (engine ported with 26 tests): two-tap connect-the-dots input, mirrored UI for the far seat, upright double-sided board on Table 3
 - 2026-08-16 11:50 tables made game-agnostic: TableBoard carries gameId + engine state JSON; games plug in via src/lounge/games/types.ts (rules, bot, 3D view, controls); Connect Four is the first plugin (behaviour unchanged)

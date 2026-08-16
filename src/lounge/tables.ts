@@ -392,18 +392,14 @@ export function seatPadWorldPosition(t: Table, seat: Seat): Vector3 {
  */
 function snapToSeat(t: Table, seat: Seat): void {
   const pos = seatPadWorldPosition(t, seat)
-  const target = Vector3.create(t.def.position.x, 1.6, t.def.position.z)
+  // The client measures the look direction from the avatar's base (y = 0),
+  // not from the eyes: a target at 1.6 m height at 1.8 m distance tilts the
+  // camera 42° up. Aiming at floor height gives a level view of the board.
+  const target = Vector3.create(t.def.position.x, 0, t.def.position.z)
   const swallow = () => {
     /* moving the player is a nicety; ignore if the client refuses */
   }
-  movePlayerTo({
-    newRelativePosition: { x: pos.x, y: 0, z: pos.z },
-    cameraTarget: target,
-    avatarTarget: target
-  }).catch(swallow)
-  timers.setTimeout(() => {
-    movePlayerTo({ newRelativePosition: { x: pos.x, y: 0, z: pos.z }, avatarTarget: target }).catch(swallow)
-  }, 450)
+  movePlayerTo({ newRelativePosition: { x: pos.x, y: 0, z: pos.z }, cameraTarget: target, avatarTarget: target }).catch(swallow)
 }
 
 function playerPosition(): Vector3 | null {
