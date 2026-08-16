@@ -2,6 +2,7 @@
 """Generate every procedural texture used by the scene (pure Python, no PIL).
 
 3D:
+  images/croc-face.png     256  green croc head for Croc Snap (alpha disc)
   images/board-face.png    512  frame face with see-through holes + bevel
   images/wood.png          512  warm plank wood (table, walls)
   images/floor.png         512  dark parquet, tiles seamlessly
@@ -353,6 +354,40 @@ def gen_ui_plain():
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
     write_png('images/ui/disc.png', S, S, disc)
 
+# ------------------------------------------------------------------ croc face
+def gen_croc_face(path='images/croc-face.png'):
+    """Round green croc head seen from the front (Croc Snap): eyes, nostrils, a
+    darker rim where the teeth sit; alpha outside the disc."""
+    S = 256
+    green, dark, light = hex_rgb('#3f8f4a'), hex_rgb('#245c2e'), hex_rgb('#7cc07f')
+    def px(x, y):
+        cov = circle_cov(x, y, S / 2, S / 2, S / 2 - 2)
+        if cov <= 0:
+            return (0, 0, 0, 0)
+        u, v = (x + 0.5) / S, (y + 0.5) / S
+        d = math.hypot(u - 0.5, v - 0.5) * 2   # 0 centre .. 1 rim
+        col = mix(green, dark, smoothstep(0.78, 1.0, d) * 0.8)
+        col = mix(col, light, 0.18 * (1 - smoothstep(0.0, 0.7, math.hypot(u - 0.42, v - 0.36) * 2)))
+        n = fbm(x / 22, y / 22, 3) - 0.5
+        col = mix(col, dark, 0.18 * max(0.0, n))   # scales
+        # eyes
+        for ex in (0.36, 0.64):
+            eye = circle_cov(x, y, ex * S, 0.36 * S, 0.11 * S)
+            col = mix(col, (0.97, 0.96, 0.9), eye)
+            pupil = circle_cov(x, y, ex * S, 0.37 * S, 0.05 * S)
+            col = mix(col, (0.08, 0.06, 0.05), pupil)
+            glint = circle_cov(x, y, (ex - 0.02) * S, 0.34 * S, 0.018 * S)
+            col = mix(col, (1, 1, 1), glint)
+        # nostrils
+        for nx in (0.44, 0.56):
+            col = mix(col, dark, circle_cov(x, y, nx * S, 0.62 * S, 0.028 * S))
+        # grin: a dark arc between the nostrils and the rim
+        ang = math.atan2(v - 0.5, u - 0.5)
+        grin = math.exp(-((d - 0.62) ** 2) / 0.002) * (1 if 0.35 < ang < 2.8 else 0)
+        col = mix(col, dark, 0.7 * grin)
+        return (*col, cov)
+    write_png(path, S, S, px)
+
 # ------------------------------------------------------------------ chess pieces
 def _sd_circle(px, py, cx, cy, r):
     return math.hypot(px - cx, py - cy) - r
@@ -472,3 +507,4 @@ if __name__ == '__main__':
     gen_ui_button()
     gen_ui_plain()
     gen_chess_pieces()
+    gen_croc_face()
