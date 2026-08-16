@@ -24,6 +24,8 @@ export const WIN_NONE = 0
 export const WIN_DRAW = 3
 
 export interface GameContext {
+  /** Table root entity: a stable per-table key for plugin-local state. */
+  root: Entity
   /** Seat of the local player at this table, 0 when spectating. */
   mySeat: 0 | SeatNo
   /** True when the local player may act right now. */
