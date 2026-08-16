@@ -203,6 +203,7 @@ export const dotLinesGame: TableGame<DotLinesGameState, DotAction> = {
   label: 'Dot Lines',
   seatNames: ['Yellow', 'Red'],
   seatSprites: [IMG.yellow, IMG.red],
+  seatColors: [UI.yellow, UI.red],
 
   newGame(opening) {
     const s = createInitialState(ENGINE_PLAYERS, ROWS, COLS)

@@ -60,8 +60,14 @@ const WHITE = Color4.White()
 type Margin = UiTransformProps['margin']
 type Width = UiTransformProps['width']
 
-function seatTint(seat: Seat): Color4 {
-  return seat === SEAT_A ? UI.yellow : UI.red
+function seatTint(t: Table, seat: Seat): Color4 {
+  return t.game.seatColors[seat - 1]
+}
+
+/** Black text on light tints, white on dark ones. */
+function textOn(c: Color4): Color4 {
+  const lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+  return lum > 0.55 ? Color4.Black() : UI.text
 }
 
 // ---------------------------------------------------------------- atoms
@@ -207,8 +213,8 @@ function TableCard() {
       )}
       {!bothTaken && (
         <Row>
-          {a.addr === '' && <Btn label={`Sit as ${nameA}`} color={UI.yellow} textColor={Color4.Black()} onClick={() => sit(t, SEAT_A)} width={205} />}
-          {s.addr === '' && <Btn label={`Sit as ${nameB}`} color={UI.red} onClick={() => sit(t, SEAT_B)} width={205} />}
+          {a.addr === '' && <Btn label={`Sit as ${nameA}`} color={seatTint(t, SEAT_A)} textColor={textOn(seatTint(t, SEAT_A))} onClick={() => sit(t, SEAT_A)} width={205} />}
+          {s.addr === '' && <Btn label={`Sit as ${nameB}`} color={seatTint(t, SEAT_B)} textColor={textOn(seatTint(t, SEAT_B))} onClick={() => sit(t, SEAT_B)} width={205} />}
         </Row>
       )}
       {!bothTaken && (
@@ -247,7 +253,8 @@ function Controller() {
   } else if (b.status === Status.Playing) {
     const secs = secondsLeft(b.updatedAt)
     status = myTurn ? `Your move · ${secs}s` : `${opp.name} is thinking… ${secs}s`
-    statusColor = myTurn ? seatTint(seat) : UI.muted
+    statusColor = myTurn ? (seat === SEAT_A ? t.game.seatColors[0] : t.game.seatColors[1]) : UI.muted
+    if (myTurn && textOn(statusColor) !== UI.text) statusColor = UI.text
   } else if (b.winner === Winner.Draw) status = 'Draw! Well played.'
   else if (b.winner === seat) status = 'You win the round!'
   else status = `${opp.name} takes the round`

@@ -6,7 +6,6 @@
  * winning cells + last move), ~120 bytes, rebuilt into the engine's grid
  * state on decode.
  */
-import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import {
   COLS,
@@ -194,6 +193,7 @@ export const connectFourGame: TableGame<ConnectFourGameState, C4Action> = {
   label: 'Connect Four',
   seatNames: ['Yellow', 'Red'],
   seatSprites: [IMG.yellow, IMG.red],
+  seatColors: [UI.yellow, UI.red],
 
   newGame(opening) {
     const s = createInitialState(ENGINE_PLAYERS)
@@ -233,6 +233,3 @@ export const connectFourGame: TableGame<ConnectFourGameState, C4Action> = {
   createView3D: createConnectFourView,
   Controls
 }
-
-// keep Color4 referenced for future per-game tints without an unused-import error
-export const C4_TINTS: [Color4, Color4] = [UI.yellow, UI.red]

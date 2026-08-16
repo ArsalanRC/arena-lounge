@@ -1,0 +1,139 @@
+/**
+ * Reversi on a table: upright double-sided felt board with an 8x8 grid
+ * texture, 64 pooled sprite discs (dark / light) and per-cell colliders so
+ * desktop players can click a square. Seat B sees the board mirrored (they
+ * stand behind it), which the UI mirrors as well.
+ */
+import {
+  ColliderLayer,
+  Entity,
+  InputAction,
+  Material,
+  MaterialTransparencyMode,
+  MeshCollider,
+  MeshRenderer,
+  Transform,
+  VisibilityComponent,
+  engine,
+  pointerEventsSystem
+} from '@dcl/sdk/ecs'
+import { Vector3 } from '@dcl/sdk/math'
+import type { ReversiGameState } from '../../engine/reversi'
+import { PALETTE } from '../config'
+import type { View3DHandle } from '../games/types'
+import { TABLE_TOP_Y, box } from './shared'
+
+export interface ReversiAction {
+  r: number
+  c: number
+}
+
+const N = 8
+const BOARD = 1.0
+const CELL = BOARD / N
+const CENTER_Y = TABLE_TOP_Y + 0.06 + BOARD / 2
+const HALF_T = 0.02
+const DISC = CELL * 0.8
+
+function cellLocal(r: number, c: number): Vector3 {
+  return Vector3.create(-BOARD / 2 + CELL * (c + 0.5), CENTER_Y + BOARD / 2 - CELL * (r + 0.5), 0)
+}
+
+function boardPlane(parent: Entity, z: number): void {
+  const e = engine.addEntity()
+  Transform.create(e, { parent, position: Vector3.create(0, CENTER_Y, z), scale: Vector3.create(BOARD, BOARD, 1) })
+  MeshRenderer.setPlane(e)
+  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: 'images/reversi-board.png' }), roughness: 0.95, metallic: 0, castShadows: false })
+}
+
+function discMaterial(e: Entity, v: number, glow: boolean): void {
+  Material.setPbrMaterial(e, {
+    texture: Material.Texture.Common({ src: v === 1 ? 'images/ui/disc-dark.png' : 'images/ui/disc-light.png' }),
+    transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
+    alphaTest: 0.5,
+    roughness: 0.4,
+    metallic: 0,
+    castShadows: false,
+    emissiveColor: glow ? { r: 0.6, g: 0.9, b: 1 } : { r: 0, g: 0, b: 0 },
+    emissiveIntensity: glow ? 0.6 : 0
+  })
+}
+
+export function createReversiView(root: Entity, onAction: (a: ReversiAction) => void): View3DHandle {
+  boardPlane(root, -HALF_T)
+  boardPlane(root, HALF_T)
+  const rim = 0.04
+  const depth = HALF_T * 2 + 0.01
+  box(root, Vector3.create(0, CENTER_Y + BOARD / 2 + rim / 2, 0), Vector3.create(BOARD + rim * 2, rim, depth), PALETTE.woodDark)
+  box(root, Vector3.create(-BOARD / 2 - rim / 2, CENTER_Y, 0), Vector3.create(rim, BOARD + rim * 2, depth), PALETTE.woodDark)
+  box(root, Vector3.create(BOARD / 2 + rim / 2, CENTER_Y, 0), Vector3.create(rim, BOARD + rim * 2, depth), PALETTE.woodDark)
+  box(root, Vector3.create(0, CENTER_Y - BOARD / 2 - rim / 2, 0), Vector3.create(BOARD, rim, depth), PALETTE.woodDark)
+  box(root, Vector3.create(0, TABLE_TOP_Y + 0.03, 0), Vector3.create(BOARD + 0.2, 0.06, 0.26), PALETTE.woodDark)
+
+  // two sprites per cell (front and back face): the felt planes are opaque,
+  // so unlike Connect Four nothing can be seen *through* the board
+  const discs: Array<[Entity, Entity]> = []
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++) {
+      const pair: Entity[] = []
+      for (const z of [-(HALF_T + 0.004), HALF_T + 0.004]) {
+        const e = engine.addEntity()
+        const at = cellLocal(r, c)
+        Transform.create(e, { parent: root, position: Vector3.create(at.x, at.y, z), scale: Vector3.create(DISC, DISC, 1) })
+        MeshRenderer.setPlane(e)
+        discMaterial(e, 1, false)
+        VisibilityComponent.create(e, { visible: false })
+        pair.push(e)
+      }
+      discs.push([pair[0], pair[1]])
+      // click target for desktop
+      const hit = engine.addEntity()
+      Transform.create(hit, { parent: root, position: cellLocal(r, c), scale: Vector3.create(CELL * 0.95, CELL * 0.95, HALF_T * 2 + 0.06) })
+      MeshCollider.setBox(hit, ColliderLayer.CL_POINTER)
+      pointerEventsSystem.onPointerDown(
+        { entity: hit, opts: { button: InputAction.IA_POINTER, hoverText: 'Place disc', maxDistance: 6, showHighlight: false } },
+        () => onAction({ r, c })
+      )
+    }
+
+  const rendered = new Array<number>(N * N).fill(0)
+  let lastIdx = -1
+
+  const setCell = (i: number, v: number, glow: boolean): void => {
+    for (const e of discs[i]) {
+      if (v === 0) VisibilityComponent.getMutable(e).visible = false
+      else {
+        discMaterial(e, v, glow)
+        VisibilityComponent.getMutable(e).visible = true
+      }
+    }
+  }
+
+  const reset = (): void => {
+    for (let i = 0; i < N * N; i++) {
+      if (rendered[i] !== 0) setCell(i, 0, false)
+      rendered[i] = 0
+    }
+    lastIdx = -1
+  }
+
+  return {
+    reset,
+    update(raw) {
+      const s = raw as ReversiGameState
+      const newLast = s.lastMove ? s.lastMove.r * N + s.lastMove.c : -1
+      for (let r = 0; r < N; r++)
+        for (let c = 0; c < N; c++) {
+          const i = r * N + c
+          const cell = s.board[r][c]
+          const v = cell === 'black' ? 1 : cell === 'white' ? 2 : 0
+          const glow = i === newLast
+          if (v !== rendered[i] || (glow && i !== lastIdx) || (!glow && i === lastIdx)) {
+            rendered[i] = v
+            setCell(i, v, glow)
+          }
+        }
+      lastIdx = newLast
+    }
+  }
+}

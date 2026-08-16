@@ -12,10 +12,11 @@
  * touch controller (and the read-only spectator board).
  */
 import type { Entity } from '@dcl/sdk/ecs'
+import type { Color4 } from '@dcl/sdk/math'
 import type ReactEcs from '@dcl/sdk/react-ecs'
 import type { BotDifficulty } from '../../engine/types'
 
-export type GameId = 'connectfour' | 'dotlines'
+export type GameId = 'connectfour' | 'dotlines' | 'reversi'
 
 /** Seat numbers as stored in TableBoard.turn / winner (0 = nobody). */
 export type SeatNo = 1 | 2
@@ -49,6 +50,8 @@ export interface TableGame<S = unknown, A = unknown> {
   seatNames: [string, string]
   /** UI sprite paths for the two sides (disc / chip images). */
   seatSprites: [string, string]
+  /** Button tints for the two sides (seat buttons, turn colour). */
+  seatColors: [Color4, Color4]
 
   /** A fresh state where `opening` moves first. */
   newGame(opening: SeatNo): S

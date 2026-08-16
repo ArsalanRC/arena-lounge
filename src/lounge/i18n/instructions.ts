@@ -26,6 +26,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Dot Lines",
         "overview": "Take turns drawing lines between adjacent dots on a 6×6 grid (5×5 boxes, 60 edges). Complete a 1×1 box by drawing its fourth side to claim it and take another turn. When all 60 lines are drawn, the player with the most boxes wins."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi is the classic 8×8 disc-flip strategy game. Place your disc on an empty square that flanks at least one straight line of enemy discs with your own colour at the far end. All flanked discs flip to your colour. Player with the most discs when neither side can move wins."
       }
     }
   },
@@ -41,6 +45,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Puntos y cajas",
         "overview": "Por turnos, dibuja líneas entre puntos adyacentes en una cuadrícula de 6×6 (5×5 cajas, 60 aristas). Completa una caja de 1×1 dibujando su cuarto lado para reclamarla y jugar de nuevo. Cuando se dibujen las 60 líneas, gana el jugador con más cajas."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi es el clásico juego de estrategia de voltear discos en un tablero 8×8. Coloca tu disco en una casilla vacía que flanquee al menos una línea recta de discos enemigos con uno tuyo al otro extremo. Todos los discos flanqueados se voltean a tu color. Gana el jugador con más discos cuando ninguno pueda mover."
       }
     }
   },
@@ -56,6 +64,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Pontos e caixas",
         "overview": "Reveze-se desenhando linhas entre pontos adjacentes em uma grade 6×6 (5×5 caixas, 60 arestas). Complete uma caixa 1×1 desenhando seu quarto lado para reivindicá-la e jogar novamente. Quando todas as 60 linhas forem desenhadas, o jogador com mais caixas vence."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi é o clássico jogo de virar discos em tabuleiro 8×8. Coloque seu disco em uma casa vazia que flanqueie pelo menos uma linha reta de discos inimigos com seu próprio disco na outra ponta. Todos os discos flanqueados viram para sua cor. O jogador com mais discos quando ninguém puder jogar vence."
       }
     }
   },
@@ -71,6 +83,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Käsekästchen",
         "overview": "Zeichne abwechselnd Linien zwischen benachbarten Punkten auf einem 6×6-Raster (5×5 Kästchen, 60 Kanten). Vervollständige ein 1×1-Kästchen, indem du seine vierte Seite zeichnest, um es zu beanspruchen und nochmal zu ziehen. Wenn alle 60 Linien gezogen sind, gewinnt der Spieler mit den meisten Kästchen."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi ist das klassische 8×8-Scheiben-Umdreh-Strategiespiel. Setze deine Scheibe auf ein leeres Feld, das mindestens eine gerade Linie gegnerischer Scheiben mit deiner eigenen Farbe am anderen Ende einschließt. Alle eingeschlossenen Scheiben werden umgedreht. Wer die meisten Scheiben hat, wenn keine Seite mehr ziehen kann, gewinnt."
       }
     }
   },
@@ -86,6 +102,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Points et carrés",
         "overview": "À tour de rôle, tracez des lignes entre des points adjacents sur une grille 6×6 (5×5 boîtes, 60 arêtes). Complétez une boîte 1×1 en traçant son quatrième côté pour la revendiquer et rejouer. Quand les 60 lignes sont tracées, le joueur avec le plus de boîtes gagne."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi est le classique jeu de stratégie de retournement de disques sur un plateau 8×8. Placez votre disque sur une case vide qui flanque au moins une ligne droite de disques ennemis avec un des vôtres à l'autre bout. Tous les disques flanqués se retournent à votre couleur. Le joueur avec le plus de disques quand aucun ne peut jouer gagne."
       }
     }
   },
@@ -101,6 +121,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Punti e quadrati",
         "overview": "A turno, disegna linee tra punti adiacenti su una griglia 6×6 (5×5 caselle, 60 bordi). Completa una casella 1×1 disegnando il suo quarto lato per reclamarla e giocare di nuovo. Quando tutte le 60 linee sono disegnate, il giocatore con più caselle vince."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi è il classico gioco di dischi da girare su tabellone 8×8. Piazza il tuo disco su una casella vuota che fiancheggi almeno una linea retta di dischi nemici con il tuo colore all'estremità. Tutti i dischi fiancheggiati si girano al tuo colore. Il giocatore con più dischi quando nessuno può muovere vince."
       }
     }
   },
@@ -116,6 +140,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Kropki i kratki",
         "overview": "Na zmianę rysujcie linie między sąsiednimi kropkami na siatce 6×6. Zamknij 4. bok pola, aby je zająć i rysować ponownie. 60 linii, kto ma więcej pól, wygrywa."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi to strategiczna gra z odwracaniem dysków na planszy 8×8. Otocz dyski przeciwnika swoimi, aby je odwrócić. Kto ma więcej dysków, gdy nikt nie może grać, wygrywa."
       }
     }
   },
@@ -131,6 +159,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Nokta Çizgi",
         "overview": "Sırayla 6×6 ızgarada komşu noktalar arasına çizgi çiz. 4. kenarı tamamlayarak kutuyu al ve tekrar çiz. 60 çizgiden sonra en çok kutuya sahip olan kazanır."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi 8×8 disk çevirme strateji oyunudur. Rakip diskleri kendi renginle çevreleyerek çevir. Kimse oynayamadığında en çok disk kazanır."
       }
     }
   },
@@ -146,6 +178,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Точки и квадраты",
         "overview": "По очереди рисуйте линии между соседними точками на сетке 6×6. Завершите 4-ю сторону клетки, чтобы забрать её и получить ещё ход. 60 линий, побеждает тот, у кого больше клеток."
+      },
+      "reversi": {
+        "name": "Реверси",
+        "overview": "Реверси, стратегия с переворотом дисков на поле 8×8. Зажмите ряд вражеских дисков вашим цветом. Побеждает тот, у кого больше дисков, когда никто не может ходить."
       }
     }
   },
@@ -161,6 +197,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "点线之战",
         "overview": "在6×6点阵上轮流画线（5×5个格子，60条边）。画出1×1格子的第四条边即占领该格并额外画一次。全部60条线画完后，拥有最多格子的玩家获胜。"
+      },
+      "reversi": {
+        "name": "黑白棋",
+        "overview": "黑白棋是经典的8×8翻转棋策略游戏。在空格上放置棋子，用你的颜色夹住对方的一条直线棋子，被夹住的棋子全部翻转。双方都无法落子时棋子多的一方获胜。"
       }
     }
   },
@@ -176,6 +216,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "ドットライン",
         "overview": "6×6のドットグリッド上で交互に線を引きます（5×5のボックス、60辺）。1×1のボックスの4辺目を引くとそのボックスを獲得し、追加ターン。60本全て引き終わったら、最もボックスが多いプレイヤーの勝ち。"
+      },
+      "reversi": {
+        "name": "リバーシ",
+        "overview": "リバーシは8×8のディスク反転戦略ゲーム。空きマスにディスクを置き、自分のディスクで相手のディスクを一直線に挟むと反転。どちらも打てなくなった時にディスクが多い方が勝ち。"
       }
     }
   },
@@ -191,6 +235,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "डॉट लाइन्स",
         "overview": "6×6 डॉट ग्रिड पर लाइनें खींचें। बॉक्स पूरा करें, अतिरिक्त बारी लें।"
+      },
+      "reversi": {
+        "name": "रिवर्सी",
+        "overview": "8×8 बोर्ड पर गोटियां घेरकर पलटें। ज़्यादा गोटियां जीतती हैं।"
       }
     }
   },
@@ -206,6 +254,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Garis Titik",
         "overview": "Bergiliran menggambar garis antara titik yang berdekatan di kisi 6×6 (5×5 kotak, 60 sisi). Selesaikan kotak 1×1 dengan menggambar sisi keempatnya untuk mengklaimnya dan mendapat giliran lagi. Saat semua 60 garis tergambar, pemain dengan kotak terbanyak menang."
+      },
+      "reversi": {
+        "name": "Reversi",
+        "overview": "Reversi adalah permainan strategi balik-cakram 8×8 klasik. Tempatkan cakrammu di kotak kosong yang mengapit setidaknya satu garis lurus cakram musuh dengan warnamu di ujung jauh. Semua cakram yang terjepit berubah ke warnamu. Pemain dengan cakram terbanyak saat kedua sisi tidak bisa bergerak menang."
       }
     }
   },
@@ -221,6 +273,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Nối Chấm",
         "overview": "Luân phiên vẽ đường giữa các chấm liền kề trên lưới 6×6 (5×5 ô, 60 cạnh). Hoàn thành ô 1×1 bằng cách vẽ cạnh thứ tư để nhận ô và thêm lượt. Khi vẽ hết 60 đường, người có nhiều ô hơn thắng."
+      },
+      "reversi": {
+        "name": "Lật Cờ",
+        "overview": "Reversi là trò chiến thuật lật đĩa 8×8 kinh điển. Đặt đĩa lên ô trống kẹp ít nhất một đường thẳng đĩa địch với đĩa của bạn ở đầu kia. Tất cả đĩa bị kẹp đổi màu. Người nhiều đĩa hơn khi cả hai không thể đi nữa thắng."
       }
     }
   },
@@ -236,6 +292,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Linya ng Tuldok",
         "overview": "Halinhinang gumuhit ng mga linya sa pagitan ng magkadikit na dots sa 6×6 grid (5×5 boxes, 60 edges). Kumpletuhin ang 1×1 box sa pamamagitan ng pagguhit ng ikaapat na gilid para i-claim ito at mag-take ng isa pang turn. Kapag lahat ng 60 linya ay naguhit na, ang manlalaro na may pinakamaraming boxes ang panalo."
+      },
+      "reversi": {
+        "name": "Baligtad",
+        "overview": "Ang Reversi ay ang klasikong 8×8 disc-flip strategy game. Ilagay ang disc mo sa isang bakanteng square na naka-flank ng kahit isang linya ng kalaban na disc kasama ang sarili mong kulay sa dulo. Lahat ng na-flank na disc ay nag-flip sa kulay mo. Ang manlalaro na may pinakamaraming disc kapag wala nang makagalaw ang panalo."
       }
     }
   },
@@ -251,6 +311,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "ডট লাইনস",
         "overview": "৬×৬ ডট গ্রিডে লাইন আঁকুন। বাক্স সম্পূর্ণ করুন।"
+      },
+      "reversi": {
+        "name": "রিভার্সি",
+        "overview": "৮×৮ বোর্ডে ডিস্ক ফ্ল্যাঙ্ক করে উল্টান।"
       }
     }
   },
@@ -266,6 +330,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "डॉट लाइन्स",
         "overview": "6×6 डॉट ग्रिडवर रेषा काढा."
+      },
+      "reversi": {
+        "name": "रिव्हर्सी",
+        "overview": "8×8 बोर्डवर गोट्या घेरून उलटवा."
       }
     }
   },
@@ -281,6 +349,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "டாட் லைன்ஸ்",
         "overview": "6×6 புள்ளி கட்டத்தில் கோடுகள் வரையுங்கள்."
+      },
+      "reversi": {
+        "name": "ரிவர்சி",
+        "overview": "8×8 போர்டில் எதிரி வட்டுகளை புரட்டுங்கள்."
       }
     }
   },
@@ -296,6 +368,10 @@ export const LOCALES: LocaleInfo[] = [
       "dotlines": {
         "name": "Dot Line",
         "overview": "Take turns draw lines between dots wey dey next to each other for 6×6 grid (5×5 boxes, 60 edges). Complete 1×1 box by drawing di fourth side to claim am and take another turn. When all 60 lines don draw, di player with most boxes win."
+      },
+      "reversi": {
+        "name": "Flip Game",
+        "overview": "Reversi na di classic 8×8 disc-flip strategy game. Place your disc for empty square wey flank at least one straight line of enemy discs with your own colour for di far end. All flanked discs flip to your colour. Player with most discs when nobody fit move win."
       }
     }
   }
