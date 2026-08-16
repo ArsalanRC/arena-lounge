@@ -210,22 +210,21 @@ function TableCard() {
     >
       <Text value={t.def.label} size={28} />
       <Text value={line} size={20} color={UI.muted} margin={{ top: 4, bottom: 10 }} />
-      {bothTaken ? (
-        <Text value="Both seats are taken. Watch, or try another table." size={18} color={UI.muted} />
-      ) : (
-        <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'column', alignItems: 'center' }}>
-          <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', justifyContent: 'center' }}>
-            {a.addr === '' && (
-              <Btn label="Sit as Yellow" color={UI.yellow} textColor={Color4.Black()} onClick={() => sit(t, SEAT_A)} width={205} />
-            )}
-            {s.addr === '' && <Btn label="Sit as Red" color={UI.red} onClick={() => sit(t, SEAT_B)} width={205} />}
-          </UiEntity>
-          <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', justifyContent: 'center' }}>
-            {a.addr === '' && s.addr === '' && (
-              <Btn label="Play the house bot" color={UI.panelSoft} onClick={() => sitWithBot(t)} width={275} />
-            )}
-            <Btn label="Not now" color={UI.panelSoft} textColor={UI.muted} onClick={() => (local.dismissedTableId = t.def.id)} width={135} />
-          </UiEntity>
+      {bothTaken && <Text value="Both seats are taken. Watch, or try another table." size={18} color={UI.muted} />}
+      {!bothTaken && (
+        <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          {a.addr === '' && (
+            <Btn label="Sit as Yellow" color={UI.yellow} textColor={Color4.Black()} onClick={() => sit(t, SEAT_A)} width={205} />
+          )}
+          {s.addr === '' && <Btn label="Sit as Red" color={UI.red} onClick={() => sit(t, SEAT_B)} width={205} />}
+        </UiEntity>
+      )}
+      {!bothTaken && (
+        <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          {a.addr === '' && s.addr === '' && (
+            <Btn label="Play the house bot" color={UI.panelSoft} onClick={() => sitWithBot(t)} width={275} />
+          )}
+          <Btn label="Not now" color={UI.panelSoft} textColor={UI.muted} onClick={() => (local.dismissedTableId = t.def.id)} width={135} />
         </UiEntity>
       )}
     </UiEntity>
