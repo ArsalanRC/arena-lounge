@@ -105,7 +105,7 @@ export const ZONES: ZoneDef[] = [
 ]
 
 /** Games that have a plugin today; zones for other games stay empty until then. */
-export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap']
+export const BUILT_GAMES: GameId[] = ['connectfour', 'dotlines', 'reversi', 'tictactoe', 'matchpairs', 'checkers', 'chess', 'crocsnap', 'backgammon']
 
 /** Yaw (degrees) so that a table's front (-Z) points at `target`. */
 export function yawToward(from: Vector3, target: Vector3): number {

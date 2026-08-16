@@ -2,8 +2,8 @@
 
 A game lounge for Decentraland, built for phones first. Walk in under the
 twisted tower, pick a corner, take a seat, and play Connect Four, Dot Lines,
-Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess or Croc Snap against a
-friend or the house bot. Every table is shared: whoever is in the World sees
+Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap or Backgammon
+against a friend or the house bot. Every table is shared: whoever is in the World sees
 the same moves. Elevator pads take you up to the game room and the rooftop
 terrace.
 
@@ -31,7 +31,7 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
   object means aiming a crosshair; tapping screen UI is direct. Seated players
   get a bottom bar with finger-sized controls: seven drop buttons for Connect
   Four, a board with 56-unit cells for the board games, a ring of teeth for
-  Croc Snap. Spectators watch the real board.
+  Croc Snap, a board of 24 points plus a Roll button for Backgammon. Spectators watch the real board.
 - **One tap to play.** Walk near a table and a card offers *Sit as Yellow*,
   *Sit as Red* or *Play the house bot*. Sitting snaps you onto the seat pad,
   facing the board, in first person. *Stand up* is always one tap away.
@@ -106,8 +106,8 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 
 ## Roadmap
 
-- [x] Eight games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap
-- [ ] Backgammon and Ludo for the remaining game-room corners
+- [x] Nine games from the same engine family: Connect Four, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon
+- [ ] Ludo for the last game-room corner, then Super Tic Tac Toe, Snakes & Ladders, Sea Strike
 - [x] The tower: game room and rooftop terrace, elevator pads
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena), lounge tips EN/DE/ES
