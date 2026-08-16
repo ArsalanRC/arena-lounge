@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 19:28 (Europe/Berlin), curved neon marquee over the entrance, 20:00 sky, submission draft refreshed
+Last update: 2026-08-16 21:12 (Europe/Berlin), tower centred + game room opened up, phone HUD hidden while seated, bot strength before the round
 
 ## 1. What this is
 
@@ -398,6 +398,8 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-16 21:12 phone HUD + bot strength (Arsalan: jump / hand icons cover "Stand up" on the phone; difficulty only choosable after losing a round): `TouchScreenControls.hideAll()` + hideCrosshair while the local player is seated, restored on standing (tables.ts touchControlsSystem, no-op on desktop); Easy/Medium/Hard picker now shows on the empty-table card and in the controller while waiting for an opponent, not only between rounds against the bot; "Dismiss bot" only when a bot is actually seated
+- 2026-08-16 20:55 layout (Arsalan: ribs poke out at the back of the square, game room congested, rooftop chairs glitchy on the phone): tower/plaza centre moved to the lounge centre (24,24) with spawn, elevators, zones and lights (now plaza offsets) following; rib base radius 15.2; game room slab r 5.0..13.1 with tables at 9.3, 4.4 m rugs, no planters, columns at 10.4; sky room slab 2.6..11.6, tables at 7.6, no planters; benches thicker with a lit seat
 - 2026-08-16 19:28 docs: submission draft refreshed to the built state (14 games / 15 tables / four floors, elevators, random sides, neon marquee, night look, generated assets; measured 516 entities, 59k triangles, 16 textures, production script 0.9 MB / 0.25 MB gzipped); portfolio page got the neon entrance shot as first figure + OG image and Four in a Row wording
 - 2026-08-16 19:21 curved neon marquee (Arsalan: "the name at the entrance ... very nice and clean and evident", then "curved, matching the curvature of the building ... neon signs, thick letters and glowing"): baked geometry in decor.glb (curved dark plate on the portal radius, teal neon frame, warm neon tube letters from stroke glyphs, posts to the pylon collars); billboarded TextShape sign and the duplicate name on the inner gateway removed; sky moved to 20:00 because the 21:00 moon drew a blocky black artefact behind the marquee when seen from inside; entrance screenshot refreshed
 - 2026-08-16 18:35 fourth floor + two games: rooftop moved to 24 m (new slab inside the crown), the 16 m slab is the Sky room with Sea Strike (N) and a Dice Royale duel (S), sofas E/W; shafts to 28 m; Sea Strike engine (40 tests) with random fleets and a two-grid public 3D board; Dice Royale duel wrapper (32 tests) with die-face sprites; strings in five languages, catalog rows in 19; 14 games / 15 tables; sea grid as a texture (36 line boxes fewer), upper-floor lamp posts dropped (string lights + collars light them); idle 512 entities / 529 renderers (the phone shows amber above 500 while idle; each running table adds 10 to 90, so expect a red line during busy hours; cosmetic)

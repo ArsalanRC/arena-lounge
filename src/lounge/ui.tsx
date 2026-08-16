@@ -266,6 +266,20 @@ function Toast() {
 
 // ---------------------------------------------------------------- table card
 
+/** Easy / Medium / Hard for the house bot (a local setting, read at every bot move). */
+function DifficultyPicker(props: { width: number; fontSize: number }) {
+  const str = L()
+  return (
+    <Segmented
+      options={[{ key: 'easy', label: str.easy }, { key: 'medium', label: str.medium }, { key: 'hard', label: str.hard }]}
+      active={botSettings.difficulty}
+      onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
+      width={props.width}
+      fontSize={props.fontSize}
+    />
+  )
+}
+
 function TableCard() {
   const t = visibleTableCard()
   if (!t) return null
@@ -284,12 +298,20 @@ function TableCard() {
         ? str.waitingForRival(displayName(s))
         : str.openTable
   const state = bothTaken ? gameStateOf(t) : null
+  const emptyTable = a.addr === '' && s.addr === ''
   const W = 480
   return (
     <Panel width={W} place={bottomCentre(W, 36)}>
       <Text value={`${tableTitle(t)}`} size={T.title} />
       <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
       {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
+      {/* bot strength is chosen before the first round, not only after one is lost */}
+      {emptyTable && (
+        <Row height={44} margin={{ bottom: 6 }}>
+          <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 8 } }} uiText={{ value: str.bot, fontSize: T.small, color: UI.muted }} />
+          <DifficultyPicker width={phone() ? 74 : 88} fontSize={16} />
+        </Row>
+      )}
       <Row>
         {!bothTaken && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={220} />}
         {!bothTaken && a.addr === '' && s.addr === '' && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
@@ -342,8 +364,10 @@ function Controller() {
   else if (b.winner === seat) status = str.youWin
   else status = str.takesRound(displayName(opp))
 
-  const showBotRow = opp.bot && b.status !== Status.Playing
   const showBotInvite = b.status === Status.Waiting && opp.addr === ''
+  // strength picker: while waiting (before inviting the bot) and between rounds against it
+  const showDismiss = opp.bot && b.status !== Status.Playing
+  const showBotRow = showDismiss || showBotInvite
   const showRematch = b.status === Status.Finished && opp.addr !== ''
   const showBoardToggle = mobile && t.game.hasStrip === true
 
@@ -355,15 +379,7 @@ function Controller() {
     </UiEntity>
   )
   const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
-  const difficulty = (
-    <Segmented
-      options={[{ key: 'easy', label: str.easy }, { key: 'medium', label: str.medium }, { key: 'hard', label: str.hard }]}
-      active={botSettings.difficulty}
-      onPick={(k) => (botSettings.difficulty = k as typeof botSettings.difficulty)}
-      width={mobile ? 66 : 92}
-      fontSize={mobile ? 15 : 16}
-    />
-  )
+  const difficulty = <DifficultyPicker width={mobile ? 66 : 92} fontSize={mobile ? 15 : 16} />
   // Bot strength: caption beside the control on desktop, above it on the narrow phone column
   const botRow = !showBotRow ? null : mobile ? (
     <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'column', alignItems: 'center', margin: { top: 4 } }}>
@@ -395,7 +411,7 @@ function Controller() {
             <UiEntity uiTransform={{ width: 220, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { left: 12 } }}>
               {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} />}
               {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={btnW} />}
-              {showBotRow && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} />}
+              {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} />}
               {botRow}
               {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} />}
               <Row height={60}>
@@ -420,7 +436,7 @@ function Controller() {
       <Row wrap height={showRematch || showBotInvite ? 60 : 0}>
         {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} />}
         {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} />}
-        {showBotRow && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} />}
+        {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} />}
       </Row>
       <Row>
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
