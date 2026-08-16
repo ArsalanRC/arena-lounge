@@ -19,6 +19,7 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
 </table>
 
 - **World:** `arenalounge.dcl.eth` (deployed at the end of the build phase)
+- **Page:** https://arsalanrc.github.io/arena-lounge/ (EN / DE)
 - **Stack:** Decentraland SDK7 (TypeScript, React-ECS UI, CRDT sync), no server, no downloads
 - **License:** MIT
 

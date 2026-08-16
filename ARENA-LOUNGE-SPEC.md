@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 13:00 (Europe/Berlin)
+Last update: 2026-08-16 13:20 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -113,7 +113,8 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
    tournament board. Keep total content within mobile budgets.
 6. Retention: persistent leaderboard + streaks (Multiplayer Server + Storage),
    tournaments, maybe prizes (check T&C / DCL policies first).
-7. Ritual: GitHub Pages landing page (bilingual EN+DE), profile README and
+7. Ritual: (done) GitHub Pages landing page (bilingual EN+DE) at
+   https://arsalanrc.github.io/arena-lounge/ ; still open: profile README and
    portfolio entry.
 
 ## 7. How to run / test / deploy
@@ -152,6 +153,7 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 13:20 bilingual GitHub Pages landing page (docs/index.html, EN/DE, animated frame), Pages enabled from main:/docs
 - 2026-08-16 13:00 one hit-area collider per board (was one per cell); entity count 590 -> 525 with four tables (textures 19 of 23, the next soft cap to watch)
 - 2026-08-16 12:40 Reversi plugin (engine ported, 31 tests): tap-a-square UI with legal hints, felt board, front+back disc sprites; per-game seat colours; four tables in an arc (Dot Lines, Connect Four x2, Reversi)
 - 2026-08-16 12:20 How-to-play panel with language picker (19 languages: rule overviews reused from game-platform, lounge sentences EN/DE/ES natively, others fall back to EN); info kiosk at spawn; ar/fa/ur/te left out until the client font shapes them

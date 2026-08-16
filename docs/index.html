@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena Lounge</title>
+<meta name="description" content="A cosy game lounge for Decentraland, built for phones: shared tables, Connect Four, Dot Lines and Reversi, a house bot, no downloads.">
+<meta property="og:title" content="Arena Lounge">
+<meta property="og:description" content="Walk in, take a seat, play a friend. A mobile-first social game lounge for Decentraland.">
+<meta property="og:image" content="screenshots/connect-four.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f4e5f'/%3E%3Ccircle cx='32' cy='32' r='16' fill='%23f5c518'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --parquet: #2b2320;
+    --parquet-2: #3a2e28;
+    --walnut: #5a3e2b;
+    --teal: #1f4e5f;
+    --teal-2: #173b48;
+    --cream: #f2e8d5;
+    --muted: #c9bfb2;
+    --yellow: #f5c518;
+    --red: #e2453d;
+    --sky: #7fd0e0;
+    --max: 1120px;
+    --display: "Rockwell", "Roboto Slab", "Georgia", "Times New Roman", serif;
+    --body: "Avenir Next", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--parquet);
+    color: var(--cream);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.55;
+    background-image:
+      linear-gradient(90deg, rgba(0,0,0,.18) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 220px 100%, 100% 46px;
+  }
+  a { color: var(--sky); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  [data-lang] { display: none; }
+  html.en [data-lang="en"], html.de [data-lang="de"] { display: inline; }
+  html.en p[data-lang="en"], html.de p[data-lang="de"],
+  html.en li[data-lang="en"], html.de li[data-lang="de"],
+  html.en h1[data-lang="en"], html.de h1[data-lang="de"],
+  html.en h2[data-lang="en"], html.de h2[data-lang="de"],
+  html.en h3[data-lang="en"], html.de h3[data-lang="de"],
+  html.en div[data-lang="en"], html.de div[data-lang="de"] { display: block; }
+
+  header {
+    max-width: var(--max); margin: 0 auto; padding: 22px 24px 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-size: 20px; letter-spacing: .02em; }
+  .brand .chip { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe680, var(--yellow) 55%, #b8890a); box-shadow: inset 0 -3px 6px rgba(0,0,0,.25); }
+  .lang { display: inline-flex; border: 1px solid rgba(242,232,213,.25); border-radius: 999px; overflow: hidden; }
+  .lang button {
+    background: transparent; color: var(--muted); border: 0; padding: 8px 14px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--cream); color: var(--parquet); font-weight: 600; }
+
+  .hero {
+    max-width: var(--max); margin: 0 auto; padding: 48px 24px 24px;
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center;
+  }
+  .kicker { color: var(--yellow); font-size: 14px; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 14px; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(40px, 6vw, 68px); line-height: 1.02; margin: 0 0 18px; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--yellow); }
+  .lede { font-size: 20px; color: var(--muted); max-width: 34ch; margin: 0 0 26px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 14px 20px; border-radius: 12px; text-decoration: none; font-weight: 600;
+    background: var(--teal); color: var(--cream); border: 1px solid rgba(255,255,255,.08); transition: transform .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); background: #256f80; }
+  .btn.alt { background: transparent; border-color: rgba(242,232,213,.3); }
+  .btn.alt:hover { background: rgba(255,255,255,.06); }
+  .note { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+  /* the see-through Connect Four frame */
+  .board { position: relative; width: 100%; aspect-ratio: 7 / 6.2; max-width: 460px; margin-inline: auto; padding: 4.5%; border-radius: 10px;
+    background: linear-gradient(180deg, #2f6f86, var(--teal) 55%, var(--teal-2)); box-shadow: 0 30px 60px rgba(0,0,0,.45), inset 0 0 0 6px var(--teal-2);
+  }
+  .board::after { content: ""; position: absolute; left: 10%; right: 10%; bottom: -12px; height: 12px; border-radius: 0 0 6px 6px; background: var(--teal-2); }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 4%; height: 100%; }
+  .cell { position: relative; border-radius: 50%; background: var(--parquet); box-shadow: inset 0 3px 8px rgba(0,0,0,.6), inset 0 -2px 4px rgba(255,255,255,.08); overflow: hidden; }
+  .cell i { position: absolute; inset: 6%; border-radius: 50%; transform: translateY(-900%); opacity: 0; }
+  .cell i.y { background: radial-gradient(circle at 35% 30%, #ffe680, var(--yellow) 55%, #b8890a); }
+  .cell i.r { background: radial-gradient(circle at 35% 30%, #ff8a7a, var(--red) 55%, #961f1a); }
+  .cell i.on { animation: drop .55s cubic-bezier(.3,.9,.4,1.25) forwards; }
+  @keyframes drop { 0% { transform: translateY(-900%); opacity: 1; } 70% { transform: translateY(6%); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+  .board .win { animation: glow 1.4s ease-in-out infinite alternate; }
+  @keyframes glow { from { box-shadow: 0 0 0 0 rgba(255,255,255,0); } to { box-shadow: 0 0 0 4px rgba(255,255,255,.55); } }
+
+  section { max-width: var(--max); margin: 0 auto; padding: 44px 24px; }
+  h2 { font-family: var(--display); font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 8px; }
+  .sub { color: var(--muted); margin: 0 0 26px; max-width: 60ch; }
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .card { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: 1px solid rgba(242,232,213,.12); border-radius: 16px; padding: 22px 22px 20px; }
+  .card h3 { margin: 0 0 8px; font-family: var(--display); font-size: 21px; display: flex; align-items: center; gap: 10px; }
+  .card h3::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--yellow); flex: none; }
+  .card:nth-child(2n) h3::before { background: var(--red); }
+  .card p { margin: 0; color: var(--muted); }
+  .shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .shots figure { margin: 0; border-radius: 14px; overflow: hidden; border: 1px solid rgba(242,232,213,.12); background: #000; }
+  .shots img { display: block; width: 100%; height: auto; }
+  .shots figcaption { padding: 10px 14px; font-size: 14px; color: var(--muted); }
+  .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: step; }
+  .step { position: relative; padding: 18px 18px 18px 18px; border-radius: 14px; background: rgba(31,78,95,.35); border: 1px solid rgba(127,208,224,.2); }
+  .step h3 { margin: 0 0 6px; font-family: var(--display); font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+  .step::before { counter-increment: step; content: counter(step); position: absolute; top: -12px; left: 16px; width: 26px; height: 26px; border-radius: 50%; background: var(--yellow); color: var(--parquet); font-weight: 700; display: grid; place-items: center; font-size: 14px; }
+  .tech { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 40px; }
+  .tech ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .tech li { margin: 6px 0; }
+  footer { max-width: var(--max); margin: 0 auto; padding: 30px 24px 60px; color: var(--muted); font-size: 15px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; border-top: 1px solid rgba(242,232,213,.12); }
+  footer nav { display: flex; gap: 18px; flex-wrap: wrap; }
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 28px; }
+    .board { max-width: 380px; }
+    .cards, .tech, .shots { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } header { padding-top: 16px; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cell i { transform: none; opacity: 1; animation: none !important; }
+    .board .win { animation: none; box-shadow: 0 0 0 4px rgba(255,255,255,.55); }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="chip" aria-hidden="true"></span> Arena Lounge</div>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-set="en" aria-pressed="true">EN</button>
+    <button type="button" data-set="de" aria-pressed="false">DE</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div>
+      <p class="kicker"><span data-lang="en">Decentraland · built for phones</span><span data-lang="de">Decentraland · gebaut fürs Handy</span></p>
+      <h1 data-lang="en">Walk in, take a seat, <em>play a friend</em>.</h1>
+      <h1 data-lang="de">Reinkommen, hinsetzen, <em>eine Runde spielen</em>.</h1>
+      <p class="lede" data-lang="en">A cosy game lounge in Decentraland. Four shared tables, three games, a house bot for when the room is empty. Everything runs on a phone and loads in seconds.</p>
+      <p class="lede" data-lang="de">Eine kleine Spiel-Lounge in Decentraland. Vier gemeinsame Tische, drei Spiele, ein Bot fürs Warmhalten, wenn gerade niemand da ist. Läuft auf dem Handy und lädt in Sekunden.</p>
+      <div class="actions">
+        <a class="btn" id="play" href="decentraland://?realm=arenalounge.dcl.eth"><span data-lang="en">Open in Decentraland</span><span data-lang="de">In Decentraland öffnen</span></a>
+        <a class="btn alt" href="https://github.com/ArsalanRC/arena-lounge"><span data-lang="en">Source on GitHub</span><span data-lang="de">Code auf GitHub</span></a>
+      </div>
+      <p class="note"><span data-lang="en">Needs the Decentraland app (iOS, Android, Mac, Windows). World name: <code>arenalounge.dcl.eth</code>. Entry for the Friendzone Mobile Buildathon 2026.</span><span data-lang="de">Braucht die Decentraland-App (iOS, Android, Mac, Windows). World-Name: <code>arenalounge.dcl.eth</code>. Beitrag zum Friendzone Mobile Buildathon 2026.</span></p>
+    </div>
+    <div class="board" aria-hidden="true">
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <section class="reveal">
+    <h2 data-lang="en">Why it works on a phone</h2>
+    <h2 data-lang="de">Warum es auf dem Handy funktioniert</h2>
+    <p class="sub" data-lang="en">Most Decentraland scenes are desktop scenes squeezed onto a small screen. This one started from the thumb.</p>
+    <p class="sub" data-lang="de">Die meisten Decentraland-Szenen sind Desktop-Szenen auf kleinem Bildschirm. Diese hier fängt beim Daumen an.</p>
+    <div class="cards">
+      <article class="card">
+        <h3><span data-lang="en">The screen is the controller</span><span data-lang="de">Der Bildschirm ist der Controller</span></h3>
+        <p data-lang="en">On a phone, tapping a 3D object means aiming a crosshair first. Here you tap big buttons at thumb height: seven columns for Connect Four, dots for Dot Lines, squares for Reversi. The 3D table is the shared show.</p>
+        <p data-lang="de">Auf dem Handy heißt "3D-Objekt antippen" erst mal zielen. Hier tippst du auf große Buttons in Daumenhöhe: sieben Spalten bei Vier gewinnt, Punkte bei Käsekästchen, Felder bei Reversi. Der 3D-Tisch ist die gemeinsame Bühne.</p>
+      </article>
+      <article class="card">
+        <h3><span data-lang="en">One tap to sit</span><span data-lang="de">Ein Tipp zum Hinsetzen</span></h3>
+        <p data-lang="en">Near a table a card offers "Sit as Yellow", "Sit as Red" or "Play the house bot". Sitting snaps you onto the seat, facing the board, in first person. "Stand up" is always one tap away.</p>
+        <p data-lang="de">In Tischnähe bietet eine Karte "Sit as Yellow", "Sit as Red" oder "Play the house bot" an. Beim Hinsetzen stellst du dich automatisch an den Platz, Blick aufs Brett, in der Ego-Perspektive. "Stand up" ist immer einen Tipp entfernt.</p>
+      </article>
+      <article class="card">
+        <h3><span data-lang="en">Shared tables, really shared</span><span data-lang="de">Gemeinsame Tische, wirklich gemeinsam</span></h3>
+        <p data-lang="en">Seats, boards, series score and the 60-second turn timer are the same for everyone in the World, late arrivals included. Full table? Stand behind a player and watch the live board on your screen.</p>
+        <p data-lang="de">Plätze, Bretter, Serienstand und die 60-Sekunden-Zuguhr sind für alle in der World gleich, auch für Nachzügler. Tisch voll? Stell dich hinter einen Spieler und schau auf deinem Bildschirm live zu.</p>
+      </article>
+      <article class="card">
+        <h3><span data-lang="en">Nothing to download</span><span data-lang="de">Nichts zum Herunterladen</span></h3>
+        <p data-lang="en">Every model is a primitive, every texture a small procedural image, every sound a synthesised WAV. About 500 entities and 15k triangles for a 2x2 parcel World: it loads on 4G before you have found the joystick.</p>
+        <p data-lang="de">Jedes Modell ist ein Primitiv, jede Textur ein kleines, generiertes Bild, jeder Ton eine synthetisierte WAV. Rund 500 Entities und 15k Dreiecke für eine 2x2-Parzellen-World: lädt über 4G, bevor du den Joystick gefunden hast.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2 data-lang="en">A look inside</h2>
+    <h2 data-lang="de">Ein Blick hinein</h2>
+    <div class="shots">
+      <figure><img src="screenshots/lounge.jpg" alt="The lounge from the entrance: tables in an arc, seat pads, robots on the corners" loading="lazy"><figcaption><span data-lang="en">The lounge from the entrance. Rugs mark the tables, robots wait on the corners.</span><span data-lang="de">Die Lounge vom Eingang aus. Teppiche markieren die Tische, auf den Ecken warten die Roboter.</span></figcaption></figure>
+      <figure><img src="screenshots/connect-four.jpg" alt="Seated at Connect Four in first person, controller docked to the right" loading="lazy"><figcaption><span data-lang="en">Seated at Connect Four. The frame is see-through, like the real toy.</span><span data-lang="de">Am Vier-gewinnt-Tisch. Der Rahmen ist durchsichtig, wie beim echten Spiel.</span></figcaption></figure>
+      <figure><img src="screenshots/dot-lines.jpg" alt="Dot Lines table with the tap-a-dot controller" loading="lazy"><figcaption><span data-lang="en">Dot Lines: tap a dot, then a neighbour. Closing a box gives you another turn.</span><span data-lang="de">Käsekästchen: Punkt antippen, dann den Nachbarpunkt. Wer ein Kästchen schließt, ist noch mal dran.</span></figcaption></figure>
+      <figure><img src="screenshots/how-to-play.jpg" alt="How to play panel with the language picker" loading="lazy"><figcaption><span data-lang="en">How to play, in 19 languages, from the info kiosk or the "?" button.</span><span data-lang="de">Spielregeln in 19 Sprachen, am Infoständer oder über den "?"-Button.</span></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2 data-lang="en">Ten seconds from door to first move</h2>
+    <h2 data-lang="de">Zehn Sekunden von der Tür zum ersten Zug</h2>
+    <div class="steps">
+      <div class="step"><h3><span data-lang="en">Walk up</span><span data-lang="de">Hingehen</span></h3><p data-lang="en">Pick a table. The sign says who is waiting for a rival.</p><p data-lang="de">Tisch aussuchen. Das Schild sagt, wer auf einen Gegner wartet.</p></div>
+      <div class="step"><h3><span data-lang="en">Sit</span><span data-lang="de">Hinsetzen</span></h3><p data-lang="en">Tap Yellow or Red. Alone? Tap the robot on the table.</p><p data-lang="de">Gelb oder Rot antippen. Allein? Den Roboter auf dem Tisch antippen.</p></div>
+      <div class="step"><h3><span data-lang="en">Play</span><span data-lang="de">Spielen</span></h3><p data-lang="en">Tap to move. Sixty seconds per turn, a ding when it is yours.</p><p data-lang="de">Tippen zum Ziehen. Sechzig Sekunden pro Zug, ein Ton, wenn du dran bist.</p></div>
+      <div class="step"><h3><span data-lang="en">Play again</span><span data-lang="de">Noch mal</span></h3><p data-lang="en">The series score stays with the pairing. Or stand up and try the next table.</p><p data-lang="de">Der Serienstand bleibt beim Paar. Oder aufstehen und den nächsten Tisch probieren.</p></div>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2 data-lang="en">Under the hood</h2>
+    <h2 data-lang="de">Unter der Haube</h2>
+    <div class="tech">
+      <ul>
+        <li data-lang="en">Decentraland SDK7, TypeScript, React-ECS UI. No server: tables are CRDT-synced components, one per table, with a strict rule for who may write what.</li>
+        <li data-lang="de">Decentraland SDK7, TypeScript, React-ECS-UI. Kein Server: Tische sind CRDT-synchronisierte Komponenten, eine pro Tisch, mit klarer Regel, wer was schreiben darf.</li>
+        <li data-lang="en">Games are plugins: pure engines from Game Arena (Connect Four, Dot Lines, Reversi, 87 unit tests) plus a 3D view and a touch controller each.</li>
+        <li data-lang="de">Spiele sind Plugins: pure Engines aus Game Arena (Vier gewinnt, Käsekästchen, Reversi, 87 Unit-Tests) plus je eine 3D-Ansicht und einen Touch-Controller.</li>
+      </ul>
+      <ul>
+        <li data-lang="en">The house bot (minimax) is driven by the human sharing the table, so nobody needs a server to keep a table warm.</li>
+        <li data-lang="de">Der Bot (Minimax) wird vom Menschen am selben Tisch angetrieben, so braucht niemand einen Server, um einen Tisch warmzuhalten.</li>
+        <li data-lang="en">Open source under MIT. Built for the Friendzone Mobile Buildathon 2026 by Arsalan Khadim.</li>
+        <li data-lang="de">Open Source unter MIT. Gebaut für den Friendzone Mobile Buildathon 2026 von Arsalan Khadim.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div><span data-lang="en">Arena Lounge · Arsalan Khadim · 2026</span><span data-lang="de">Arena Lounge · Arsalan Khadim · 2026</span></div>
+  <nav>
+    <a href="https://github.com/ArsalanRC/arena-lounge">GitHub</a>
+    <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/">LinkedIn</a>
+    <a href="https://arsalanrc.github.io">Portfolio</a>
+    <a href="https://dorahacks.io/hackathon/2353/detail">DoraHacks</a>
+  </nav>
+</footer>
+
+<script>
+  // language: stored choice, else browser language, else English
+  (function () {
+    var root = document.documentElement;
+    var stored = null;
+    try { stored = localStorage.getItem('arena-lang'); } catch (e) {}
+    var lang = stored || ((navigator.language || 'en').slice(0, 2) === 'de' ? 'de' : 'en');
+    function apply(l) {
+      root.classList.remove('en', 'de'); root.classList.add(l); root.setAttribute('lang', l);
+      document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+      try { localStorage.setItem('arena-lang', l); } catch (e) {}
+    }
+    apply(lang);
+    document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.set); }); });
+  })();
+
+  // hero board: play a short game, discs drop in one by one, winner glows
+  (function () {
+    var grid = document.getElementById('grid');
+    var cells = [];
+    for (var r = 0; r < 6; r++) { cells.push([]); for (var c = 0; c < 7; c++) { var d = document.createElement('div'); d.className = 'cell'; var i = document.createElement('i'); d.appendChild(i); grid.appendChild(d); cells[r].push(d); } }
+    // column sequence of a real game where yellow wins on a diagonal
+    var moves = [3, 3, 2, 4, 4, 2, 5, 5, 5, 6, 6, 6, 6];
+    var heights = [0, 0, 0, 0, 0, 0, 0];
+    var placed = [];
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function place(k) {
+      if (k >= moves.length) { finish(); return; }
+      var col = moves[k], row = 5 - heights[col]++;
+      var i = cells[row][col].firstChild; i.className = (k % 2 === 0 ? 'y' : 'r') + ' on';
+      placed.push([row, col]);
+      setTimeout(function () { place(k + 1); }, reduce ? 0 : 420);
+    }
+    function finish() {
+      // highlight the diagonal that the sequence produces for yellow
+      var win = [[5, 3], [4, 4], [3, 5], [2, 6]];
+      win.forEach(function (rc) { cells[rc[0]][rc[1]].classList.add('win'); });
+    }
+    setTimeout(function () { place(0); }, 500);
+  })();
+
+  // scroll reveals
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) { entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .12 });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+</body>
+</html>
