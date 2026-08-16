@@ -16,7 +16,7 @@ server.
 ## Layout
 - `src/engine/`          pure TS game engines + tests (no SDK imports allowed); copied verbatim from game-platform except chess/bot.ts (time-budgeted iterative deepening for phones)
 - `src/lounge/config.ts` layout (48 m scene, 32 m fenced lounge, FLOORS, ZONES per floor, ELEVATOR), tunables, palette
-- `src/lounge/state.ts`  synced components (TableBoard, TableSeatA, TableSeatB)
+- `src/lounge/state.ts`  synced components (TableBoard, TableSeatA..D; C and D only on four-seat tables such as Ludo)
 - `src/lounge/games/`    TableGame contract (types.ts), registry, one plugin per game (rules bridge + controls UI)
 - `src/lounge/views/`    per-game 3D views + shared primitive builders
 - `src/lounge/tables.ts` seat / turn / bot / janitor logic and systems (write discipline lives here), elevator proximity + `rideTo`

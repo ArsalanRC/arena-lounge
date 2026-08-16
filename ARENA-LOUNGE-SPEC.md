@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 21:12 (Europe/Berlin), tower centred + game room opened up, phone HUD hidden while seated, bot strength before the round
+Last update: 2026-08-16 21:31 (Europe/Berlin), Ludo for two to four players at a four-seat table
 
 ## 1. What this is
 
@@ -122,14 +122,21 @@ version works as well", 16 Aug 11:30):
   sprite-plane discs with drop tween + bounce, win glow, seat pads, robot
   token (tap = play the house bot), floating sign with live status.
 - Networking: serverless CRDT (`syncEntity`), one entity per table with
-  `TableBoard` (gameId + engine state JSON + turn/status/score + `swap`) +
-  `TableSeatA` + `TableSeatB` (fixed sync ids 100..102). Chairs carry no
-  colour: at each deal `swap` says which chair plays the game's first side
-  (random when a pairing starts, also against the bot, then alternating per
-  round); tables.ts maps chair <-> side (`sideOf`), plugins only ever see
-  sides (`ctx.mySeat` = my colour, `ctx.behind` = I sit behind the upright
-  board and see it mirrored). The card offers one "Take a seat" button; a
-  toast at the deal says which colour you got. Games plug in through
+  `TableBoard` (gameId + engine state JSON + turn/status/wins per seat +
+  `sides` + `players`) + `TableSeatA..D` (C and D only on tables whose game
+  declares `seats: 4`, i.e. Ludo; fixed sync ids 100..). Chairs carry no
+  colour: at each deal `sides[seat-1]` says which game side (colour) a chair
+  plays (random when a pairing starts, also against the bot, then rotating
+  per round); tables.ts maps chair <-> side (`sideOf` / `seatOfSide`),
+  plugins only ever see sides (`ctx.mySeat` = my colour, `ctx.behind` = I
+  sit behind the upright board and see it mirrored). Multi-seat tables
+  (since 21:31): the host (lowest human seat) picks the player count 2..4
+  (`setPlayers`), the round starts when that many are seated, "Fill with
+  bots" seats bots up to the count, newcomers cannot join a running round, a
+  human leaving mid-round is replaced by a bot, a timed-out player gets a
+  bot move played by the host instead of forfeiting. The card offers one
+  "Take a seat" button; a toast at the deal says which colour you got. Games
+  plug in through
   `src/lounge/games/types.ts` (TableGame: rules, bot, 3D view, controls). Write
   discipline documented in src/lounge/tables.ts. Seat heartbeats (5 s),
   stale seat cleanup (30 s), onLeaveScene cleanup, orphan-bot cleanup,
@@ -189,13 +196,16 @@ version works as well", 16 Aug 11:30):
   corners: N Chess, NE Super TTT, E Backgammon, S Croc Snap, SW reserved for
   Snakes & Ladders ("coming soon" banner until built), W Ludo; columns and
   lamps moved between them.
-- Ludo (Table 11, game room west corner, seat A red vs seat B green, opposite
-  yards): engine from game-platform (69 tests, single-die rules: six leaves the
+- Ludo (Table 11, game room west corner, two to four players since 21:31 at
+  a square four-pad table (models/table4.glb); sides red, green (opposite
+  yard), blue, yellow; the round ends when the first player brings all four
+  home): engine from game-platform (69 tests, single-die rules: six leaves the
   yard + rolls again, three sixes forfeit, capture / home = extra roll, safe
   cells); actions roll (die chosen by the acting client) / piece / skip,
-  `pending` skips a roll with no legal move; upright 15x15 board texture
-  (images/ludo-board.png generated from the engine's track constants), eight
-  sliding disc pieces, "red rolled 6" readout; controls: mini board for the
+  `pending` skips a roll with no legal move; flat 15x15 board texture on the
+  table top (images/ludo-board.png generated from the engine's track
+  constants), up to sixteen sliding disc pieces, floating "red rolled 6"
+  readout; controls: mini board for the
   picture + one big button per legal move (pieces are too small to tap on a
   phone) + Roll button. All four game-room corners are live: no "coming soon"
   banners remain.
@@ -398,7 +408,8 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
-- 2026-08-16 21:12 phone HUD + bot strength (Arsalan: jump / hand icons cover "Stand up" on the phone; difficulty only choosable after losing a round): `TouchScreenControls.hideAll()` + hideCrosshair while the local player is seated, restored on standing (tables.ts touchControlsSystem, no-op on desktop); Easy/Medium/Hard picker now shows on the empty-table card and in the controller while waiting for an opponent, not only between rounds against the bot; "Dismiss bot" only when a bot is actually seated
+- 2026-08-16 21:31 Ludo for two to four players (Arsalan: "the first person who sits decides how many play, minimum 2 ... this game needs space for players"): seat model generalised to four seats (state.ts TableSeatC/D, `sides` array instead of `swap`, `players`, wins per seat, Winner.Draw = 9), tables.ts host / target-count / bot-fill / mid-round bot replacement / host-played timeouts, table3d four pads + cams + N-name sign, ui.tsx multi-player header + Players 2/3/4 picker + "Fill with bots", Ludo plugin with 2..4 sides and a flat board on a square four-pad table (models/table4.glb), 5.6 m rug under four-seat tables; strings in five languages
+- 2026-08-16 21:03 phone HUD + bot strength (Arsalan: jump / hand icons cover "Stand up" on the phone; difficulty only choosable after losing a round): `TouchScreenControls.hideAll()` + hideCrosshair while the local player is seated, restored on standing (tables.ts touchControlsSystem, no-op on desktop); Easy/Medium/Hard picker now shows on the empty-table card and in the controller while waiting for an opponent, not only between rounds against the bot; "Dismiss bot" only when a bot is actually seated
 - 2026-08-16 20:55 layout (Arsalan: ribs poke out at the back of the square, game room congested, rooftop chairs glitchy on the phone): tower/plaza centre moved to the lounge centre (24,24) with spawn, elevators, zones and lights (now plaza offsets) following; rib base radius 15.2; game room slab r 5.0..13.1 with tables at 9.3, 4.4 m rugs, no planters, columns at 10.4; sky room slab 2.6..11.6, tables at 7.6, no planters; benches thicker with a lit seat
 - 2026-08-16 19:28 docs: submission draft refreshed to the built state (14 games / 15 tables / four floors, elevators, random sides, neon marquee, night look, generated assets; measured 516 entities, 59k triangles, 16 textures, production script 0.9 MB / 0.25 MB gzipped); portfolio page got the neon entrance shot as first figure + OG image and Four in a Row wording
 - 2026-08-16 19:21 curved neon marquee (Arsalan: "the name at the entrance ... very nice and clean and evident", then "curved, matching the curvature of the building ... neon signs, thick letters and glowing"): baked geometry in decor.glb (curved dark plate on the portal radius, teal neon frame, warm neon tube letters from stroke glyphs, posts to the pylon collars); billboarded TextShape sign and the duplicate name on the inner gateway removed; sky moved to 20:00 because the 21:00 moon drew a blocky black artefact behind the marquee when seen from inside; entrance screenshot refreshed

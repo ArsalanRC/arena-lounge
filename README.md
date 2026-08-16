@@ -79,7 +79,7 @@ the SDK resolves `@dcl/ecs` relative to `@dcl/js-runtime`.
 |------|------------------|
 | `src/engine/` | Pure TypeScript game engines with unit tests, no SDK imports. Copied from [Game Arena](https://github.com/fgamesforfun-star/game-platform); the chess bot gained a time budget for phones. |
 | `src/lounge/config.ts` | Scene layout (48 m scene, fenced lounge, floors, zones, elevator), tunables, palette |
-| `src/lounge/state.ts` | Synced components `TableBoard`, `TableSeatA`, `TableSeatB` |
+| `src/lounge/state.ts` | Synced components `TableBoard`, `TableSeatA..D` (C and D only on four-seat tables) |
 | `src/lounge/games/` | The `TableGame` contract (`types.ts`), the registry and one plugin per game (rules bridge + touch controls) |
 | `src/lounge/views/` | One 3D view per game (boards, sliding piece pools) + shared primitive builders |
 | `src/lounge/tables.ts` | Seat / turn / bot / janitor logic, elevator rides, all systems. The write discipline for CRDT lives here |
@@ -99,15 +99,16 @@ never clobber each other:
 - `TableBoard` (game id + engine state as JSON + turn, status, score) is
   written by the player to move, by whoever seats the second player (deal),
   or by a seated player applying the turn timeout.
-- `TableSeatA` / `TableSeatB` are written by the seat holder (claim,
-  heartbeat, leave) or by any client when the holder went silent for 30 s.
+- `TableSeatA..D` are written by the seat holder (claim, heartbeat, leave)
+  or by any client when the holder went silent for 30 s. Ludo seats up to
+  four: the first seated player picks the player count, bots fill the rest.
 
 The pure engine validates every move; a client only writes a board it derived
 from `applyMove`. Bot moves are computed by the human sharing the table.
 
 ## Roadmap
 
-- [x] Fourteen games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe, Snakes & Ladders, Sea Strike, Dice Royale duel
+- [x] Fourteen games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo (two to four players at one table), Super Tic Tac Toe, Snakes & Ladders, Sea Strike, Dice Royale duel
 - [ ] Card games (hidden hands) if wanted: Color Clash, Card Lines
 - [x] The tower: game room, sky room and rooftop terrace, elevator pads, night lighting (fixed 20:00 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights), curved neon marquee over the entrance
 - [x] Sound effects (drop, win chime, your-move ding)

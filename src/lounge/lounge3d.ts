@@ -29,7 +29,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
 import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
-import { GAME_NAMES } from './games/registry'
+import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
 
@@ -296,8 +296,10 @@ export function buildLounge(): void {
 
   // corners on every floor: rug + banner (planters between ground-floor neighbours)
   for (const z of ZONES) {
-    // upper floors get tighter rugs: the annular slabs need a walkway inside and outside the tables
-    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 8.4 : z.floor > 0 ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
+    // upper floors get tighter rugs (the annular slabs need a walkway inside and outside the
+    // tables), except under a four-seat table, which needs room on every side
+    const fourSeats = (getGame(z.gameId).seats ?? 2) > 2
+    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 8.4 : z.floor > 0 && !fourSeats ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
     zoneBanner(z)
   }
   const ground = ZONES.filter((z) => z.floor === 0)

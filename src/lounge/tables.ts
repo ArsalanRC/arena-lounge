@@ -43,10 +43,12 @@ import {
 import { getGame } from './games/registry'
 import type { TableGame } from './games/types'
 import {
+  ALL_SEATS,
   BOT_ADDR,
   BOT_NAME,
   SEAT_A,
   SEAT_B,
+  SEAT_COMPONENTS,
   Status,
   TableBoard,
   TableSeatA,
@@ -54,6 +56,8 @@ import {
   Winner,
   emptyBoard,
   emptySeat,
+  setWins,
+  winsOf,
   type BoardData,
   type Seat,
   type SeatData
@@ -62,8 +66,10 @@ import {
 export interface Table {
   def: TableDef
   game: TableGame
-  /** Entity carrying the synced TableBoard / TableSeatA / TableSeatB components. */
+  /** Entity carrying the synced TableBoard / TableSeatA..D components. */
   root: Entity
+  /** Physical seats at this table (2, or the game's `seats`). */
+  seats: number
   /** Decoded engine state cache, keyed by round:moveCount. */
   cache: { key: string; state: unknown; lastAction: unknown }
 }
@@ -113,15 +119,13 @@ export function createTables(): void {
       position: def.position,
       rotation: Quaternion.fromEulerDegrees(0, def.rotationY, 0)
     })
+    const game = getGame(def.gameId)
+    const seats = Math.max(2, Math.min(ALL_SEATS.length, game.seats ?? 2))
     TableBoard.create(root, emptyBoard(def.gameId))
-    TableSeatA.create(root, emptySeat())
-    TableSeatB.create(root, emptySeat())
-    syncEntity(
-      root,
-      [TableBoard.componentId, TableSeatA.componentId, TableSeatB.componentId],
-      SYNC_TABLE_BASE + def.id
-    )
-    tables.push({ def, game: getGame(def.gameId), root, cache: { key: '', state: null, lastAction: null } })
+    const seatComponents = SEAT_COMPONENTS.slice(0, seats)
+    for (const c of seatComponents) c.create(root, emptySeat())
+    syncEntity(root, [TableBoard.componentId, ...seatComponents.map((c) => c.componentId)], SYNC_TABLE_BASE + def.id)
+    tables.push({ def, game, root, seats, cache: { key: '', state: null, lastAction: null } })
   }
   local.startedAt = Date.now()
   onLeaveScene((userId) => vacateEverywhere(userId.toLowerCase()))
@@ -161,16 +165,59 @@ export function lastActionOf(t: Table): unknown | null {
   return t.cache.lastAction
 }
 
+const NO_SEAT: SeatData = { addr: '', name: '', bot: false, beat: 0 }
+
 export function seatOf(t: Table, seat: Seat): SeatData {
-  return seat === SEAT_A ? TableSeatA.get(t.root) : TableSeatB.get(t.root)
+  return SEAT_COMPONENTS[seat - 1].getOrNull(t.root) ?? NO_SEAT
 }
 
 function seatMutable(t: Table, seat: Seat) {
-  return seat === SEAT_A ? TableSeatA.getMutable(t.root) : TableSeatB.getMutable(t.root)
+  return SEAT_COMPONENTS[seat - 1].getMutable(t.root)
 }
 
+/** The physical seats of a table, in seat order. */
+export function seatsOf(t: Table): Seat[] {
+  return ALL_SEATS.slice(0, t.seats)
+}
+
+/** Seats currently held (by humans or bots), in seat order. */
+export function occupiedSeats(t: Table): Seat[] {
+  return seatsOf(t).filter((seat) => seatOf(t, seat).addr !== '')
+}
+
+/** How many players the current round (or the next one) is for: the host's choice, never below the seated count. */
+export function targetPlayers(t: Table): number {
+  const want = TableBoard.get(t.root).players || 2
+  return Math.max(2, Math.min(t.seats, want, Math.max(want, occupiedSeats(t).length)))
+}
+
+/** The seated human who decides the player count and drives the bots: the lowest occupied human seat. */
+export function hostSeat(t: Table): 0 | Seat {
+  for (const seat of seatsOf(t)) {
+    const s = seatOf(t, seat)
+    if (s.addr !== '' && !s.bot) return seat
+  }
+  return 0
+}
+
+export function amHost(t: Table): boolean {
+  const h = hostSeat(t)
+  return h !== 0 && seatHeldByMe(seatOf(t, h))
+}
+
+/** The other seat of a two-seat table (the classic opponent). */
 export function otherSeat(seat: Seat): Seat {
   return seat === SEAT_A ? SEAT_B : SEAT_A
+}
+
+/** Every seat at the table except `seat`. */
+export function otherSeats(t: Table, seat: Seat): Seat[] {
+  return seatsOf(t).filter((x) => x !== seat)
+}
+
+/** True when the local player shares the table with a house bot. */
+export function botAt(t: Table): boolean {
+  return seatsOf(t).some((seat) => seatOf(t, seat).bot)
 }
 
 export function seatIsOpen(s: SeatData): boolean {
@@ -184,8 +231,7 @@ export function seatHeldByMe(s: SeatData): boolean {
 /** 0 when the local player is not seated at this table. */
 export function mySeatAt(t: Table): 0 | Seat {
   if (!me.ready) return 0
-  if (TableSeatA.get(t.root).addr === me.addr) return SEAT_A
-  if (TableSeatB.get(t.root).addr === me.addr) return SEAT_B
+  for (const seat of seatsOf(t)) if (seatOf(t, seat).addr === me.addr) return seat
   return 0
 }
 
@@ -229,38 +275,58 @@ function resetBoard(t: Table, resetSeries: boolean): void {
   if (resetSeries) {
     b.winsA = 0
     b.winsB = 0
+    b.winsC = 0
+    b.winsD = 0
   }
   b.updatedAt = Date.now()
 }
 
 /**
- * Game side (1 = the game's first colour, 2 = the second) played by a physical
- * seat, and back: the mapping is an involution, so one function serves both.
+ * Game side (1 = the game's first colour, 2 = the second, ...) played by a
+ * physical seat in the current round; falls back to the seat number while
+ * nothing is dealt so chips keep a colour.
  */
 export function sideOf(t: Table, seat: Seat): Seat {
-  return TableBoard.get(t.root).swap ? otherSeat(seat) : seat
+  const side = TableBoard.get(t.root).sides[seat - 1]
+  return side ? (side as Seat) : seat
 }
 
-/** Deal a new round if both seats are taken and nothing is in progress. */
+/** The physical seat that plays game side `side` this round (0 when nobody does). */
+export function seatOfSide(t: Table, side: number): 0 | Seat {
+  const i = TableBoard.get(t.root).sides.indexOf(side)
+  return i >= 0 ? ((i + 1) as Seat) : 0
+}
+
+/** Deal a new round when the table has its players and nothing is in progress. */
 export function maybeStart(t: Table): void {
-  const a = TableSeatA.get(t.root)
-  const bs = TableSeatB.get(t.root)
-  if (a.addr === '' || bs.addr === '') return
   const cur = TableBoard.get(t.root)
   if (cur.status === Status.Playing) return
+  const seated = occupiedSeats(t)
+  const players = targetPlayers(t)
+  if (seated.length < players) return
+  // players of the round: the seated ones in seat order (a 4-seat table can run a 2- or 3-player round)
+  const inRound = seated.slice(0, players)
   const round = cur.round + 1
   // Sides: random when a pairing starts (also against the bot), then they
-  // alternate every round so both players get each colour and each opening.
-  const swap = cur.status === Status.Finished ? !cur.swap : Math.random() < 0.5
-  const state = t.game.newGame(1)
+  // rotate every round so everybody gets each colour and each opening.
+  const same = cur.status === Status.Finished && inRound.every((seat) => cur.sides[seat - 1] > 0) && cur.sides.filter((x) => x > 0).length === players
+  const offset = same ? 1 : Math.floor(Math.random() * players)
+  const sides: number[] = []
+  for (const seat of seatsOf(t)) sides.push(0)
+  inRound.forEach((seat, k) => {
+    const prev = same ? cur.sides[seat - 1] : k + 1
+    sides[seat - 1] = ((prev - 1 + offset) % players) + 1
+  })
+  const state = t.game.newGame(1, players)
   const b = TableBoard.getMutable(t.root)
   b.gameId = t.game.id
   b.state = t.game.encode(state)
   b.lastAction = ''
   b.round = round
-  b.swap = swap
+  b.sides = sides
+  b.players = players
   b.status = Status.Playing
-  b.turn = swap ? SEAT_B : SEAT_A
+  b.turn = (sides.indexOf(1) + 1) as Seat
   b.winner = Winner.None
   b.moveCount = 0
   b.updatedAt = Date.now()
@@ -275,6 +341,11 @@ export function sit(t: Table, seat: Seat, snap = true): boolean {
   const s = seatOf(t, seat)
   if (!seatIsOpen(s) && !seatHeldByMe(s)) {
     toast(L().seatTaken)
+    return false
+  }
+  // a multi-seat round is closed to newcomers until it ends
+  if (t.seats > 2 && seatIsOpen(s) && TableBoard.get(t.root).status === Status.Playing) {
+    toast(L().roundRunning)
     return false
   }
   const cur = findMySeat()
@@ -295,12 +366,34 @@ export function stand(t: Table): void {
 }
 
 /**
- * Free a seat. If a game was running or finished, the board resets so the
- * remaining player waits for a fresh opponent; the series score resets too.
- * A house bot never sits alone, so it leaves with its human.
+ * Free a seat. Two-seat tables: if a game was running or finished, the board
+ * resets so the remaining player waits for a fresh opponent, and the series
+ * score resets too. Multi-seat tables: a human leaving a running round is
+ * replaced by the house bot so the others can finish; outside a round the
+ * seat just empties (its wins reset) and the player count follows the seated
+ * count. A house bot never sits alone, so bots leave with the last human.
  */
 export function vacate(t: Table, seat: Seat): void {
   const cur = TableBoard.get(t.root)
+  const wasHuman = !seatIsOpen(seatOf(t, seat)) && !seatOf(t, seat).bot
+  if (t.seats > 2) {
+    const humansLeft = seatsOf(t).some((x) => x !== seat && seatOf(t, x).addr !== '' && !seatOf(t, x).bot)
+    if (cur.status === Status.Playing && wasHuman && humansLeft && cur.sides[seat - 1] > 0) {
+      writeSeat(t, seat, { addr: BOT_ADDR, name: BOT_NAME, bot: true, beat: Date.now() })
+      return
+    }
+    if (!seatIsOpen(seatOf(t, seat))) writeSeat(t, seat, emptySeat())
+    if (!humansLeft) {
+      for (const x of seatsOf(t)) if (seatOf(t, x).bot) writeSeat(t, x, emptySeat())
+      if (cur.status !== Status.Waiting || cur.moveCount > 0) resetBoard(t, true)
+      return
+    }
+    const b = TableBoard.getMutable(t.root)
+    setWins(b, seat, 0)
+    if (cur.status === Status.Playing) resetBoard(t, false)
+    else b.players = Math.max(2, Math.min(cur.players || 2, occupiedSeats(t).length))
+    return
+  }
   const other = otherSeat(seat)
   const otherData = seatOf(t, other)
   if (!seatIsOpen(seatOf(t, seat))) writeSeat(t, seat, emptySeat())
@@ -310,19 +403,35 @@ export function vacate(t: Table, seat: Seat): void {
 
 function vacateEverywhere(addr: string): void {
   if (!addr) return
-  for (const t of tables) {
-    if (TableSeatA.get(t.root).addr === addr) vacate(t, SEAT_A)
-    if (TableSeatB.get(t.root).addr === addr) vacate(t, SEAT_B)
-  }
+  for (const t of tables) for (const seat of seatsOf(t)) if (seatOf(t, seat).addr === addr) vacate(t, seat)
 }
 
-/** Seat the house bot opposite the local player. */
+/**
+ * Seat house bots: opposite the local player on a two-seat table, or on a
+ * multi-seat table in every empty seat until the round has its players.
+ */
 export function inviteBot(t: Table): void {
   const mine = mySeatAt(t)
   if (!mine || !canWrite()) return
-  const other = otherSeat(mine)
-  if (!seatIsOpen(seatOf(t, other))) return
-  writeSeat(t, other, { addr: BOT_ADDR, name: BOT_NAME, bot: true, beat: Date.now() })
+  const players = targetPlayers(t)
+  let seated = occupiedSeats(t).length
+  for (const seat of seatsOf(t)) {
+    if (seated >= players) break
+    if (!seatIsOpen(seatOf(t, seat))) continue
+    writeSeat(t, seat, { addr: BOT_ADDR, name: BOT_NAME, bot: true, beat: Date.now() })
+    seated++
+  }
+  local.lastActionAt = Date.now()
+  maybeStart(t)
+}
+
+/** Host of a multi-seat table picks how many play the next round (2..seats, never below the seated count). */
+export function setPlayers(t: Table, n: number): void {
+  if (!amHost(t) || !canWrite()) return
+  const cur = TableBoard.get(t.root)
+  if (cur.status === Status.Playing) return
+  const b = TableBoard.getMutable(t.root)
+  b.players = Math.max(2, Math.min(t.seats, Math.floor(n)))
   local.lastActionAt = Date.now()
   maybeStart(t)
 }
@@ -335,9 +444,7 @@ export function sitWithBot(t: Table): void {
   }
   let mine = mySeatAt(t)
   if (!mine) {
-    const a = TableSeatA.get(t.root)
-    const b = TableSeatB.get(t.root)
-    const free: 0 | Seat = a.addr === '' ? SEAT_A : b.addr === '' ? SEAT_B : 0
+    const free = seatsOf(t).find((seat) => seatOf(t, seat).addr === '')
     if (!free) {
       toast(L().tableFull)
       return
@@ -348,11 +455,9 @@ export function sitWithBot(t: Table): void {
   inviteBot(t)
 }
 
-/** Take the first free seat (A, then B): chairs carry no colour, sides are dealt at random. */
+/** Take the first free seat (A, then B, ...): chairs carry no colour, sides are dealt at random. */
 export function sitAnywhere(t: Table): boolean {
-  const a = TableSeatA.get(t.root)
-  const b = TableSeatB.get(t.root)
-  const free: 0 | Seat = a.addr === '' || a.addr === me.addr ? SEAT_A : b.addr === '' || b.addr === me.addr ? SEAT_B : 0
+  const free = seatsOf(t).find((seat) => seatOf(t, seat).addr === '' || seatOf(t, seat).addr === me.addr)
   if (!free) {
     toast(L().tableFull)
     return false
@@ -360,11 +465,11 @@ export function sitAnywhere(t: Table): boolean {
   return sit(t, free)
 }
 
+/** Send every house bot at the local player's table away. */
 export function dismissBot(t: Table): void {
   const mine = mySeatAt(t)
   if (!mine) return
-  const other = otherSeat(mine)
-  if (seatOf(t, other).bot) vacate(t, other)
+  for (const seat of otherSeats(t, mine)) if (seatOf(t, seat).bot) vacate(t, seat)
 }
 
 /** Deal the next round of a finished game (either seated player may tap). */
@@ -403,24 +508,39 @@ function applyAction(t: Table, action: unknown, seat: Seat): boolean {
     b.turn = 0
     const w = t.game.winner(next)
     // winner comes back as a game side; store the chair that holds it
-    const chair = w === 1 || w === 2 ? sideOf(t, w) : w
+    const chair = w >= 1 && w <= 4 ? seatOfSide(t, w) : w
     b.winner = chair
-    if (chair === SEAT_A) b.winsA = board.winsA + 1
-    else if (chair === SEAT_B) b.winsB = board.winsB + 1
+    if (chair >= 1 && chair <= 4) setWins(b, chair as Seat, winsOf(board, chair as Seat) + 1)
   } else {
     const side = t.game.turnSeat(next)
-    b.turn = side ? sideOf(t, side) : otherSeat(seat)
+    const chair = side ? seatOfSide(t, side) : 0
+    b.turn = chair || nextSeatAfter(t, seat)
   }
   return true
 }
 
+/** The next seat in the round after `seat` (fallback when a game does not name the mover). */
+function nextSeatAfter(t: Table, seat: Seat): Seat {
+  const inRound = seatsOf(t).filter((x) => TableBoard.get(t.root).sides[x - 1] > 0)
+  if (inRound.length === 0) return otherSeat(seat)
+  const i = inRound.indexOf(seat)
+  return inRound[(i + 1) % inRound.length]
+}
+
 // ---------------------------------------------------------------- helpers
+
+/** Table-local offset of a seat pad: A in front (-Z), B behind, C on the left (-X), D on the right. */
+export function seatPadLocalOffset(seat: Seat): Vector3 {
+  if (seat === SEAT_A) return Vector3.create(0, 0, -SEAT_PAD_OFFSET)
+  if (seat === SEAT_B) return Vector3.create(0, 0, SEAT_PAD_OFFSET)
+  if (seat === 3) return Vector3.create(-SEAT_PAD_OFFSET, 0, 0)
+  return Vector3.create(SEAT_PAD_OFFSET, 0, 0)
+}
 
 /** World-space centre of a seat pad. */
 export function seatPadWorldPosition(t: Table, seat: Seat): Vector3 {
-  const localOffset = Vector3.create(0, 0, seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET)
   const rot = Quaternion.fromEulerDegrees(0, t.def.rotationY, 0)
-  return Vector3.add(t.def.position, Vector3.rotate(localOffset, rot))
+  return Vector3.add(t.def.position, Vector3.rotate(seatPadLocalOffset(seat), rot))
 }
 
 /**
@@ -585,27 +705,32 @@ function janitorSystem(dt: number): void {
   if (!canWrite()) return
   const now = Date.now()
   for (const t of tables) {
-    const a = TableSeatA.get(t.root)
-    const b = TableSeatB.get(t.root)
     // seats whose holder went silent
-    if (a.addr !== '' && !a.bot && now - a.beat > SEAT_STALE_MS) vacate(t, SEAT_A)
-    if (b.addr !== '' && !b.bot && now - b.beat > SEAT_STALE_MS) vacate(t, SEAT_B)
+    for (const seat of seatsOf(t)) {
+      const sd = seatOf(t, seat)
+      if (sd.addr !== '' && !sd.bot && now - sd.beat > SEAT_STALE_MS) vacate(t, seat)
+    }
     // a bot never sits alone
-    const a2 = TableSeatA.get(t.root)
-    const b2 = TableSeatB.get(t.root)
-    if (a2.bot && b2.addr === '') vacate(t, SEAT_A)
-    if (b2.bot && a2.addr === '') vacate(t, SEAT_B)
+    if (hostSeat(t) === 0) for (const seat of seatsOf(t)) if (seatOf(t, seat).bot) vacate(t, seat)
     // turn timer, applied by a seated player
     const board = TableBoard.get(t.root)
     if (board.status === Status.Playing && mySeatAt(t) && now - board.updatedAt > TURN_LIMIT_MS) {
       const loser = board.turn as Seat
+      if (t.seats > 2) {
+        // multi-seat round: the host plays a bot move for the sleeper so the others can go on
+        if (!amHost(t)) continue
+        const state = gameStateOf(t)
+        const action = state === null ? null : t.game.botAction(state, botSettings.difficulty)
+        if (action !== null && applyAction(t, action, loser)) toast(L().timeoutPlayed(seatOf(t, loser).name))
+        else TableBoard.getMutable(t.root).updatedAt = now
+        continue
+      }
       const winner = otherSeat(loser)
       const m = TableBoard.getMutable(t.root)
       m.status = Status.Finished
       m.turn = 0
       m.winner = winner
-      if (winner === SEAT_A) m.winsA = board.winsA + 1
-      else m.winsB = board.winsB + 1
+      setWins(m, winner, winsOf(board, winner) + 1)
       m.updatedAt = now
       if (loser === mySeatAt(t)) toast(L().timeoutLost)
       else toast(L().timeoutWon)
@@ -644,8 +769,8 @@ function botSystem(): void {
     if (board.status !== Status.Playing || board.turn === 0) continue
     const turnSeat = seatOf(t, board.turn as Seat)
     if (!turnSeat.bot) continue
-    // the human sharing the table drives the bot
-    if (!seatHeldByMe(seatOf(t, otherSeat(board.turn as Seat)))) continue
+    // the host (lowest human seat) drives the bots
+    if (!amHost(t)) continue
     const key = `${board.round}:${board.moveCount}`
     if (botPending.get(t.def.id) === key) continue
     botPending.set(t.def.id, key)
@@ -674,7 +799,7 @@ function autoActionSystem(): void {
     if (board.status !== Status.Playing || board.turn === 0) continue
     const seat = board.turn as Seat
     const holder = seatOf(t, seat)
-    const driver = holder.bot ? seatHeldByMe(seatOf(t, otherSeat(seat))) : seatHeldByMe(holder)
+    const driver = holder.bot ? amHost(t) : seatHeldByMe(holder)
     if (!driver) continue
     const state = gameStateOf(t)
     if (state === null) continue

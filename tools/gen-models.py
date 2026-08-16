@@ -356,6 +356,17 @@ for z in (-1.8, 1.8):
     prism(tb_coll, 0, z, 0.5, 0, 0.03, 12)
 write_glb('models/table.glb', [("top", tb_top, 0), ("frame", tb_dark, 1), ("pads", tb_pads, 2), ("pads_collider", tb_coll, 3)], [WOOD, WOOD_DARK, PAD, COLLIDER])
 
+# four-seat table (Ludo): square top, a pad on every side at the same 1.8 m offset
+t4_top, t4_dark, t4_pads, t4_coll = Mesh(), Mesh(), Mesh(), Mesh()
+box_mesh(t4_top, (0, TABLE_TOP - 0.03, 0), (1.5, 0.06, 1.5))
+box_mesh(t4_dark, (0, TABLE_TOP - 0.1, 0), (1.3, 0.08, 1.3))
+for (x, z) in [(-0.6, -0.6), (0.6, -0.6), (-0.6, 0.6), (0.6, 0.6)]:
+    box_mesh(t4_dark, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+for (x, z) in [(0, -1.8), (0, 1.8), (-1.8, 0), (1.8, 0)]:
+    prism(t4_pads, x, z, 0.5, 0, 0.03, 16)
+    prism(t4_coll, x, z, 0.5, 0, 0.03, 12)
+write_glb('models/table4.glb', [("top", t4_top, 0), ("frame", t4_dark, 1), ("pads", t4_pads, 2), ("pads_collider", t4_coll, 3)], [WOOD, WOOD_DARK, PAD, COLLIDER])
+
 # robot token: body + head + eyes + antenna + tip; pointer collider around it
 rb_dark, rb_eyes, rb_tip, rb_coll = Mesh(), Mesh(), Mesh(), Mesh()
 box_mesh(rb_dark, (0, 0.11, 0), (0.16, 0.2, 0.12))                       # body

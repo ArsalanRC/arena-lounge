@@ -1,12 +1,15 @@
 /**
- * Ludo table game, the two-player duel (red vs green, opposite yards).
- * Bridges the pure engine (src/engine/ludo, single-die rules: a six leaves
- * the yard and rolls again, three sixes forfeit the turn, captures and
- * reaching home roll again, safe cells) to the TableGame contract. A turn is
- * roll, then move; the die is chosen by the acting client and travels in the
- * action (casual honesty, no server); a roll with no legal move is skipped by
- * the `pending` hook after a moment. Touch UI: a mini board for the picture
- * and one big button per legal move (pieces on a phone are too small to tap).
+ * Ludo table game for two to four players at a square four-seat table (side
+ * 1 red, 2 green in the opposite yard, 3 blue, 4 yellow; the first seated
+ * player picks how many play). Bridges the pure engine (src/engine/ludo,
+ * single-die rules: a six leaves the yard and rolls again, three sixes forfeit
+ * the turn, captures and reaching home roll again, safe cells) to the
+ * TableGame contract. The round ends when the first player brings all four
+ * pieces home. A turn is roll, then move; the die is chosen by the acting
+ * client and travels in the action (casual honesty, no server); a roll with
+ * no legal move is skipped by the `pending` hook after a moment. Touch UI: a
+ * mini board for the picture and one big button per legal move (pieces on a
+ * phone are too small to tap).
  */
 import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
@@ -27,20 +30,28 @@ import {
 } from '../../engine/ludo'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
 import { UI } from '../config'
-import { t as L } from '../i18n'
+import { seatLabel, t as L } from '../i18n'
 import { LUDO_COLORS, LUDO_SPRITES, createLudoView, type LudoAction } from '../views/ludo3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
 
-const ENGINE_PLAYERS: PlayerInfo[] = [
-  { id: 'A', color: 'red', playerOrder: 0 },
-  { id: 'B', color: 'green', playerOrder: 1 }
-]
+const SEAT_NAMES = ['Red', 'Green', 'Blue', 'Yellow']
+/** Engine players for a round of `n` sides: id = side number, colour by lounge side order, turn order = side order. */
+function enginePlayers(n: number): PlayerInfo[] {
+  const count = Math.max(2, Math.min(4, n))
+  return LUDO_COLORS.slice(0, count).map((color, i) => ({ id: `${i + 1}`, color, playerOrder: i }))
+}
 const IMG = { button: 'images/ui/button.png', ring: 'images/ui/ring.png' }
 const N = 15
+const YARD: PiecePositions = [YARD_POSITION, YARD_POSITION, YARD_POSITION, YARD_POSITION]
 
 interface Wire {
+  /** Pieces per colour (red, green, blue, yellow); absent colours stay in the yard. */
   r: PiecePositions
   g: PiecePositions
+  b?: PiecePositions
+  y?: PiecePositions
+  /** Number of sides in the round (2..4). */
+  k?: number
   p: number
   d: number | null
   hr: 0 | 1
@@ -54,6 +65,9 @@ function encode(s: LudoGameState): string {
   const w: Wire = {
     r: s.board.pieces.red,
     g: s.board.pieces.green,
+    b: s.board.pieces.blue,
+    y: s.board.pieces.yellow,
+    k: s.players.length,
     p: s.currentPlayerIndex,
     d: s.currentDiceValue,
     hr: s.hasRolled ? 1 : 0,
@@ -67,15 +81,15 @@ function encode(s: LudoGameState): string {
 
 function decode(json: string): LudoGameState {
   const w = JSON.parse(json) as Wire
-  const yard: PiecePositions = [YARD_POSITION, YARD_POSITION, YARD_POSITION, YARD_POSITION]
-  const idx = w.p === 1 ? 1 : 0
+  const players = enginePlayers(w.k ?? 2)
+  const idx = Math.max(0, Math.min(players.length - 1, Math.floor(w.p)))
   const base: LudoGameState = {
     status: w.s === 'f' ? 'finished' : 'playing',
-    players: ENGINE_PLAYERS,
+    players,
     currentPlayerIndex: idx,
     turnNumber: w.n,
     finishOrder: Array.isArray(w.fo) ? w.fo : [],
-    board: { pieces: { red: w.r, blue: yard, green: w.g, yellow: yard } },
+    board: { pieces: { red: w.r, green: w.g, blue: w.b ?? YARD, yellow: w.y ?? YARD } },
     currentDiceValue: w.d,
     hasRolled: w.hr === 1,
     consecutiveSixes: w.cs,
@@ -85,7 +99,7 @@ function decode(json: string): LudoGameState {
     doubleDice: null
   }
   if (base.hasRolled && base.currentDiceValue !== null && base.status === 'playing') {
-    const color = ENGINE_PLAYERS[idx].color
+    const color = players[idx].color
     base.validMoves = getValidMoves(base, color, base.currentDiceValue)
     base.turnPhase = base.validMoves.length > 0 ? 'move' : 'roll'
   }
@@ -93,7 +107,12 @@ function decode(json: string): LudoGameState {
 }
 
 function seatOfIndex(i: number): SeatNo {
-  return i === 0 ? 1 : 2
+  return Math.max(1, Math.min(4, i + 1)) as SeatNo
+}
+
+/** The round is over as soon as somebody has all four pieces home. */
+function roundOver(s: LudoGameState): boolean {
+  return s.status === 'finished' || s.finishOrder.length > 0
 }
 
 function d6(): number {
@@ -110,7 +129,7 @@ function isSkip(a: LudoAction): a is { skip: true } {
 /** 3D tap: roll when it is time to roll, else move the nearest own piece that has a legal move. */
 export function tapLudoCell(root: Entity, state: LudoGameState, row: number, col: number, act: (a: LudoAction) => boolean | void): void {
   void root
-  if (state.status !== 'playing') return
+  if (roundOver(state)) return
   if (!state.hasRolled) {
     act({ roll: d6() })
     return
@@ -132,12 +151,15 @@ export function tapLudoCell(root: Entity, state: LudoGameState, row: number, col
 
 // ---------------------------------------------------------------- controls
 
+/** Move-button tints per side (red, green, blue, yellow), dark enough for cream text. */
+const MOVE_TINTS = [Color4.fromHexString('#a33a33ff'), Color4.fromHexString('#2f7d46ff'), Color4.fromHexString('#2f5f9dff'), Color4.fromHexString('#9a7a12ff')]
+
 function MiniBoard(props: { state: LudoGameState; cell: number }) {
   const { state, cell } = props
   const size = cell * N
   const items: ReactEcs.JSX.Element[] = []
   const movable = new Set(state.turnPhase === 'move' ? state.validMoves.map((m) => `${m.color}:${m.pieceIndex}`) : [])
-  for (let ci = 0; ci < 2; ci++) {
+  for (let ci = 0; ci < state.players.length; ci++) {
     const color = LUDO_COLORS[ci]
     const positions = state.board.pieces[color]
     for (let pi = 0; pi < 4; pi++) {
@@ -174,14 +196,14 @@ function moveLabel(m: ValidMove): string {
 function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolean }) {
   const s = props.state
   const ctx = props.ctx
-  const finished = s.status === 'finished'
+  const finished = roundOver(s)
   const cell = props.phone ? 26 : 22
   const canRoll = ctx.myTurn && !s.hasRolled && !finished
-  const canMove = ctx.myTurn && s.turnPhase === 'move'
+  const canMove = ctx.myTurn && s.turnPhase === 'move' && !finished
   const g = L().g
   const die = s.hasRolled && s.currentDiceValue ? g.rolled(s.currentDiceValue) : ''
   const hint = finished
-    ? g.broughtHome(s.finishOrder[0] === 'A' ? g.red : g.green)
+    ? g.broughtHome(seatLabel(SEAT_NAMES[Math.max(0, Number(s.finishOrder[0]) - 1)] ?? SEAT_NAMES[0]))
     : ctx.myTurn
       ? canRoll
         ? g.tapRoll
@@ -202,7 +224,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
     )
   }
   if (canMove) {
-    const tint = ctx.mySeat === 2 ? Color4.fromHexString('#2f7d46ff') : Color4.fromHexString('#a33a33ff')
+    const tint = MOVE_TINTS[Math.max(0, ctx.mySeat - 1)] ?? MOVE_TINTS[0]
     for (const m of s.validMoves) {
       buttons.push(
         <UiEntity
@@ -235,28 +257,31 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
 export const ludoGame: TableGame<LudoGameState, LudoAction> = {
   id: 'ludo',
   label: 'Ludo',
-  seatNames: ['Red', 'Green'],
+  seatNames: SEAT_NAMES,
   seatSprites: LUDO_SPRITES,
-  seatColors: [UI.red, Color4.fromHexString('#3fa35aff')],
+  seatColors: [UI.red, Color4.fromHexString('#3fa35aff'), Color4.fromHexString('#3a7bd5ff'), Color4.fromHexString('#f5c518ff')],
+  seats: 4,
 
-  newGame(opening) {
-    const s = createInitialState(ENGINE_PLAYERS)
-    return opening === 2 ? { ...s, currentPlayerIndex: 1 } : s
+  newGame(opening, players) {
+    const s = createInitialState(enginePlayers(players))
+    const idx = Math.max(0, Math.min(s.players.length - 1, opening - 1))
+    return idx > 0 ? { ...s, currentPlayerIndex: idx } : s
   },
   encode,
   decode,
   turnSeat(s) {
-    return s.status === 'finished' ? 0 : seatOfIndex(s.currentPlayerIndex)
+    return roundOver(s) ? 0 : seatOfIndex(s.currentPlayerIndex)
   },
   finished(s) {
-    return s.status === 'finished'
+    return roundOver(s)
   },
   winner(s) {
-    if (s.status !== 'finished') return WIN_NONE
-    return s.finishOrder[0] === 'A' ? 1 : s.finishOrder[0] === 'B' ? 2 : WIN_DRAW
+    if (!roundOver(s)) return WIN_NONE
+    const first = Number(s.finishOrder[0])
+    return first >= 1 && first <= 4 ? (first as SeatNo) : WIN_DRAW
   },
   apply(s, action, seat) {
-    if (s.status !== 'playing') return null
+    if (roundOver(s)) return null
     if (seatOfIndex(s.currentPlayerIndex) !== seat) return null
     if (!action) return null
     if (isRoll(action)) {
@@ -279,7 +304,7 @@ export const ludoGame: TableGame<LudoGameState, LudoAction> = {
     }
   },
   pending(s) {
-    if (s.status === 'playing' && s.hasRolled && s.validMoves.length === 0) return { delayMs: 1500, action: { skip: true } }
+    if (!roundOver(s) && s.hasRolled && s.validMoves.length === 0) return { delayMs: 1500, action: { skip: true } }
     return null
   },
   botAction(s, difficulty: BotDifficulty) {
