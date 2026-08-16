@@ -319,8 +319,7 @@ export function buildLounge(): void {
   // entrance: a wooden gateway over the path with the welcome sign, kiosk beside it
   const gz = SPAWN.z + 3.4
   prop('models/gateway.glb', Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
-  label(Vector3.create(SPAWN.x, 4.35, gz), 'ARENA LOUNGE', 3.4, Color4.White(), 10)
-  liveLabel(Vector3.create(SPAWN.x, 2.95, gz), () => L().welcome, 1.5, PALETTE.cream, 10)
+  liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
   infoKiosk(SPAWN.x - 4.6, SPAWN.z + 1.6)
   directoryBoard(SPAWN.x - 5.4, SPAWN.z - 1.2)
 
@@ -347,10 +346,7 @@ function buildTower(): void {
   const decor = engine.addEntity()
   Transform.create(decor, { position: Vector3.create(PLAZA.x, 0, PLAZA.z) })
   GltfContainer.create(decor, { src: 'models/decor.glb', visibleMeshesCollisionMask: ColliderLayer.CL_NONE, invisibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
-  // the sign over the portal (the marquee plate sits at y 8.6 on the entrance axis)
-  const portalZ = PLAZA.z - (15.4 - 0.35)
-  liveLabel(Vector3.create(PLAZA.x, 8.6, portalZ - 0.2), () => 'ARENA LOUNGE', 3.2, Color4.White(), 8)
-  liveLabel(Vector3.create(PLAZA.x, 7.2, portalZ - 0.2), () => L().welcome, 1.3, PALETTE.cream, 10)
+  // the name over the portal is baked neon geometry in decor.glb (tools/gen-models.py)
 
   // lounge furniture: sofa pairs looking at the plaza tree, a bar by the entrance
   for (const deg of [22, 158, 202, 338]) {
