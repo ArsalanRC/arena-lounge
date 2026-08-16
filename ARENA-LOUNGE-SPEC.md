@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 13:20 (Europe/Berlin)
+Last update: 2026-08-16 13:35 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -153,6 +153,7 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 13:35 ARSALAN: "don't publish on GitHub yet, wait" -> publishing HOLD. No pushes/PRs until he says so. Open question to him: make the (already public) repo private now, or leave as is. Profile README card is merged/live; portfolio card edited locally in the scratchpad clone, uncommitted; missing plinth-market.de.jpg found and prepared there too.
 - 2026-08-16 13:20 bilingual GitHub Pages landing page (docs/index.html, EN/DE, animated frame), Pages enabled from main:/docs
 - 2026-08-16 13:00 one hit-area collider per board (was one per cell); entity count 590 -> 525 with four tables (textures 19 of 23, the next soft cap to watch)
 - 2026-08-16 12:40 Reversi plugin (engine ported, 31 tests): tap-a-square UI with legal hints, felt board, front+back disc sprites; per-game seat colours; four tables in an arc (Dot Lines, Connect Four x2, Reversi)
