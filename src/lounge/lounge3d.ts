@@ -15,6 +15,7 @@ import {
   Font,
   GltfContainer,
   InputAction,
+  LightSource,
   Material,
   MaterialTransparencyMode,
   MeshCollider,
@@ -27,7 +28,7 @@ import {
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { BUILT_GAMES, ELEVATORS, FLOORS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
+import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
 import { GAME_NAMES } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
@@ -324,6 +325,13 @@ export function buildLounge(): void {
   directoryBoard(SPAWN.x - 5.4, SPAWN.z - 1.2)
 
   buildTower()
+
+  // real lights on top of the emissive fixtures (see config LIGHTS)
+  for (const l of LIGHTS) {
+    const e = engine.addEntity()
+    Transform.create(e, { position: Vector3.create(l.x, l.y, l.z) })
+    LightSource.create(e, { type: LightSource.Type.Point({}), color: l.color, intensity: l.intensity, range: l.range, shadow: false })
+  }
 }
 
 /**

@@ -12,8 +12,8 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/tower-overview.jpg" alt="The tower: a woven lattice over the lounge with the game room and the rooftop terrace" /></td>
-    <td width="50%"><img src="docs/screenshots/lounge.jpg" alt="Arrival: the gateway, the plaza tree, the corners and the game room above" /></td>
+    <td width="50%"><img src="docs/screenshots/tower-night.jpg" alt="The tower at night: a woven lattice with beacon lights, glowing rims and rug rings, the game room and the rooftop terrace" /></td>
+    <td width="50%"><img src="docs/screenshots/lounge.jpg" alt="Arrival at night: string lights, the plaza tree, the corners and the game room above" /></td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/connect-four.jpg" alt="Seated at Four in a Row in first person, controller docked right" /></td>
@@ -109,7 +109,7 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 
 - [x] Twelve games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe, Snakes & Ladders
 - [ ] Sea Strike and a Dice Royale duel (need new corners)
-- [x] The tower: game room and rooftop terrace, elevator pads
+- [x] The tower: game room and rooftop terrace, elevator pads, night lighting (fixed 21:00 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights)
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena)
 - [x] Lounge UI (cards, controller, toasts, signs, hints) in EN / DE / ES / PT / FR, other languages fall back to English

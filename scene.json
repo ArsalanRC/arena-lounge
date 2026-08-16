@@ -68,6 +68,9 @@
     "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE"
   ],
   "worldConfiguration": {
-    "name": "arenalounge.dcl.eth"
+    "name": "arenalounge.dcl.eth",
+    "skyboxConfig": {
+      "fixedTime": 75600
+    }
   }
 }
