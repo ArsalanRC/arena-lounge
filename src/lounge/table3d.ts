@@ -29,8 +29,8 @@ import { SEAT_PAD_OFFSET } from './config'
 import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
-import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
-import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, otherSeat, seatOf, sideOf, sit, sitWithBot, toast, type Table } from './tables'
+import { SEAT_A, SEAT_B, Status, Winner, winsOf, type Seat } from './state'
+import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, occupiedSeats, otherSeats, seatOf, seatPadLocalOffset, seatsOf, sideOf, sit, sitWithBot, targetPlayers, toast, type Table } from './tables'
 import { TABLE_TOP_Y, toTableLocal } from './views/shared'
 
 export { TABLE_TOP_Y, box } from './views/shared'
@@ -39,8 +39,8 @@ export interface TableVisual {
   table: Table
   view: View3DHandle
   sign: Entity
-  camA: Entity
-  camB: Entity
+  /** One camera area per physical seat (index = seat - 1). */
+  cams: Entity[]
   sfx: TableSfx
   rendered: {
     round: number
@@ -51,7 +51,7 @@ export interface TableVisual {
     signVisible: boolean
     myTurnKey: string
     seated: boolean
-    /** Address in the opponent seat last frame (to notice them leaving). */
+    /** Addresses in the other seats last frame, joined (to notice someone leaving). */
     oppAddr: string
   }
 }
@@ -68,7 +68,8 @@ export const visuals: TableVisual[] = []
  */
 function makeCam(parent: Entity, seat: Seat): Entity {
   const cam = engine.addEntity()
-  Transform.create(cam, { parent, position: Vector3.create(0, 1.2, seat === SEAT_A ? -SEAT_PAD_OFFSET : SEAT_PAD_OFFSET) })
+  const off = seatPadLocalOffset(seat)
+  Transform.create(cam, { parent, position: Vector3.create(off.x, 1.2, off.z) })
   return cam
 }
 
@@ -105,9 +106,9 @@ const SIGN_Y = TABLE_TOP_Y + 0.05 + 1.04 + 0.55
 export function buildTableVisual(t: Table): TableVisual {
   const root = t.root
 
-  // table top + apron + legs + both seat pads: one GLB on the root (models/table.glb);
-  // the pads' pointer collider is an invisible mesh inside it
-  GltfContainer.create(root, { src: 'models/table.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
+  // table top + apron + legs + the seat pads: one GLB on the root (models/table.glb,
+  // or the square four-pad table4.glb); the pads' pointer collider is an invisible mesh inside it
+  GltfContainer.create(root, { src: t.seats > 2 ? 'models/table4.glb' : 'models/table.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
 
   // the game itself
   const view = t.game.createView3D(
@@ -118,17 +119,18 @@ export function buildTableVisual(t: Table): TableVisual {
     () => gameStateOf(t)
   )
 
-  // seat pads: both look the same (chairs carry no colour, sides are dealt at
+  // seat pads: all look the same (chairs carry no colour, sides are dealt at
   // random per round); a tap on the GLB's pad collider picks the seat by the
-  // hit point's side of the table
-  const camA = makeCam(root, SEAT_A)
-  const camB = makeCam(root, SEAT_B)
+  // hit point's side of the table (front / back, and left / right on four-pad tables)
+  const cams = seatsOf(t).map((seat) => makeCam(root, seat))
   pointerEventsSystem.onPointerDown(
     { entity: root, opts: { button: InputAction.IA_POINTER, hoverText: 'Sit here', maxDistance: 8 } },
     (event) => {
       const p = event.hit?.position
       if (!p) return
-      sit(t, toTableLocal(root, p).z < 0 ? SEAT_A : SEAT_B)
+      const l = toTableLocal(root, p)
+      if (t.seats > 2 && Math.abs(l.x) > Math.abs(l.z)) sit(t, l.x < 0 ? 3 : 4)
+      else sit(t, l.z < 0 ? SEAT_A : SEAT_B)
     }
   )
 
@@ -148,8 +150,7 @@ export function buildTableVisual(t: Table): TableVisual {
     table: t,
     view,
     sign,
-    camA,
-    camB,
+    cams,
     sfx: createTableSfx(root, Vector3.create(0, TABLE_TOP_Y + 0.6, 0)),
     rendered: {
       round: -1,
@@ -177,7 +178,19 @@ function signTextFor(t: Table): string {
   const str = L()
   const nameOf = (x: { name: string; bot: boolean }) => (x.bot ? str.houseBot : x.name)
   const title = `${str.table(t.def.id + 1)} · ${localeInfo(uiLang.code).games[t.game.id]?.name ?? t.game.label}`
-  if (a.addr === '' && s.addr === '') return `${title}\n${str.comePlay}`
+  const seated = occupiedSeats(t)
+  if (seated.length === 0) return `${title}\n${str.comePlay}`
+  if (t.seats > 2) {
+    const names = str.seatedList(seated.map((x) => nameOf(seatOf(t, x))))
+    const score = seated.map((x) => winsOf(b, x)).join(':')
+    if (b.status === Status.Playing) return `${title}\n${names}\n${str.toMove(nameOf(seatOf(t, b.turn as Seat)))} · ${score}`
+    if (b.status === Status.Finished) {
+      const line = b.winner === Winner.Draw ? str.drawShort : str.wins(nameOf(seatOf(t, b.winner as Seat)))
+      return `${title}\n${names}\n${line} · ${score}`
+    }
+    const missing = targetPlayers(t) - seated.length
+    return `${title}\n${names}\n${missing > 0 ? str.waitingForMore(missing) : str.oneSeatFree}`
+  }
   if (b.status === Status.Playing) {
     const who = b.turn === SEAT_A ? nameOf(a) : nameOf(s)
     return `${title}\n${str.vs(nameOf(a), nameOf(s))}\n${str.toMove(who)} · ${b.winsA}:${b.winsB}`
@@ -203,8 +216,7 @@ export function updateTableVisual(vis: TableVisual): void {
 
   // first person only for the local player's own seat
   const mine = mySeatAt(t)
-  setFirstPersonArea(vis.camA, mine === SEAT_A)
-  setFirstPersonArea(vis.camB, mine === SEAT_B)
+  vis.cams.forEach((cam, i) => setFirstPersonArea(cam, mine === i + 1))
 
   // sign (hidden for the local player while they are at this table: the UI
   // card / controller carries the same info and the sign would loom overhead)
@@ -257,10 +269,13 @@ export function updateTableVisual(vis: TableVisual): void {
     r.myTurnKey = turnKey
     if (seated && b.status === Status.Playing && b.turn === mine) playPersonal('turn')
   }
-  const oppAddr = seated ? seatOf(t, otherSeat(mine as Seat)).addr : ''
+  const others = seated ? otherSeats(t, mine as Seat).map((x) => seatOf(t, x).addr) : []
+  const oppAddr = others.join('|')
   if (oppAddr !== r.oppAddr) {
-    const wasHuman = r.oppAddr !== '' && r.oppAddr !== 'bot'
-    if (seated && wasHuman && oppAddr === '') toast(L().opponentLeft)
+    // a human in another seat became an empty seat (or a bot took their chair): say so
+    const before = r.oppAddr === '' ? [] : r.oppAddr.split('|')
+    const humanLeft = before.some((addr, i) => addr !== '' && addr !== 'bot' && (others[i] === '' || others[i] === 'bot'))
+    if (seated && humanLeft && before.length === others.length) toast(L().opponentLeft)
     r.oppAddr = oppAddr
   }
 }

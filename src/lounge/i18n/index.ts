@@ -68,6 +68,13 @@ export interface LoungeStrings {
   hard: string
   playAgain: string
   dismissBot: string
+  /** Multi-seat tables (Ludo): host picks the player count, bots fill, newcomers wait for the next round. */
+  players: string
+  waitingForMore: (n: number) => string
+  fillBots: string
+  roundRunning: string
+  timeoutPlayed: (name: string) => string
+  seatedList: (names: string[]) => string
   showBoard: string
   hideBoard: string
   standUp: string
@@ -214,6 +221,12 @@ const EN: LoungeStrings = {
   hard: 'Hard',
   playAgain: 'Play again',
   dismissBot: 'Dismiss bot',
+  players: 'Players',
+  waitingForMore: (n) => (n === 1 ? 'Waiting for one more player…' : `Waiting for ${n} more players…`),
+  fillBots: 'Fill with bots',
+  roundRunning: 'A round is running, wait for the next one',
+  timeoutPlayed: (name) => `${name} ran out of time, the house played the move`,
+  seatedList: (names) => names.join(', '),
   showBoard: 'Show board',
   hideBoard: 'Hide board',
   standUp: 'Stand up',
@@ -357,6 +370,12 @@ const DE: LoungeStrings = {
   hard: 'Schwer',
   playAgain: 'Noch einmal',
   dismissBot: 'Bot wegschicken',
+  players: 'Spieler',
+  waitingForMore: (n) => (n === 1 ? 'Wartet auf einen weiteren Spieler…' : `Wartet auf ${n} weitere Spieler…`),
+  fillBots: 'Mit Bots auffüllen',
+  roundRunning: 'Eine Runde läuft, warte auf die nächste',
+  timeoutPlayed: (name) => `${name} hat die Zeit überschritten, das Haus hat gezogen`,
+  seatedList: (names) => names.join(', '),
   showBoard: 'Brett zeigen',
   hideBoard: 'Brett ausblenden',
   standUp: 'Aufstehen',
@@ -500,6 +519,12 @@ const ES: LoungeStrings = {
   hard: 'Difícil',
   playAgain: 'Otra ronda',
   dismissBot: 'Despedir al bot',
+  players: 'Jugadores',
+  waitingForMore: (n) => (n === 1 ? 'Esperando a un jugador más…' : `Esperando a ${n} jugadores más…`),
+  fillBots: 'Completar con bots',
+  roundRunning: 'Hay una ronda en curso, espera a la siguiente',
+  timeoutPlayed: (name) => `${name} se quedó sin tiempo, la casa hizo la jugada`,
+  seatedList: (names) => names.join(', '),
   showBoard: 'Ver tablero',
   hideBoard: 'Ocultar tablero',
   standUp: 'Levantarse',
@@ -643,6 +668,12 @@ const PT: LoungeStrings = {
   hard: 'Difícil',
   playAgain: 'Jogar de novo',
   dismissBot: 'Dispensar o bot',
+  players: 'Jogadores',
+  waitingForMore: (n) => (n === 1 ? 'À espera de mais um jogador…' : `À espera de mais ${n} jogadores…`),
+  fillBots: 'Completar com bots',
+  roundRunning: 'Há uma ronda a decorrer, espera pela próxima',
+  timeoutPlayed: (name) => `${name} ficou sem tempo, a casa fez a jogada`,
+  seatedList: (names) => names.join(', '),
   showBoard: 'Ver tabuleiro',
   hideBoard: 'Ocultar tabuleiro',
   standUp: 'Levantar',
@@ -786,6 +817,12 @@ const FR: LoungeStrings = {
   hard: 'Difficile',
   playAgain: 'Rejouer',
   dismissBot: 'Renvoyer le bot',
+  players: 'Joueurs',
+  waitingForMore: (n) => (n === 1 ? 'En attente d’un joueur de plus…' : `En attente de ${n} joueurs de plus…`),
+  fillBots: 'Compléter avec des bots',
+  roundRunning: 'Une manche est en cours, attends la prochaine',
+  timeoutPlayed: (name) => `${name} a dépassé le temps, la maison a joué le coup`,
+  seatedList: (names) => names.join(', '),
   showBoard: 'Voir le plateau',
   hideBoard: 'Masquer le plateau',
   standUp: 'Se lever',

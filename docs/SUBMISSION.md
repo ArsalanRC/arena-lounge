@@ -55,6 +55,8 @@ tables become natural gathering points: play, watch, take the next seat.
 
 - Tables are shared CRDT state: seats, board, series score and turn timer are
   identical for everyone, late joiners included.
+- Ludo seats up to four people at one square table: the first to sit picks
+  how many play, friends fill the chairs, house bots fill what is left.
 - The floating sign over each table says who is waiting for a rival; full
   tables invite you to watch from behind either player.
 - Fourteen games at fifteen tables across four floors give a group reasons to

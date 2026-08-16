@@ -31,7 +31,7 @@ import { botSettings } from './games/botSettings'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
 import { LOCALES, localeInfo, t as L, uiLang } from './i18n'
-import { SEAT_A, SEAT_B, Status, Winner, type Seat } from './state'
+import { SEAT_A, SEAT_B, Status, Winner, winsOf, type Seat } from './state'
 import {
   act,
   boardOf,
@@ -44,6 +44,12 @@ import {
   me,
   mySeatAt,
   otherSeat,
+  amHost,
+  occupiedSeats,
+  seatsOf,
+  setPlayers,
+  targetPlayers,
+  botAt,
   rematch,
   rideTo,
   seatOf,
@@ -146,9 +152,10 @@ function Para(props: { value: string; size?: number; color?: Color4; margin?: Ma
   )
 }
 
-function Chip(props: { sprite: string; label: string; reverse?: boolean; tint?: Color4 }) {
-  const disc = <UiEntity uiTransform={{ width: 26, height: 26, margin: props.reverse ? { left: 8 } : { right: 8 } }} uiBackground={{ texture: { src: props.sprite }, textureMode: 'stretch', color: props.tint ?? WHITE }} />
-  const label = <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: props.label, fontSize: 19, color: UI.text }} />
+function Chip(props: { key?: string; sprite: string; label: string; reverse?: boolean; tint?: Color4; dim?: boolean; small?: boolean }) {
+  const d = props.small ? 20 : 26
+  const disc = <UiEntity uiTransform={{ width: d, height: d, margin: props.reverse ? { left: 6 } : { right: 6 } }} uiBackground={{ texture: { src: props.sprite }, textureMode: 'stretch', color: props.tint ?? WHITE }} />
+  const label = <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: props.label, fontSize: props.small ? 15 : 19, color: props.dim ? UI.muted : UI.text }} />
   return (
     <UiEntity uiTransform={{ width: 'auto', height: 30, flexDirection: 'row', alignItems: 'center' }}>
       {props.reverse ? label : disc}
@@ -280,25 +287,37 @@ function DifficultyPicker(props: { width: number; fontSize: number }) {
   )
 }
 
+/** One line about who sits at a table: "A vs B · 2:1", "A is waiting for a rival", "A, B · waiting for 2 more…". */
+function seatsLine(t: Table): string {
+  const b = boardOf(t)
+  const str = L()
+  const seated = occupiedSeats(t)
+  const names = seated.map((seat) => displayName(seatOf(t, seat)))
+  if (seated.length === 0) return str.openTable
+  if (t.seats === 2) {
+    if (seated.length === 1) return str.waitingForRival(names[0])
+    const both = str.vs(names[0], names[1])
+    return b.status === Status.Playing ? `${both} · ${b.winsA}:${b.winsB}` : both
+  }
+  const list = str.seatedList(names)
+  const missing = targetPlayers(t) - seated.length
+  if (b.status !== Status.Playing && missing > 0) return `${list} · ${str.waitingForMore(missing)}`
+  if (b.status === Status.Playing) return `${list} · ${seated.map((seat) => winsOf(b, seat)).join(':')}`
+  return list
+}
+
 function TableCard() {
   const t = visibleTableCard()
   if (!t) return null
   const b = boardOf(t)
-  const a = seatOf(t, SEAT_A)
-  const s = seatOf(t, SEAT_B)
   const str = L()
-  const bothTaken = a.addr !== '' && s.addr !== ''
-  const line = bothTaken
-    ? b.status === Status.Playing
-      ? `${str.vs(displayName(a), displayName(s))} · ${b.winsA}:${b.winsB}`
-      : str.vs(displayName(a), displayName(s))
-    : a.addr !== ''
-      ? str.waitingForRival(displayName(a))
-      : s.addr !== ''
-        ? str.waitingForRival(displayName(s))
-        : str.openTable
+  const seated = occupiedSeats(t)
+  const full = seated.length >= t.seats
+  const bothTaken = t.seats === 2 ? full : b.status === Status.Playing
+  const line = seatsLine(t)
   const state = bothTaken ? gameStateOf(t) : null
-  const emptyTable = a.addr === '' && s.addr === ''
+  const emptyTable = seated.length === 0
+  const canSit = !full && !(t.seats > 2 && b.status === Status.Playing)
   const W = 480
   return (
     <Panel width={W} place={bottomCentre(W, 36)}>
@@ -313,8 +332,8 @@ function TableCard() {
         </Row>
       )}
       <Row>
-        {!bothTaken && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={220} />}
-        {!bothTaken && a.addr === '' && s.addr === '' && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
+        {canSit && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={220} />}
+        {emptyTable && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
         <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
         <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} />
       </Row>
@@ -336,22 +355,26 @@ function Controller() {
   const t = mine.table
   const seat = mine.seat
   const b = boardOf(t)
-  const opp = seatOf(t, otherSeat(seat))
+  const multi = t.seats > 2
+  const seated = occupiedSeats(t)
+  const players = targetPlayers(t)
+  // the classic opponent (two-seat tables); on a multi-seat table the "opponent" is whoever is to move
+  const opp = multi ? seatOf(t, (b.turn || otherSeat(seat)) as Seat) : seatOf(t, otherSeat(seat))
   const myTurn = b.status === Status.Playing && b.turn === seat
-  const myWins = seat === SEAT_A ? b.winsA : b.winsB
-  const oppWins = seat === SEAT_A ? b.winsB : b.winsA
+  const myWins = winsOf(b, seat)
+  const oppWins = multi ? 0 : winsOf(b, otherSeat(seat))
   const mobile = phone()
   const state = gameStateOf(t)
   const sprites = t.game.seatSprites
   // colours are dealt per round: chips and the turn tint follow the game side, not the chair
   const mySide = sideOf(t, seat)
-  const oppSide = otherSeat(mySide)
+  const oppSide = multi ? sideOf(t, (b.turn || otherSeat(seat)) as Seat) : otherSeat(mySide)
 
   const str = L()
   let status = ''
   let statusColor = UI.text
   if (b.status === Status.Waiting) {
-    status = opp.addr === '' ? str.waitingOpponent : str.dealing
+    status = seated.length < players ? (multi ? str.waitingForMore(players - seated.length) : str.waitingOpponent) : str.dealing
     statusColor = UI.muted
   } else if (b.status === Status.Playing) {
     const secs = secondsLeft(b.updatedAt)
@@ -362,21 +385,53 @@ function Controller() {
     } else statusColor = UI.muted
   } else if (b.winner === Winner.Draw) status = str.draw
   else if (b.winner === seat) status = str.youWin
-  else status = str.takesRound(displayName(opp))
+  else status = str.takesRound(displayName(seatOf(t, (b.winner || otherSeat(seat)) as Seat)))
 
-  const showBotInvite = b.status === Status.Waiting && opp.addr === ''
+  const host = amHost(t)
+  const showBotInvite = b.status === Status.Waiting && seated.length < players && (multi ? host : true)
   // strength picker: while waiting (before inviting the bot) and between rounds against it
-  const showDismiss = opp.bot && b.status !== Status.Playing
+  const showDismiss = botAt(t) && b.status !== Status.Playing
   const showBotRow = showDismiss || showBotInvite
-  const showRematch = b.status === Status.Finished && opp.addr !== ''
+  const showRematch = b.status === Status.Finished && seated.length >= players
   const showBoardToggle = mobile && t.game.hasStrip === true
+  const showPlayers = multi && host && b.status !== Status.Playing
 
-  const header = (
+  const header = multi ? (
+    // every player at the table: sprite of their side, name, series wins; the mover is bright
+    <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+      {seatsOf(t)
+        .filter((x) => seatOf(t, x).addr !== '')
+        .map((x) => {
+          const sd = seatOf(t, x)
+          const side = sideOf(t, x)
+          const who = x === seat ? str.you : sd.bot ? str.bot : displayName(sd)
+          const label = `${who.length > 8 ? who.slice(0, 7) + '…' : who} ${winsOf(b, x)}`
+          return <Chip key={`h${x}`} sprite={sprites[side - 1]} label={label} tint={t.game.seatSpriteTints?.[side - 1]} dim={b.status === Status.Playing && b.turn !== x} small />
+        })}
+    </UiEntity>
+  ) : (
     <UiEntity uiTransform={{ width: '100%', height: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <Chip sprite={sprites[mySide - 1]} label={str.you} tint={t.game.seatSpriteTints?.[mySide - 1]} />
       <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: `${myWins} : ${oppWins}`, fontSize: 22, color: UI.text }} />
       <Chip sprite={sprites[oppSide - 1]} label={opp.addr === '' ? '—' : displayName(opp)} reverse tint={t.game.seatSpriteTints?.[oppSide - 1]} />
     </UiEntity>
+  )
+  // host of a multi-seat table: how many play the next round (never below the seated count)
+  const playersRow = !showPlayers ? null : (
+    <Row height={46} margin={{ top: 4 }}>
+      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.players, fontSize: T.small, color: UI.muted }} />
+      <Segmented
+        options={seatsOf(t)
+          .filter((n) => n >= 2)
+          .map((n) => ({ key: `${n}`, label: `${n}` }))}
+        active={`${players}`}
+        onPick={(k) => {
+          if (Number(k) >= seated.length) setPlayers(t, Number(k))
+        }}
+        width={mobile ? 44 : 52}
+        fontSize={17}
+      />
+    </Row>
   )
   const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
   const difficulty = <DifficultyPicker width={mobile ? 66 : 92} fontSize={mobile ? 15 : 16} />
@@ -409,9 +464,10 @@ function Controller() {
             {/* explicit vertical margins: nested auto-height wrappers eat the panel padding */}
             <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { top: 10, bottom: 10 } }}>{controls}</UiEntity>
             <UiEntity uiTransform={{ width: 220, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { left: 12 } }}>
-              {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} />}
+              {showBotInvite && <Btn label={multi && players > 2 ? str.fillBots : str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} />}
               {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={btnW} />}
               {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} />}
+              {playersRow}
               {botRow}
               {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} />}
               <Row height={60}>
@@ -432,9 +488,10 @@ function Controller() {
       <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 2 }} />
       <Text value={status} size={T.status} color={statusColor} margin={{ top: 4, bottom: 6 }} />
       {controls}
+      {playersRow}
       {botRow}
       <Row wrap height={showRematch || showBotInvite ? 60 : 0}>
-        {showBotInvite && <Btn label={str.playBot} onClick={() => inviteBot(t)} />}
+        {showBotInvite && <Btn label={multi && players > 2 ? str.fillBots : str.playBot} onClick={() => inviteBot(t)} />}
         {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} />}
         {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} />}
       </Row>

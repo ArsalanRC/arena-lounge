@@ -19,20 +19,21 @@ import type { BotDifficulty } from '../../engine/types'
 /** Hosted games plus the ids reserved for the game-room corners (banner until the plugin lands). */
 export type GameId = 'connectfour' | 'dotlines' | 'reversi' | 'tictactoe' | 'matchpairs' | 'checkers' | 'chess' | 'backgammon' | 'crocsnap' | 'ludo' | 'supertictactoe' | 'snakesladders' | 'seastrike' | 'diceroyale'
 
-/** Seat numbers as stored in TableBoard.turn / winner (0 = nobody). */
-export type SeatNo = 1 | 2
+/** Game side numbers (1 = the game's first colour); most games use 1..2, Ludo up to 4. */
+export type SeatNo = 1 | 2 | 3 | 4
 
 export const WIN_NONE = 0
-export const WIN_DRAW = 3
+/** Must stay clear of the side numbers (state.ts Winner.Draw). */
+export const WIN_DRAW = 9
 
 export interface GameContext {
   /** Table root entity: a stable per-table key for plugin-local state. */
   root: Entity
   /**
    * The game side the local player plays at this table: 1 = the game's first
-   * side (yellow / white / X / red), 2 = the second, 0 when spectating. Sides
-   * are dealt at random and alternate per round; the physical chair is
-   * separate (see `behind`).
+   * side (yellow / white / X / red), 2 = the second and so on, 0 when
+   * spectating. Sides are dealt at random and rotate per round; the physical
+   * chair is separate (see `behind`).
    */
   mySeat: 0 | SeatNo
   /** True when the local player sits behind the upright board (physical seat B) and sees it mirrored left-right. */
@@ -60,23 +61,33 @@ export interface TableGame<S = unknown, A = unknown> {
   id: GameId
   /** Full name for cards and signs. */
   label: string
-  /** Names of the two sides in seat order, e.g. ['Yellow', 'Red']. */
-  seatNames: [string, string]
-  /** UI sprite paths for the two sides (disc / chip images). */
-  seatSprites: [string, string]
+  /** Names of the sides in side order, e.g. ['Yellow', 'Red'] (as many as `seats`). */
+  seatNames: string[]
+  /** UI sprite paths for the sides (disc / chip images). */
+  seatSprites: string[]
   /** Optional tints applied to seatSprites in chips (for white sprites). */
-  seatSpriteTints?: [Color4, Color4]
-  /** Button tints for the two sides (seat buttons, turn colour). */
-  seatColors: [Color4, Color4]
+  seatSpriteTints?: Color4[]
+  /** Button tints for the sides (seat buttons, turn colour). */
+  seatColors: Color4[]
+  /**
+   * Physical seats at the table (default 2). A multi-seat game gets a square
+   * table with a pad on every side; the first seated player picks how many
+   * play (2..seats) and the round starts when that many are seated.
+   */
+  seats?: number
 
-  /** A fresh state where side `opening` moves first (the lounge always passes 1: the game's own first mover; chairs get sides at random). */
-  newGame(opening: SeatNo): S
+  /**
+   * A fresh state where side `opening` moves first (the lounge always passes
+   * 1: the game's own first mover; chairs get sides at random) for `players`
+   * sides (2 unless the game seats more).
+   */
+  newGame(opening: SeatNo, players: number): S
   encode(state: S): string
   decode(json: string): S
   /** Seat to move, 0 once the game is over. */
   turnSeat(state: S): 0 | SeatNo
   finished(state: S): boolean
-  /** 1 or 2 for a winning seat, WIN_DRAW for a draw, WIN_NONE while running. */
+  /** The winning side (1..seats), WIN_DRAW for a draw, WIN_NONE while running. */
   winner(state: S): number
   /**
    * Apply an action for `seat`. Must validate fully (turn, legality) and
