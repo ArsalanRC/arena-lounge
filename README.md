@@ -1,10 +1,21 @@
 # Arena Lounge
 
 A cosy game lounge for Decentraland, built for phones first. Walk in, pick a
-table, take a seat, and play Connect Four against a friend or the house bot.
-Every table is shared: whoever is in the World sees the same discs fall.
+table, take a seat, and play Connect Four or Dot Lines against a friend or the
+house bot. Every table is shared: whoever is in the World sees the same moves.
 
 Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks.io/hackathon/2353/detail).
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/lounge.jpg" alt="The lounge: three tables in an arc, seat pads, robots" /></td>
+    <td width="50%"><img src="docs/screenshots/connect-four.jpg" alt="Seated at Connect Four in first person, controller docked right" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dot-lines.jpg" alt="Dot Lines table with the tap-a-dot controller" /></td>
+    <td width="50%"><img src="docs/screenshots/how-to-play.jpg" alt="How to play panel with the language picker" /></td>
+  </tr>
+</table>
 
 - **World:** `arenalounge.dcl.eth` (deployed at the end of the build phase)
 - **Stack:** Decentraland SDK7 (TypeScript, React-ECS UI, CRDT sync), no server, no downloads
