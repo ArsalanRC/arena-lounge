@@ -5,7 +5,7 @@ meaningful change (new commit, decision, test result). If a chat is closed,
 start the next one with: "read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md
 and continue". Keep this file honest: only verified facts under "State".
 
-Last update: 2026-08-16 12:05 (Europe/Berlin)
+Last update: 2026-08-16 12:20 (Europe/Berlin)
 
 ## 1. What this is
 
@@ -67,6 +67,8 @@ version works as well", 16 Aug 11:30):
 - Sounds: synthesised WAVs (drop, win chime, your-move ding, sit click, lose).
 - Perf: 269 entities, ~12k triangles (30% of the 4-parcel cap), 60 fps desktop.
 - Tests: 30 vitest tests on the pure engine. `pnpm build` strict type-check green.
+- How to play: "?" buttons + info kiosk at spawn open a panel with the rules
+  overview in 19 languages (from game-platform), lounge tips EN/DE/ES.
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
 
 Not done: buy NAME, deploy, DoraHacks form, GitHub Pages
@@ -100,8 +102,8 @@ landing page (Arsalan's standing repo ritual), phone screenshots for the README.
    4 Sept.
 3. Content: second game type (Dot Lines or Reversi from game-platform engines),
    generic "table game" plugin interface so tables can host any 2-player engine.
-4. Instructions board with language picker; reuse game-platform's 23-locale
-   instruction texts (messages/*.json).
+4. (done 16 Aug) Instructions panel with language picker. Next: lounge chrome
+   strings in more languages, native review of the imported overviews.
 5. The house: compact multi-floor building, elevator = floor-selector UI that
    teleports (movePlayerTo), each floor a game area; rooftop = leaderboard /
    tournament board. Keep total content within mobile budgets.
@@ -146,6 +148,7 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - 2026-08-16 11:35 this file created; Arsalan confirmed the phone build works
 - 2026-08-16 11:40 spectator mini board, opponent-left toast, idle auto-stand (150 s), bot difficulty Easy/Medium/Hard
 - 2026-08-16 11:45 repo pushed to github.com/ArsalanRC/arena-lounge; CI switched to pnpm (test + build)
+- 2026-08-16 12:20 How-to-play panel with language picker (19 languages: rule overviews reused from game-platform, lounge sentences EN/DE/ES natively, others fall back to EN); info kiosk at spawn; ar/fa/ur/te left out until the client font shapes them
 - 2026-08-16 12:05 seat camera fixed for rotated tables (aim at floor height; client measures from the feet)
 - 2026-08-16 11:55 Dot Lines plugin (engine ported with 26 tests): two-tap connect-the-dots input, mirrored UI for the far seat, upright double-sided board on Table 3
 - 2026-08-16 11:50 tables made game-agnostic: TableBoard carries gameId + engine state JSON; games plug in via src/lounge/games/types.ts (rules, bot, 3D view, controls); Connect Four is the first plugin (behaviour unchanged)

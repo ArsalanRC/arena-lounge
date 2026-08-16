@@ -82,6 +82,10 @@ export const local = {
   showMiniBoard: false,
   /** Bot strength for games this client drives (local choice, no sync needed). */
   botDifficulty: 'medium' as BotDifficulty,
+  /** UI language code (see i18n); 'en' until the player picks another. */
+  lang: 'en',
+  /** Whether the "How to play" panel is open (and for which game). */
+  helpOpen: false,
   /** Last time the local player did something at a table (sit / act / rematch). */
   lastActionAt: 0,
   /** Set when the CRDT room never connected; local play is still allowed. */
