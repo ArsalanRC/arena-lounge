@@ -91,6 +91,17 @@ export interface LoungeStrings {
   skyRoom: string
   rooftop: string
   rooftopNote: string
+  /** Leaderboard (rooftop board + help panel tab): wins against real players. */
+  leaderboardTitle: string
+  leaderboardSub: string
+  leaderboardEmpty: string
+  leaderboardOffline: string
+  leaderboardTab: string
+  howToPlayTab: string
+  winsShort: string
+  streakShort: string
+  yourStats: (wins: number, streak: number, best: number) => string
+  notRanked: string
   /** Seat colour names shown on buttons and chips. */
   seat: Record<string, string>
   /** Per-game hint lines. */
@@ -242,6 +253,16 @@ const EN: LoungeStrings = {
   skyRoom: 'SKY ROOM',
   rooftop: 'ROOFTOP',
   rooftopNote: 'Leaderboard and tournaments: coming after the buildathon',
+  leaderboardTitle: 'Leaderboard',
+  leaderboardSub: 'Wins against real players, on every floor, kept forever. Rounds against the house bot do not count.',
+  leaderboardEmpty: 'Nobody on the board yet. Beat a friend and be the first.',
+  leaderboardOffline: 'The board is taking a moment. Try again in a bit.',
+  leaderboardTab: 'Leaderboard',
+  howToPlayTab: 'How to play',
+  winsShort: 'wins',
+  streakShort: 'streak',
+  yourStats: (wins, streak, best) => `You: ${wins} wins · streak ${streak} · best ${best}`,
+  notRanked: 'You are not on the board yet. Win a round against a person.',
   seat: { Yellow: 'Yellow', Red: 'Red', Black: 'Black', White: 'White', Green: 'Green', Blue: 'Blue', X: 'X', O: 'O' },
   g: {
     boxes: 'Boxes',
@@ -391,6 +412,16 @@ const DE: LoungeStrings = {
   skyRoom: 'HIMMELSZIMMER',
   rooftop: 'DACHTERRASSE',
   rooftopNote: 'Bestenliste und Turniere: kommen nach dem Buildathon',
+  leaderboardTitle: 'Bestenliste',
+  leaderboardSub: 'Siege gegen echte Spieler, auf allen Etagen, dauerhaft gezählt. Runden gegen den Bot zählen nicht.',
+  leaderboardEmpty: 'Noch niemand auf der Liste. Schlag einen Freund und sei der Erste.',
+  leaderboardOffline: 'Die Liste braucht gerade einen Moment. Versuch es gleich noch mal.',
+  leaderboardTab: 'Bestenliste',
+  howToPlayTab: 'So geht’s',
+  winsShort: 'Siege',
+  streakShort: 'Serie',
+  yourStats: (wins, streak, best) => `Du: ${wins} Siege · Serie ${streak} · beste ${best}`,
+  notRanked: 'Du stehst noch nicht auf der Liste. Gewinn eine Runde gegen einen Menschen.',
   seat: { Yellow: 'Gelb', Red: 'Rot', Black: 'Schwarz', White: 'Weiß', Green: 'Grün', Blue: 'Blau', X: 'X', O: 'O' },
   g: {
     boxes: 'Kästchen',
@@ -540,6 +571,16 @@ const ES: LoungeStrings = {
   skyRoom: 'SALA DEL CIELO',
   rooftop: 'AZOTEA',
   rooftopNote: 'Clasificación y torneos: después del buildathon',
+  leaderboardTitle: 'Clasificación',
+  leaderboardSub: 'Victorias contra jugadores reales, en todas las plantas, para siempre. Las rondas contra el bot no cuentan.',
+  leaderboardEmpty: 'Todavía no hay nadie. Gana a un amigo y sé el primero.',
+  leaderboardOffline: 'La tabla tarda un momento. Prueba de nuevo enseguida.',
+  leaderboardTab: 'Clasificación',
+  howToPlayTab: 'Cómo se juega',
+  winsShort: 'victorias',
+  streakShort: 'racha',
+  yourStats: (wins, streak, best) => `Tú: ${wins} victorias · racha ${streak} · mejor ${best}`,
+  notRanked: 'Aún no estás en la tabla. Gana una ronda contra una persona.',
   seat: { Yellow: 'Amarillo', Red: 'Rojo', Black: 'Negras', White: 'Blancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
   g: {
     boxes: 'Cajas',
@@ -689,6 +730,16 @@ const PT: LoungeStrings = {
   skyRoom: 'SALA DO CÉU',
   rooftop: 'TERRAÇO',
   rooftopNote: 'Ranking e torneios: depois do buildathon',
+  leaderboardTitle: 'Ranking',
+  leaderboardSub: 'Vitórias contra jogadores reais, em todos os pisos, guardadas para sempre. Rondas contra o bot não contam.',
+  leaderboardEmpty: 'Ainda ninguém na tabela. Ganha a um amigo e sê o primeiro.',
+  leaderboardOffline: 'A tabela está a demorar um pouco. Tenta outra vez daqui a nada.',
+  leaderboardTab: 'Ranking',
+  howToPlayTab: 'Como jogar',
+  winsShort: 'vitórias',
+  streakShort: 'série',
+  yourStats: (wins, streak, best) => `Tu: ${wins} vitórias · série ${streak} · melhor ${best}`,
+  notRanked: 'Ainda não estás na tabela. Ganha uma ronda contra uma pessoa.',
   seat: { Yellow: 'Amarelo', Red: 'Vermelho', Black: 'Pretas', White: 'Brancas', Green: 'Verde', Blue: 'Azul', X: 'X', O: 'O' },
   g: {
     boxes: 'Caixas',
@@ -838,6 +889,16 @@ const FR: LoungeStrings = {
   skyRoom: 'SALLE DU CIEL',
   rooftop: 'TOIT-TERRASSE',
   rooftopNote: 'Classement et tournois : après le buildathon',
+  leaderboardTitle: 'Classement',
+  leaderboardSub: 'Victoires contre de vrais joueurs, à tous les étages, gardées pour toujours. Les manches contre le bot ne comptent pas.',
+  leaderboardEmpty: 'Personne au classement pour l’instant. Bats un ami et sois le premier.',
+  leaderboardOffline: 'Le classement met un moment. Réessaie dans un instant.',
+  leaderboardTab: 'Classement',
+  howToPlayTab: 'Comment jouer',
+  winsShort: 'victoires',
+  streakShort: 'série',
+  yourStats: (wins, streak, best) => `Toi : ${wins} victoires · série ${streak} · record ${best}`,
+  notRanked: 'Tu n’es pas encore au classement. Gagne une manche contre quelqu’un.',
   seat: { Yellow: 'les jaunes', Red: 'les rouges', Black: 'les noirs', White: 'les blancs', Green: 'les verts', Blue: 'les bleus', X: 'X', O: 'O' },
   g: {
     boxes: 'Cases',
