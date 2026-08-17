@@ -571,12 +571,12 @@ neon_text(neon, 'ARENA LOUNGE', (SIGN_Y0 + SIGN_Y1) / 2 - LETTER_H / 2, 0.13 + T
 
 # string lights: catenaries between the seven ground columns around the plaza (r 11.4)
 lights = Mesh()
-col_angles = [160, 200, 259, 304, 0, 56, 101]
+col_angles = [160, 200, 262, 304, 0, 56, 101]
 def col_pos(deg):
     t = math.radians(deg)
     # scene: x = sin, z = cos (config.ts ring()); glTF keeps x and z
     return (11.4 * math.sin(t), 11.4 * math.cos(t))
-pairs = [(200, 259), (259, 304), (304, 0), (0, 56), (56, 101), (101, 160)]
+pairs = [(200, 262), (262, 304), (304, 0), (0, 56), (56, 101), (101, 160)]
 for (a, b) in pairs:
     (x0, z0), (x1, z1) = col_pos(a), col_pos(b)
     for i in range(1, 12):
@@ -616,7 +616,7 @@ def collar(deg, r, y):
     t = math.radians(deg)
     cx, cz = r * math.sin(t), r * math.cos(t)     # scene ring(): x = sin, z = cos
     box_strip(lights, [((cx + 0.42 * math.cos(a), y, cz + 0.42 * math.sin(a)), (-math.sin(a), 0, math.cos(a)), (math.cos(a), 0, math.sin(a))) for a in [2 * math.pi * k / 16 for k in range(17)]], 0.07, 0.07)
-for deg in [160, 200, 259, 304, 0, 56, 101]:
+for deg in [160, 200, 262, 304, 0, 56, 101]:
     collar(deg, 11.4, 0.55)
     collar(deg, 11.4, 7.3)
 for deg in [112, 158, 202, 338]:

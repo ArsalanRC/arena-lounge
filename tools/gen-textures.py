@@ -12,6 +12,7 @@
   images/floor.png         512  dark parquet, tiles seamlessly
   images/rug.png           512  round woven rug with alpha outside the circle
   images/rug-ring.png      256  ring mask, emissive on rugs (tinted per corner)
+  images/path-a.png, path-b.png 1024 ring runners (walkable path per floor)
 UI (all alpha):
   images/ui/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
   images/ui/die-1..6.png    128  die faces with pips (Dice Royale)
@@ -183,6 +184,30 @@ def gen_rug():
         col = mix(col, c3, 0.25 * (weave - 0.5))
         return (*col, cov)
     write_png('images/rug.png', W, H, px)
+
+def gen_path_ring(path, inner):
+    """Ring runner drawn on a transparent square: a soft, low-contrast carpet band from
+    `inner` (fraction of the half size) to the edge, with a light and a dark border.
+    One texture serves every floor whose inner/outer radius ratio matches."""
+    W = H = 1024
+    c1, c2, c3, c4 = hex_rgb('#efe6d6'), hex_rgb('#f7f1e6'), hex_rgb('#c9b9a0'), hex_rgb('#e0d3bd')
+    def px(x, y):
+        dx, dy = x + 0.5 - W / 2, y + 0.5 - H / 2
+        d = math.hypot(dx, dy) / (W / 2)
+        cov = smoothstep(inner - 0.012, inner, d) * (1 - smoothstep(0.985, 0.998, d))
+        if cov <= 0:
+            return (0, 0, 0, 0)
+        ang = math.atan2(dy, dx)
+        t = (d - inner) / (1 - inner)              # 0 inner edge .. 1 outer edge
+        pile = fbm(x / 6, y / 6, 3)                # short fluffy pile
+        col = mix(c1, c2, 0.55 * (pile - 0.3))
+        col = mix(col, c4, 0.35 * (0.5 + 0.5 * math.sin(ang * 60)))   # faint radial weave
+        edge = smoothstep(0.0, 0.05, t) * (1 - smoothstep(0.95, 1.0, t))
+        col = mix(col, c3, 0.55 * (1 - edge))      # dark borders at both edges
+        band = (1 - smoothstep(0.08, 0.13, t)) * smoothstep(0.03, 0.08, t) + smoothstep(0.87, 0.92, t) * (1 - smoothstep(0.92, 0.97, t))
+        col = mix(col, c2, 0.5 * band)             # light stripe just inside each border
+        return (*col, cov)
+    write_png(path, W, H, px)
 
 # ================================================================== UI
 def gen_ui_disc(path, base_hex, dark_hex, light_hex):
@@ -744,6 +769,8 @@ if __name__ == '__main__':
     gen_wood()
     gen_floor()
     gen_rug()
+    gen_path_ring('images/path-a.png', 0.786)   # ground 6.0..7.6, game room 5.5..7.0, rooftop 4.7..6.0
+    gen_path_ring('images/path-b.png', 0.654)   # sky room 3.4..5.2
     gen_ui_disc('images/ui/disc-yellow.png', '#f5c518', '#b8890a', '#ffe680')
     gen_ui_disc('images/ui/disc-red.png', '#e2453d', '#961f1a', '#ff8a7a')
     gen_ui_disc('images/ui/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')
