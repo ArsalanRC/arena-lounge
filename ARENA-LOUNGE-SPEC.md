@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-16 21:31 (Europe/Berlin), Ludo for two to four players at a four-seat table
+Last update: 2026-08-17 03:35 (Europe/Berlin), first World deploy live at arenalounge.dcl.eth
 
 ## 1. What this is
 
@@ -255,8 +255,10 @@ version works as well", 16 Aug 11:30):
    process serves its own comms room, `/mini-comms/room-1`, verified in
    sdk-commands/start/server/realm.js): stop the 8000/8001 pair and run one
    `pnpm start:pair` (desktop Explorer + MCP + phone QR on one port).
-3. Arsalan: buy the NAME (docs/DEPLOY.md), then Claude deploys the World and
-   both test it from the real app; keep deploying often after that.
+3. (done 17 Aug 03:24) NAME bought + first deploy live at
+   arenalounge.dcl.eth. Now: both test it from the real app; redeploy with
+   `pnpm deploy:world` after every merged change (Arsalan signs, five-minute
+   window).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
@@ -279,8 +281,9 @@ version works as well", 16 Aug 11:30):
 9. Later: Multiplayer Server for a persistent leaderboard on the rooftop,
    tournaments (see sections 6 and 10).
 
-Not done: buy NAME, deploy, DoraHacks form, GitHub Pages
-landing page (Arsalan's standing repo ritual), phone screenshots for the README.
+Not done: DoraHacks form (World is live, repo still private: flip it public
+right before submitting), phone screenshots for the README, two-player test on
+the deployed World.
 
 ## 5. Decisions log
 
@@ -408,6 +411,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-17 03:24 DEPLOYED: Arsalan bought `arenalounge.dcl.eth` (03:12, marketplace, cross-chain checkout hung on Polygon MANA, he got it done anyway) and signed the first World deploy at 03:24 (entity bafkreif6axhmmz33k2xj7bbkhavzkukkuhrzcmg6yemfqaxg4nyuwb5vmm; healthy, comms v3, skybox 20:00). Deploy gotchas (port 8000 clash, Node 25 linker header bug patched by tools/dev/patch-linker.py, 5-minute signing window, Sepolia badge) in docs/DEPLOY.md; `pnpm deploy:world` is the one-command redeploy
 - 2026-08-16 21:31 Ludo for two to four players (Arsalan: "the first person who sits decides how many play, minimum 2 ... this game needs space for players"): seat model generalised to four seats (state.ts TableSeatC/D, `sides` array instead of `swap`, `players`, wins per seat, Winner.Draw = 9), tables.ts host / target-count / bot-fill / mid-round bot replacement / host-played timeouts, table3d four pads + cams + N-name sign, ui.tsx multi-player header + Players 2/3/4 picker + "Fill with bots", Ludo plugin with 2..4 sides and a flat board on a square four-pad table (models/table4.glb), 5.6 m rug under four-seat tables; strings in five languages
 - 2026-08-16 21:03 phone HUD + bot strength (Arsalan: jump / hand icons cover "Stand up" on the phone; difficulty only choosable after losing a round): `TouchScreenControls.hideAll()` + hideCrosshair while the local player is seated, restored on standing (tables.ts touchControlsSystem, no-op on desktop); Easy/Medium/Hard picker now shows on the empty-table card and in the controller while waiting for an opponent, not only between rounds against the bot; "Dismiss bot" only when a bot is actually seated
 - 2026-08-16 20:55 layout (Arsalan: ribs poke out at the back of the square, game room congested, rooftop chairs glitchy on the phone): tower/plaza centre moved to the lounge centre (24,24) with spawn, elevators, zones and lights (now plaza offsets) following; rib base radius 15.2; game room slab r 5.0..13.1 with tables at 9.3, 4.4 m rugs, no planters, columns at 10.4; sky room slab 2.6..11.6, tables at 7.6, no planters; benches thicker with a lit seat

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "sdk-commands start",
     "deploy": "sdk-commands deploy",
+    "deploy:world": "python3 tools/dev/patch-linker.py && sdk-commands deploy --target-content https://worlds-content-server.decentraland.org --port 8010",
     "build": "sdk-commands build",
     "build:prod": "sdk-commands build --production",
     "upgrade-sdk": "pnpm add -D @dcl/sdk@latest @dcl/sdk-commands@latest",

@@ -1,5 +1,7 @@
 # Arena Lounge
 
+**Live World:** [arenalounge.dcl.eth](https://decentraland.org/jump/?realm=arenalounge.dcl.eth) (open on a phone with the Decentraland app installed, or on desktop).
+
 A game lounge for Decentraland, built for phones first. Walk in under the
 twisted tower, pick a corner, take a seat, and play Four in a Row, Dot Lines,
 Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon,

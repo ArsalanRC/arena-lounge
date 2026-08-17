@@ -11,7 +11,7 @@ tower: walk in, take a seat, play Four in a Row, Chess, Backgammon, Ludo,
 Reversi and ten more against a friend or the house bot, at tables everyone in
 the World shares.
 
-**World:** `arenalounge.dcl.eth`
+**World:** `arenalounge.dcl.eth` (live since 17 Aug 2026: https://decentraland.org/jump/?realm=arenalounge.dcl.eth)
 **Repo:** https://github.com/ArsalanRC/arena-lounge (MIT)
 
 ## Short description
