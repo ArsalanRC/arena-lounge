@@ -3,8 +3,8 @@
   "runtimeVersion": "7",
   "display": {
     "title": "Arena Lounge",
-    "description": "A game lounge built for phones under a twisted tower: walk up to a table, take a seat, play Four in a Row, Checkers, Reversi and more against a friend or the house bot. Mobile-first social hangout for the Friendzone Buildathon.",
-    "navmapThumbnail": "images/scene-thumbnail.png",
+    "description": "A game lounge built for phones under a neon-lit twisted tower: walk in, take a seat, play Four in a Row, Chess, Backgammon, Ludo for up to four and ten more games against friends or the house bot at tables everyone shares. Four floors, two elevators, mobile-first social hangout for the Friendzone Buildathon.",
+    "navmapThumbnail": "images/scene-thumbnail.jpg",
     "favicon": "favicon_asset"
   },
   "owner": "Arsalan Khadim",
