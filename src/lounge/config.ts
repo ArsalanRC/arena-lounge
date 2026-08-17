@@ -22,7 +22,7 @@ export const LOUNGE_MIN = (SCENE_SIZE - LOUNGE_SIZE) / 2
 export const LOUNGE_MAX = LOUNGE_MIN + LOUNGE_SIZE
 
 /** Where new players appear (also mirrored in scene.json spawnPoints). */
-export const SPAWN = Vector3.create(24, 0, 16.5)
+export const SPAWN = Vector3.create(24, 0, 12.5)
 
 export interface FloorDef {
   id: number
@@ -49,7 +49,7 @@ export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 17), Vector3.create
 export const ELEVATOR_RADIUS = 1.3
 
 /** Fixed time of day for the skybox (seconds since midnight): 21:00, a lit lounge at night, DCL night stays readable. */
-export const DUSK_TIME = 72000
+export const DUSK_TIME = 16200
 
 /**
  * Real point lights (LightSource). Warm amber inside, teal at the entrance;
@@ -117,12 +117,12 @@ function ring(deg: number, r: number, f: number): Vector3 {
  * banner and get their rug + tables only once the plugin exists.
  */
 export const ZONES: ZoneDef[] = [
-  { id: 0, gameId: 'connectfour', position: Vector3.create(15.5, 0, 18.5), rug: Color4.fromHexString('#3f8fa3ff'), banner: Color4.fromHexString('#1f4e5fff'), tables: 2, floor: 0 },
-  { id: 1, gameId: 'dotlines', position: Vector3.create(13.5, 0, 26), rug: Color4.fromHexString('#d9c08aff'), banner: Color4.fromHexString('#a5843dff'), tables: 1, floor: 0 },
-  { id: 2, gameId: 'matchpairs', position: Vector3.create(18.5, 0, 32.5), rug: Color4.fromHexString('#a68bd6ff'), banner: Color4.fromHexString('#6b4fa3ff'), tables: 1, floor: 0 },
-  { id: 3, gameId: 'checkers', position: Vector3.create(29.5, 0, 32.5), rug: Color4.fromHexString('#c46b6bff'), banner: Color4.fromHexString('#7a2e2eff'), tables: 1, floor: 0 },
-  { id: 4, gameId: 'reversi', position: Vector3.create(34.5, 0, 26), rug: Color4.fromHexString('#6fae7cff'), banner: Color4.fromHexString('#2f6b46ff'), tables: 1, floor: 0 },
-  { id: 5, gameId: 'tictactoe', position: Vector3.create(32.5, 0, 18.5), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 0 },
+  { id: 0, gameId: 'connectfour', position: Vector3.create(14.02, 0, 18.69), rug: Color4.fromHexString('#3f8fa3ff'), banner: Color4.fromHexString('#1f4e5fff'), tables: 2, floor: 0 },
+  { id: 1, gameId: 'dotlines', position: Vector3.create(13.19, 0, 26.06), rug: Color4.fromHexString('#d9c08aff'), banner: Color4.fromHexString('#a5843dff'), tables: 1, floor: 0 },
+  { id: 2, gameId: 'matchpairs', position: Vector3.create(18.08, 0, 33.15), rug: Color4.fromHexString('#a68bd6ff'), banner: Color4.fromHexString('#6b4fa3ff'), tables: 1, floor: 0 },
+  { id: 3, gameId: 'checkers', position: Vector3.create(29.92, 0, 33.15), rug: Color4.fromHexString('#c46b6bff'), banner: Color4.fromHexString('#7a2e2eff'), tables: 1, floor: 0 },
+  { id: 4, gameId: 'reversi', position: Vector3.create(34.81, 0, 26.06), rug: Color4.fromHexString('#6fae7cff'), banner: Color4.fromHexString('#2f6b46ff'), tables: 1, floor: 0 },
+  { id: 5, gameId: 'tictactoe', position: Vector3.create(33.62, 0, 18.88), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 1, floor: 0 },
   { id: 6, gameId: 'chess', position: ring(0, 9.3, 1), rug: Color4.fromHexString('#8f5d8aff'), banner: Color4.fromHexString('#5a2f57ff'), tables: 1, floor: 1 },
   { id: 7, gameId: 'backgammon', position: ring(90, 9.3, 1), rug: Color4.fromHexString('#a6743fff'), banner: Color4.fromHexString('#6b4423ff'), tables: 1, floor: 1 },
   { id: 8, gameId: 'crocsnap', position: ring(180, 9.3, 1), rug: Color4.fromHexString('#4f9d6bff'), banner: Color4.fromHexString('#2c5e3fff'), tables: 1, floor: 1 },

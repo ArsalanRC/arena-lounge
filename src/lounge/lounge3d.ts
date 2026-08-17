@@ -159,6 +159,20 @@ function bench(pos: Vector3, toward: Vector3): void {
   prop('models/bench.glb', pos, yawToward(pos, toward), 1, true)
 }
 
+/**
+ * Walkable ring path around a floor's centre: a light carpet runner (alpha-cut plane
+ * textured with a ring) that furniture keeps off. `outer` is the ring's outer radius;
+ * the inner radius comes from the texture (path-a 0.786, path-b 0.654 of outer).
+ */
+function pathRing(y: number, outer: number, tex: string): Entity {
+  const e = engine.addEntity()
+  Transform.create(e, { position: Vector3.create(PLAZA.x, y + 0.006, PLAZA.z), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(outer * 2, outer * 2, 1) })
+  MeshRenderer.setPlane(e)
+  // a touch of self-light keeps the runner cream under the purple night sky instead of turning it magenta
+  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: Color3.create(1, 0.96, 0.9), emissiveIntensity: 0.22 })
+  return e
+}
+
 /** Banner pole with a coloured cloth and the game name, marking a corner. */
 function zoneBanner(z: ZoneDef): void {
   // pole stands on the outer side of the corner (away from the plaza)
@@ -299,7 +313,7 @@ export function buildLounge(): void {
     // upper floors get tighter rugs (the annular slabs need a walkway inside and outside the
     // tables), except under a four-seat table, which needs room on every side
     const fourSeats = (getGame(z.gameId).seats ?? 2) > 2
-    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 8.4 : z.floor > 0 && !fourSeats ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
+    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 6.8 : z.floor > 0 && !fourSeats ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
     zoneBanner(z)
   }
   const ground = ZONES.filter((z) => z.floor === 0)
@@ -319,12 +333,13 @@ export function buildLounge(): void {
   planter(LOUNGE_MIN + 2.6, LOUNGE_MAX - 2.6)
   planter(LOUNGE_MAX - 2.6, LOUNGE_MAX - 2.6)
 
-  // entrance: a wooden gateway over the path with the welcome sign, kiosk beside it
-  const gz = SPAWN.z + 3.4
+  // entrance sequence (south to north): portal, bars flanking the path, gateway with the
+  // welcome sign, then the ring path; kiosk and directory sit off the path to the west
+  const gz = PLAZA.z - 8.6
   prop('models/gateway.glb', Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
   liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
-  infoKiosk(SPAWN.x - 4.6, SPAWN.z + 1.6)
-  directoryBoard(SPAWN.x - 5.4, SPAWN.z - 1.2)
+  infoKiosk(20.3, 16.0)
+  directoryBoard(18.9, 14.9)
 
   buildTower()
 
@@ -351,14 +366,21 @@ function buildTower(): void {
   GltfContainer.create(decor, { src: 'models/decor.glb', visibleMeshesCollisionMask: ColliderLayer.CL_NONE, invisibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
   // the name over the portal is baked neon geometry in decor.glb (tools/gen-models.py)
 
-  // lounge furniture: sofa pairs looking at the plaza tree, a bar by the entrance
+  // lounge furniture: sofa pairs close to the plaza tree (inside the ring path), two bars
+  // flanking the entrance path just inside the portal
   for (const deg of [22, 158, 202, 338]) {
     const t = (deg * Math.PI) / 180
-    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.6, 0, PLAZA.z + Math.cos(t) * 7.6)
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 5.4, 0, PLAZA.z + Math.cos(t) * 5.4)
     prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
-  prop('models/bar.glb', Vector3.create(PLAZA.x - 7.5, 0, PLAZA.z - 9.5), 90, 1, true)
-  prop('models/bar.glb', Vector3.create(PLAZA.x + 7.5, 0, PLAZA.z - 9.5), -90, 1, true)
+  prop('models/bar.glb', Vector3.create(21.4, 0, 11.9), 90, 1, true)
+  prop('models/bar.glb', Vector3.create(26.6, 0, 11.9), -90, 1, true)
+
+  // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture
+  pathRing(FLOORS[0].y, 7.6, 'images/path-a.png')
+  pathRing(FLOORS[1].y, 7.0, 'images/path-a.png')
+  pathRing(FLOORS[2].y, 5.2, 'images/path-b.png')
+  pathRing(FLOORS[3].y, 6.0, 'images/path-a.png')
 
   // columns carrying the slabs, between the corners so they never block a table
   const column = (deg: number, r: number, y0: number, y1: number, thick: number) => {
@@ -366,7 +388,7 @@ function buildTower(): void {
     cylinder(Vector3.create(PLAZA.x + Math.sin(t) * r, (y0 + y1) / 2, PLAZA.z + Math.cos(t) * r), Vector3.create(thick, y1 - y0, thick), PALETTE.column, true)
   }
   // ground: between the corners, two flanking the entrance path; game room: between its corners
-  for (const deg of [160, 200, 259, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
+  for (const deg of [160, 200, 262, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
   for (const deg of [112, 158, 202, 338]) column(deg, 10.4, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
 
   for (const pad of ELEVATORS) elevatorShaft(pad)
@@ -390,10 +412,10 @@ function buildTower(): void {
   const roofCentre = Vector3.create(PLAZA.x, y3, PLAZA.z)
   for (const deg of [30, 100, 170, 260, 330]) {
     const t = (deg * Math.PI) / 180
-    bench(Vector3.create(PLAZA.x + Math.sin(t) * 6.0, y3, PLAZA.z + Math.cos(t) * 6.0), roofCentre)
+    bench(Vector3.create(PLAZA.x + Math.sin(t) * 7.4, y3, PLAZA.z + Math.cos(t) * 7.4), roofCentre)
   }
-  planter(PLAZA.x - 8.0, PLAZA.z + 3, y3)
-  planter(PLAZA.x + 8.0, PLAZA.z + 3, y3)
+  planter(PLAZA.x - 8.9, PLAZA.z + 3, y3)
+  planter(PLAZA.x + 8.9, PLAZA.z + 3, y3)
   liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z + 7.0), () => L().rooftop, 2.6, Color4.White(), 8)
   liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
 }
