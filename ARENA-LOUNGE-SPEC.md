@@ -49,6 +49,41 @@ Last update: 2026-08-17 03:35 (Europe/Berlin), first World deploy live at arenal
 | Judging criteria | Mobile-First Experience, Social Value, Mobile UX & Accessibility, Performance, Creativity & Originality, Retention & Discovery, Overall Execution |
 | AI tools | no restriction; Decentraland officially supports Claude Code + `npx skills add decentraland/sdk-skills` |
 
+## 2b. Kickoff AMA digest (recording of 14 Aug, read 17 Aug from the captions)
+
+Source: https://www.youtube.com/watch?v=dWd_RGItkw0 (DCL Regenesis Labs, 48 min).
+
+- Requirements restated: World, publicly reachable through judging, persistent
+  without a host, social component, mobile-first, public GitHub repo at
+  submission, teams and AI tools allowed. Not eligible: empty venues, one-time
+  events, host-dependent, purely single-player, or anything the judges cannot
+  reliably open in the mobile app.
+- Judging: every eligible project is opened in the mobile app and scored on
+  the seven criteria; "simple, polished, understandable beats complex",
+  "sometimes good mobile design means removing things"; test questions:
+  "would I invite someone?", "would I come back?". Judges: Georgian, August
+  (Regenesis Labs content), Bay Backner, Nico E (Foundation), Meta Rework
+  (DAO council).
+- Mobile team heads-up: the client's own UI moves entirely to the left edge
+  so scenes get the whole right side, and the gamepad becomes hideable. Re-check
+  the controller bar on the phone after that client update.
+- Multiplayer Server: recommended by ToxSam for long-lived experiences and
+  leaderboards; retention is a scored criterion, so a persistent rooftop
+  leaderboard is the obvious candidate for the remaining time.
+- Mobile facts: particles now work, no voice chat, tablets not fully
+  supported (test on a phone), scene stats visible in preview and desktop.
+- Events (all UTC): workshops 15 Aug Creator Hub (Nico E), ~18 Aug 17:00 build
+  for mobile (Kirk, Gabriel), 19 Aug 19:00 mobile UX and controls (Leon,
+  Sevar: safe areas, thumb zones, touch targets, hiding the gamepad), 21 Aug
+  17:00 performance and VFX (Wewo, Kirk); show and tell 20 Aug and 28 Aug
+  18:00 (casual, reveals the idea to other builders); final troubleshooting
+  2 Sept 19:00 (deployment, GitHub, submission); deadline 4 Sept, judging 5
+  to 11 Sept, winners 13 Sept. Recordings go to the same channel.
+- Rewards: MANA prizes to an Ethereum wallet; the $30 merch voucher goes to
+  the first 50 valid submissions (submit a day or two early rather than the
+  last hour; repo must be public at that moment); top 10 may be featured in
+  Mobile Discover if the World stays up; maintenance is on the builder.
+
 ## 3. Names, links, accounts
 
 - Working title: **Arena Lounge** (rename possible; World name follows the NAME bought)
