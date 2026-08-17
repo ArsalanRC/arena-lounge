@@ -185,6 +185,21 @@ export const SEAT_PAD_OFFSET = 1.8
  * canvas, compact controller, phone panel placement). Flip it locally while
  * tuning the mobile UI; never commit `true`.
  */
+/**
+ * Leaderboard backend: a Supabase project (personal account, region eu-central-1)
+ * reached over HTTPS with its publishable key. The key is public by design; row-level
+ * security on the server only lets it call `record_result` and `leaderboard`
+ * (supabase/001_leaderboard.sql). Empty url = feature hidden.
+ */
+export const LEADERBOARD = {
+  url: '',
+  key: '',
+  /** How long a fetched board stays fresh before a panel or the rooftop asks again. */
+  cacheMs: 45_000,
+  /** Rows shown on the rooftop board and in the panel. */
+  rows: 10
+}
+
 export const DEBUG_MOBILE_UI = false
 
 // ---------------------------------------------------------------- palette

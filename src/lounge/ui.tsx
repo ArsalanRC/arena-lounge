@@ -28,6 +28,7 @@ import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
+import { board, leaderboardEnabled, refreshLeaderboard } from './leaderboard'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
 import { LOCALES, localeInfo, t as L, uiLang } from './i18n'
@@ -549,6 +550,27 @@ function hostedGames(): GameId[] {
   return out
 }
 
+/** Ranked rows + the local player's totals, inside the help panel. */
+function LeaderboardBody() {
+  const str = L()
+  const rows = board.rows.slice(0, 10)
+  const mobile = phone()
+  const line = (r: { rank: number; name: string; wins: number; streak: number }, i: number) => (
+    <UiEntity key={`lb${i}`} uiTransform={{ width: '100%', height: mobile ? 30 : 34, flexDirection: 'row', alignItems: 'center', margin: { top: 2 } }}>
+      <UiEntity uiTransform={{ width: 44, height: 'auto' }} uiText={{ value: `${r.rank}.`, fontSize: 18, color: r.rank <= 3 ? UI.accent : UI.muted, textAlign: 'middle-right' }} />
+      <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { left: 12 } }} uiText={{ value: r.name.slice(0, 22), fontSize: 18, color: UI.text }} />
+      <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { left: 14 } }} uiText={{ value: `${r.wins} ${str.winsShort} · ${str.streakShort} ${r.streak}`, fontSize: 16, color: UI.muted }} />
+    </UiEntity>
+  )
+  return (
+    <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'column' }}>
+      <Para value={str.leaderboardSub} color={UI.muted} margin={{ bottom: 8 }} />
+      {rows.length === 0 ? <Para value={board.failed ? str.leaderboardOffline : str.leaderboardEmpty} color={UI.text} margin={{ top: 6, bottom: 6 }} /> : rows.map(line)}
+      <Para value={board.me ? str.yourStats(board.me.wins, board.me.streak, board.me.best_streak) : str.notRanked} color={UI.text} margin={{ top: 10, bottom: 4 }} />
+    </UiEntity>
+  )
+}
+
 function HelpPanel() {
   if (!local.helpOpen) return null
   if (local.helpGame === '') local.helpGame = defaultHelpGame()
@@ -566,19 +588,40 @@ function HelpPanel() {
       onMouseDown={() => (local.helpOpen = false)}
     >
       <Panel width={width} place={{}} padding={20}>
-        <Text value={str.howToPlay} size={T.title} />
-        <Row height={48} margin={{ top: 4, bottom: 8 }} wrap>
-          <Segmented
-            options={hostedGames().map((id) => ({ key: id, label: info.games[id]?.name ?? getGame(id).label }))}
-            active={gameId}
-            onPick={(k) => (local.helpGame = k)}
-            width={mobile ? 150 : 132}
-          />
-        </Row>
-        <Para value={rules.overview} size={19} margin={{ bottom: 6 }} rtl={info.rtl} />
-        <Para value={`• ${str.howToSit}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
-        <Para value={`• ${str.move[gameId] ?? str.move.connectfour}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
-        <Para value={`• ${str.timer}`} color={UI.muted} margin={{ top: 4, bottom: 6 }} rtl={info.rtl} />
+        {leaderboardEnabled() ? (
+          <Row height={46} margin={{ bottom: 6 }}>
+            <Segmented
+              options={[{ key: 'rules', label: str.howToPlayTab }, { key: 'board', label: str.leaderboardTab }]}
+              active={local.helpTab}
+              onPick={(k) => {
+                local.helpTab = k as 'rules' | 'board'
+                if (k === 'board') void refreshLeaderboard(false)
+              }}
+              width={mobile ? 190 : 170}
+              fontSize={17}
+            />
+          </Row>
+        ) : (
+          <Text value={str.howToPlay} size={T.title} />
+        )}
+        {local.helpTab === 'board' && leaderboardEnabled() ? (
+          <LeaderboardBody />
+        ) : (
+          <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'column' }}>
+            <Row height={48} margin={{ top: 4, bottom: 8 }} wrap>
+              <Segmented
+                options={hostedGames().map((id) => ({ key: id, label: info.games[id]?.name ?? getGame(id).label }))}
+                active={gameId}
+                onPick={(k) => (local.helpGame = k)}
+                width={mobile ? 150 : 132}
+              />
+            </Row>
+            <Para value={rules.overview} size={19} margin={{ bottom: 6 }} rtl={info.rtl} />
+            <Para value={`• ${str.howToSit}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
+            <Para value={`• ${str.move[gameId] ?? str.move.connectfour}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
+            <Para value={`• ${str.timer}`} color={UI.muted} margin={{ top: 4, bottom: 6 }} rtl={info.rtl} />
+          </UiEntity>
+        )}
         <Row height={48} margin={{ bottom: 6 }}>
           <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={260} />
           <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={170} />

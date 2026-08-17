@@ -32,6 +32,7 @@ import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_
 import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
+import { board, leaderboardEnabled, leaderboardTicker } from './leaderboard'
 
 /**
  * Text labels that follow the UI language: each entry re-renders its text
@@ -417,5 +418,35 @@ function buildTower(): void {
   planter(PLAZA.x - 8.9, PLAZA.z + 3, y3)
   planter(PLAZA.x + 8.9, PLAZA.z + 3, y3)
   liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z + 7.0), () => L().rooftop, 2.6, Color4.White(), 8)
-  liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
+  if (leaderboardEnabled()) leaderboardBoard(Vector3.create(PLAZA.x, y3, PLAZA.z + 8.4))
+  else liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
+}
+
+/**
+ * The rooftop leaderboard: the directory board model with the ranked rows as
+ * monospace text, refreshed while somebody is on the rooftop (see
+ * leaderboardSystem). Faces south (readers come from the elevators / oculus).
+ */
+function leaderboardBoard(pos: Vector3): void {
+  prop('models/board.glb', Vector3.create(pos.x, pos.y + 2.4, pos.z), 0, 1.35, true)
+  const title = engine.addEntity()
+  Transform.create(title, { parent: undefined, position: Vector3.create(pos.x, pos.y + 3.55, pos.z - 0.14), rotation: Quaternion.fromEulerDegrees(0, 180, 0) })
+  TextShape.create(title, { text: '', fontSize: 1.5, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 5, height: 0.6 })
+  const body = engine.addEntity()
+  Transform.create(body, { position: Vector3.create(pos.x, pos.y + 2.25, pos.z - 0.14), rotation: Quaternion.fromEulerDegrees(0, 180, 0) })
+  TextShape.create(body, { text: '', fontSize: 0.78, font: Font.F_MONOSPACE, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), width: 5.6, height: 3.4, lineSpacing: 6 })
+  let shownVersion = -1
+  let shownLang = ''
+  engine.addSystem((dt) => {
+    leaderboardTicker(dt, local.floor === 3)
+    if (board.version === shownVersion && uiLang.code === shownLang) return
+    shownVersion = board.version
+    shownLang = uiLang.code
+    const str = L()
+    TextShape.getMutable(title).text = str.leaderboardTitle
+    const rows = board.rows.slice(0, 10)
+    TextShape.getMutable(body).text = rows.length === 0
+      ? (board.failed ? str.leaderboardOffline : str.leaderboardEmpty)
+      : rows.map((r) => `${String(r.rank).padStart(2, ' ')}. ${r.name.slice(0, 14).padEnd(14, ' ')} ${String(r.wins).padStart(3, ' ')} ${str.winsShort}  ${str.streakShort} ${r.streak}`).join('\n')
+  })
 }

@@ -20,6 +20,7 @@ import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
 import { movePlayerTo } from '~system/RestrictedActions'
 import { botSettings } from './games/botSettings'
+import { loadMyStats } from './leaderboard'
 import { t as L } from './i18n'
 import {
   AFK_MS,
@@ -95,6 +96,8 @@ export const local = {
   /** Whether the "How to play" panel is open, which game tab it shows, and whether the language grid is expanded. */
   helpOpen: false,
   helpGame: '',
+  /** Help panel tab: the rules or the leaderboard. */
+  helpTab: 'rules' as 'rules' | 'board',
   langPickerOpen: false,
   /** Last time the local player did something at a table (sit / act / rematch). */
   lastActionAt: 0,
@@ -621,6 +624,7 @@ function identitySystem(): void {
   me.addr = p.userId.toLowerCase()
   me.name = p.name && p.name.trim() !== '' ? p.name.trim() : 'Guest'
   me.ready = true
+  void loadMyStats(me.addr)
 }
 
 let syncWatch = 0

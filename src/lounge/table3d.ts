@@ -30,7 +30,8 @@ import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
 import { SEAT_A, SEAT_B, Status, Winner, winsOf, type Seat } from './state'
-import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, mySeatAt, occupiedSeats, otherSeats, seatOf, seatPadLocalOffset, seatsOf, sideOf, sit, sitWithBot, targetPlayers, toast, type Table } from './tables'
+import { act, boardOf, gameStateOf, inviteBot, lastActionOf, local, me, mySeatAt, occupiedSeats, otherSeats, seatOf, seatPadLocalOffset, seatsOf, sideOf, sit, sitWithBot, targetPlayers, toast, type Table } from './tables'
+import { reportResult } from './leaderboard'
 import { TABLE_TOP_Y, toTableLocal } from './views/shared'
 
 export { TABLE_TOP_Y, box } from './views/shared'
@@ -252,6 +253,14 @@ export function updateTableVisual(vis: TableVisual): void {
     if (b.winner !== r.winner && b.winner !== Winner.None) {
       if (b.winner !== Winner.Draw) play(vis.sfx.win)
       if (mine && b.winner !== mine && b.winner !== Winner.Draw) playPersonal('lose')
+      // the leaderboard counts rounds against people: report my result once when a human sat with me
+      if (mine && b.sides[mine - 1] > 0) {
+        const humanRival = otherSeats(t, mine).some((x) => {
+          const sd = seatOf(t, x)
+          return sd.addr !== '' && !sd.bot && b.sides[x - 1] > 0
+        })
+        if (humanRival) void reportResult(me.addr, me.name, t.game.id, b.winner === Winner.Draw ? 'draw' : b.winner === mine ? 'win' : 'loss')
+      }
     }
     r.moveCount = b.moveCount
     r.status = b.status
