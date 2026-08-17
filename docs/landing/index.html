@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en" class="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arena Lounge</title>
+<meta name="description" content="A game lounge in Decentraland, built for phones: fourteen games at fifteen shared tables on four floors of a neon-lit tower, Ludo for up to four, a house bot, no server. Live at arenalounge.dcl.eth.">
+<meta property="og:title" content="Arena Lounge">
+<meta property="og:description" content="Walk in, take a seat, play a friend. A mobile-first social game lounge in Decentraland, live at arenalounge.dcl.eth.">
+<meta property="og:image" content="https://arsalanrc.github.io/arena-lounge/screenshots/entrance.jpg">
+<meta name="theme-color" content="#39055c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ff2d55'/%3E%3Ccircle cx='32' cy='32' r='15' fill='none' stroke='%23fff' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Design language borrowed from decentraland.org (read off the live site on
+     17 Aug 2026): Inter, white type on a purple world, #ff2d55 pill buttons,
+     16px corners, image-led cards two to a row, faint watermark, dark footer
+     with a big wordmark. Credited at the bottom of the page. */
+  :root {
+    --red: #ff2d55; --red-2: #ff4a6d; --live: #fb3b3b; --ink: #242129;
+    --p1: #570f88; --p2: #68149b; --p3: #9425cd; --deep: #39055c; --night: #1b002e;
+    --card: rgba(29, 6, 56, .72); --card-2: rgba(29, 6, 56, .88);
+    --line: rgba(255,255,255,.12); --line-2: rgba(255,255,255,.28);
+    --muted: rgba(255,255,255,.74); --faint: rgba(255,255,255,.5);
+    --max: 1200px; --r: 16px;
+    --font: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* watermark tile: a die, a pawn, braces and a chip, drawn for this page */
+    --tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' opacity='.07'%3E%3Crect x='30' y='30' width='48' height='48' rx='10'/%3E%3Ccircle cx='44' cy='44' r='3.5' fill='%23fff'/%3E%3Ccircle cx='54' cy='54' r='3.5' fill='%23fff'/%3E%3Ccircle cx='64' cy='64' r='3.5' fill='%23fff'/%3E%3Ccircle cx='190' cy='58' r='9'/%3E%3Cpath d='M182 70h16l6 20h-28zM172 96h36'/%3E%3Cpath d='M78 190c-8 0-8-6-8-12s0-12-8-12c8 0 8-6 8-12s0-12 8-12M110 190c8 0 8-6 8-12s0-12 8-12c-8 0-8-6-8-12s0-12-8-12'/%3E%3Ccircle cx='196' cy='196' r='22'/%3E%3Ccircle cx='196' cy='196' r='9'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--deep); color: #fff; font-family: var(--font); font-size: 18px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  h1, h2, h3, p, ul { margin: 0; }
+  :focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 6px; }
+
+  /* two languages, both written natively; the switch shows one */
+  [data-lang] { display: none; }
+  html.en [data-lang="en"], html.de [data-lang="de"] { display: inline; }
+  html.en p[data-lang="en"], html.de p[data-lang="de"],
+  html.en li[data-lang="en"], html.de li[data-lang="de"],
+  html.en h1[data-lang="en"], html.de h1[data-lang="de"],
+  html.en h2[data-lang="en"], html.de h2[data-lang="de"],
+  html.en h3[data-lang="en"], html.de h3[data-lang="de"],
+  html.en div[data-lang="en"], html.de div[data-lang="de"] { display: block; }
+
+  .wrap { width: min(var(--max), 100% - 48px); margin-inline: auto; }
+  h1 { font-size: clamp(38px, 6vw, 60px); line-height: 1.15; font-weight: 600; letter-spacing: -.5px; max-width: 16ch; text-wrap: balance; }
+  h1 em { font-style: normal; color: #ff8fa6; }
+  h2 { font-size: clamp(32px, 4.4vw, 48px); line-height: 1.2; font-weight: 600; letter-spacing: -.5px; text-align: center; text-wrap: balance; }
+  h3 { font-size: 22px; line-height: 1.3; font-weight: 600; letter-spacing: -.2px; }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .sub { max-width: 62ch; margin: 18px auto 0; text-align: center; color: var(--muted); }
+  .body { color: var(--muted); font-size: 16.5px; line-height: 1.6; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 14px; height: 64px; padding: 0 34px; border-radius: var(--r); font-size: 18px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; white-space: nowrap; transition: transform .18s ease, background-color .18s ease; }
+  .btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:hover { background: var(--red-2); }
+  .btn-light { background: #fff; color: var(--ink); border: 3px solid #fff; }
+  .btn-light:hover { background: #f4f0fa; border-color: #f4f0fa; }
+  .btn-sm { height: 52px; padding: 0 24px; font-size: 15px; }
+  @media (max-width: 640px) { .btn { height: 56px; padding: 0 22px; font-size: 15px; gap: 10px; } }
+
+  .pill { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+  .pill-live { background: var(--live); }
+  .pill-live i { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.28); }
+  .pill-dark { background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px; background: rgba(0,0,0,.32); border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,.88); white-space: nowrap; }
+  .chip.on { background: var(--red); border-color: var(--red); }
+
+  /* header: transparent over the hero, solid once scrolled */
+  .nav { position: fixed; inset: 0 0 auto 0; z-index: 20; padding: 16px 0; transition: background-color .25s ease, padding .25s ease, box-shadow .25s ease; }
+  .nav.is-scrolled { padding: 10px 0; background: rgba(27,0,46,.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); }
+  .nav-in { width: min(1320px, 100% - 48px); margin-inline: auto; display: flex; align-items: center; gap: 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 600; font-size: 17px; }
+  .brand-mark { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--red), #ff7a2f); display: grid; place-items: center; }
+  .brand-mark i { width: 16px; height: 16px; border-radius: 50%; border: 4px solid #fff; }
+  .nav-links { display: flex; gap: 4px; margin-left: 8px; }
+  .nav-links a { padding: 10px 14px; border-radius: 10px; font-size: 17px; font-weight: 500; transition: background-color .18s ease; }
+  .nav-links a:hover { background: rgba(255,255,255,.12); }
+  .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .lang { display: inline-flex; border: 1.5px solid var(--line-2); border-radius: 12px; overflow: hidden; }
+  .lang button { height: 40px; padding: 0 14px; border: 0; background: transparent; font-size: 14px; font-weight: 700; letter-spacing: .08em; color: rgba(255,255,255,.75); }
+  .lang button[aria-pressed="true"] { background: #fff; color: var(--ink); }
+  .nav-actions .link { padding: 10px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; }
+  .nav-actions .link:hover { background: rgba(255,255,255,.12); }
+  @media (max-width: 860px) { .nav-links, .nav-actions .link { display: none; } .brand span { display: none; } }
+  @media (max-width: 640px) { .nav-in { width: calc(100% - 32px); } }
+
+  /* hero: the marquee, full bleed */
+  .hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; overflow: hidden; background: var(--deep); }
+  .hero-media { position: absolute; inset: 0; }
+  .hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%; }
+  .hero-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(27,0,46,.5) 0%, rgba(27,0,46,.08) 30%, rgba(57,5,92,.6) 70%, var(--deep) 100%); }
+  .hero-in { position: relative; padding: 150px 0 88px; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
+  .live { display: inline-flex; align-items: center; gap: 12px; padding: 6px 14px 6px 6px; border-radius: 12px; background: rgba(0,0,0,.42); border: 1px solid var(--line); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background-color .18s ease; }
+  .live:hover { background: rgba(0,0,0,.6); }
+  .live-name { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.9); }
+  .hero .lede { max-width: 58ch; font-size: clamp(17px, 1.6vw, 20px); color: rgba(255,255,255,.88); text-shadow: 0 1px 12px rgba(0,0,0,.35); }
+  .hero h1 { text-shadow: 0 2px 24px rgba(0,0,0,.35); }
+  .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; }
+  .trust { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 500; color: rgba(255,255,255,.88); }
+  .trust svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .hero-note { font-size: 14px; color: var(--faint); margin-top: -8px; max-width: 70ch; }
+  .hero-note code { font: 600 13px/1 ui-monospace, Menlo, monospace; background: rgba(0,0,0,.35); padding: 3px 7px; border-radius: 6px; color: #fff; }
+  @media (max-width: 640px) { .hero-in { padding: 120px 0 56px; gap: 18px; } .actions .btn { width: 100%; } .live { flex-wrap: wrap; max-width: 100%; row-gap: 6px; } .live-name { font-size: 13px; } }
+
+  /* bands */
+  .band { position: relative; padding: 104px 0; }
+  .band::before { content: ""; position: absolute; inset: 0; background-image: var(--tile); background-size: 260px 260px; pointer-events: none; }
+  .band > .wrap { position: relative; }
+  .band-a { background: radial-gradient(at 110% 50%, var(--p3) 0%, var(--p2) 100%); }
+  .band-b { background: var(--p1); }
+  .band-c { background: var(--deep); }
+  .band-c::before { opacity: .6; }
+  .band .eyebrow { display: block; text-align: center; }
+  .band h2 { margin-top: 12px; }
+  @media (max-width: 640px) { .band { padding: 72px 0; } }
+
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 48px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; gap: 18px; } }
+
+  /* picture cards */
+  .card { position: relative; display: flex; flex-direction: column; border-radius: var(--r); background: var(--card); border: 1px solid var(--line); overflow: hidden; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+  .card:hover { transform: translateY(-4px); border-color: var(--line-2); box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+  .card-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: rgba(0,0,0,.35); }
+  .card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+  .card:hover .card-media img { transform: scale(1.04); }
+  .pills { position: absolute; top: 14px; left: 14px; display: flex; gap: 8px; }
+  .card-body { display: flex; flex-direction: column; gap: 10px; padding: 20px 24px 24px; }
+  .card-body p { color: var(--muted); font-size: 15.5px; line-height: 1.55; }
+
+  /* text panels */
+  .panel { padding: 30px 30px 32px; border-radius: var(--r); background: var(--card); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; }
+  .panel h3 { text-wrap: balance; }
+  @media (max-width: 640px) { .panel { padding: 24px 20px 26px; } }
+
+  /* the four floors */
+  .floor .eyebrow { text-align: left; }
+  .floor-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .floor-head > span { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+
+  /* steps: a real sequence, so the numbers mean something */
+  .steps { counter-reset: step; }
+  .step { position: relative; padding-top: 34px; }
+  .step::before { counter-increment: step; content: counter(step); position: absolute; top: 24px; left: 30px; width: 30px; height: 30px; border-radius: 9px; background: var(--red); color: #fff; font-weight: 700; font-size: 14px; display: grid; place-items: center; }
+  .step h3 { margin-top: 20px; }
+  @media (max-width: 640px) { .step::before { left: 20px; } }
+
+  /* tech */
+  .tech ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .tech li { position: relative; padding-left: 26px; color: var(--muted); font-size: 16.5px; line-height: 1.6; }
+  .tech li::before { content: ""; position: absolute; left: 4px; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+
+  /* footer */
+  .foot { background: radial-gradient(at 0% 0%, rgba(121,47,158,.6) 0%, rgba(74,23,102,.8) 25%, rgba(51,12,74,.9) 50%, var(--night) 75%); padding: 88px 0 0; }
+  .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 48px; padding-bottom: 64px; }
+  .wordmark { font-size: clamp(36px, 4.6vw, 56px); font-weight: 700; letter-spacing: -1px; line-height: 1.05; }
+  .foot-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .foot-note { max-width: 44ch; color: var(--muted); font-size: 16px; }
+  .social { display: flex; gap: 22px; }
+  .social a { display: grid; place-items: center; width: 34px; height: 34px; }
+  .social svg { width: 26px; height: 26px; fill: #fff; transition: opacity .18s ease; }
+  .social a:hover svg { opacity: .7; }
+  .foot-col { display: flex; flex-direction: column; gap: 14px; }
+  .foot-col .eyebrow { margin-bottom: 8px; }
+  .foot-col a { font-size: 17px; font-weight: 600; transition: opacity .18s ease; }
+  .foot-col a:hover { opacity: .72; }
+  .foot-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 26px; padding: 22px 0 28px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); }
+  .foot-bar .lang { border-radius: 10px; }
+  .foot-bar .lang button { height: 34px; }
+  .foot-bar a { color: #fff; font-weight: 600; }
+  .foot-bar a:hover { text-decoration: underline; }
+  .foot-bar > span:last-child { margin-left: auto; }
+  @media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-brand { grid-column: 1 / -1; } }
+  @media (max-width: 640px) { .foot { padding-top: 64px; } .foot-grid { grid-template-columns: 1fr; gap: 36px; } .foot-bar > span:last-child { margin-left: 0; } }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .btn, .card, .card-media img, .nav { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i></span><span>Arena Lounge</span></a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#inside"><span data-lang="en">Inside</span><span data-lang="de">Drinnen</span></a>
+      <a href="#phone"><span data-lang="en">Phone</span><span data-lang="de">Handy</span></a>
+      <a href="#games"><span data-lang="en">Games</span><span data-lang="de">Spiele</span></a>
+      <a href="#how"><span data-lang="en">How to play</span><span data-lang="de">So geht’s</span></a>
+      <a href="#tech"><span data-lang="en">Tech</span><span data-lang="de">Technik</span></a>
+    </nav>
+    <div class="nav-actions">
+      <a class="link" href="https://arsalanrc.github.io"><span data-lang="en">Portfolio</span><span data-lang="de">Portfolio</span></a>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-set="en" aria-pressed="true">EN</button>
+        <button type="button" data-set="de" aria-pressed="false">DE</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-media" aria-hidden="true"><img src="screenshots/hero-1920.jpg" srcset="screenshots/hero-1920.jpg 1920w, screenshots/hero-3840.jpg 3840w" sizes="100vw" alt="" width="1920" height="1200" fetchpriority="high"></div>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="hero-in wrap">
+      <a class="live" href="https://decentraland.org/jump/?realm=arenalounge.dcl.eth" target="_blank" rel="noopener">
+        <span class="pill pill-live"><i></i><span data-lang="en">Live in Decentraland</span><span data-lang="de">Live in Decentraland</span></span>
+        <span class="live-name">arenalounge.dcl.eth</span>
+      </a>
+      <h1 data-lang="en">Walk in, take a seat, <em>play a friend</em>.</h1>
+      <h1 data-lang="de">Reinkommen, hinsetzen, <em>eine Runde spielen</em>.</h1>
+      <p class="lede" data-lang="en">A game lounge in Decentraland, built for phones first: fourteen games at fifteen shared tables on four floors of a neon-lit tower, Ludo for up to four, a house bot for empty rooms, colours dealt at random every round. No server, and it loads on 4G in seconds.</p>
+      <p class="lede" data-lang="de">Eine Spiel-Lounge in Decentraland, zuerst fürs Handy gedacht: vierzehn Spiele an fünfzehn gemeinsamen Tischen auf vier Etagen eines neonbeleuchteten Turms, Ludo für bis zu vier, ein Bot für leere Räume, die Farben jede Runde neu ausgelost. Kein Server, und über 4G in Sekunden geladen.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://decentraland.org/jump/?realm=arenalounge.dcl.eth" target="_blank" rel="noopener">
+          <span data-lang="en">Open in Decentraland</span><span data-lang="de">In Decentraland öffnen</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-light" href="#inside">
+          <span data-lang="en">Look inside</span><span data-lang="de">Reinschauen</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </a>
+      </div>
+      <p class="trust">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 14.6 5l3.4-.5.6 3.4 3 1.7-1.7 3 .9 3.4-3.3 1.1L16 20l-3.1-1.6L9.8 20l-1.5-3-3.3-1L6 12.6l-1.7-3 3-1.7L7.9 4.5 11.3 5z"/><path d="m8.5 12.2 2.4 2.4 4.6-4.8"/></svg>
+        <span data-lang="en">14 games · 15 tables · 4 floors · 561 tests · live since 17 Aug 2026</span>
+        <span data-lang="de">14 Spiele · 15 Tische · 4 Etagen · 561 Tests · live seit 17. Aug. 2026</span>
+      </p>
+      <p class="hero-note">
+        <span data-lang="en">Needs the free Decentraland app (iOS, Android, Mac, Windows); the link hands over to it. World name <code>arenalounge.dcl.eth</code>. Entry for the Friendzone Mobile Buildathon 2026; the source opens in September.</span>
+        <span data-lang="de">Braucht die kostenlose Decentraland-App (iOS, Android, Mac, Windows); der Link übergibt an die App. World-Name <code>arenalounge.dcl.eth</code>. Beitrag zum Friendzone Mobile Buildathon 2026; der Code wird im September offen.</span>
+      </p>
+    </div>
+  </section>
+
+  <section id="inside" class="band band-a">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span data-lang="en">A look inside</span><span data-lang="de">Ein Blick hinein</span></span>
+      <h2 class="reveal" data-lang="en">Jump into what’s inside</h2>
+      <h2 class="reveal" data-lang="de">Ein Rundgang durch den Turm</h2>
+      <p class="sub reveal" data-lang="en">Everything you see is generated: the tower, the neon, the furniture and every texture come out of two Python scripts, which is why the World is small enough to load on a phone.</p>
+      <p class="sub reveal" data-lang="de">Alles hier ist generiert: Turm, Neon, Möbel und jede Textur kommen aus zwei Python-Skripten. Deshalb ist die World klein genug fürs Handy.</p>
+      <div class="grid2">
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/entrance.jpg" alt="The entrance at night: a curved neon marquee reading ARENA LOUNGE over the arched portal, string lights and the tower above" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-live"><i></i>LIVE</span><span class="pill pill-dark"><span data-lang="en">Entrance</span><span data-lang="de">Eingang</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">The marquee</h3><h3 data-lang="de">Die Neonreklame</h3><p data-lang="en">A curved neon sign over the portal, string lights, and the tower climbing behind it. You spawn on the path and walk straight in.</p><p data-lang="de">Ein gebogenes Neonschild über dem Portal, Lichterketten, dahinter steigt der Turm auf. Du startest auf dem Weg und gehst direkt hinein.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/tower-overview.jpg" alt="The tower at night: a woven lattice with beacon lights, glowing rims and rug rings, four floors" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-dark"><span data-lang="en">The tower</span><span data-lang="de">Der Turm</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">Four floors, two glass elevators</h3><h3 data-lang="de">Vier Etagen, zwei Glasaufzüge</h3><p data-lang="en">A twisted lattice of 24 ribs with a light at every crossing. Lounge, game room, sky room and a rooftop terrace, reached by a tap in the elevator, no stairs.</p><p data-lang="de">Ein verdrehtes Gitter aus 24 Rippen mit einem Licht an jeder Kreuzung. Lounge, Spielzimmer, Himmelszimmer und Dachterrasse, per Tipp im Aufzug erreichbar, keine Treppe.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/lounge.jpg" alt="Arrival at night: string lights, the plaza tree, the corners and the game room above" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-dark"><span data-lang="en">Ground floor</span><span data-lang="de">Erdgeschoss</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">The lounge</h3><h3 data-lang="de">Die Lounge</h3><p data-lang="en">Six glowing corners around a plaza tree: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs and Checkers. Big signs say which corner is which from anywhere.</p><p data-lang="de">Sechs leuchtende Ecken um einen Baum auf dem Platz: Vier in einer Reihe, Käsekästchen, Reversi, Tic Tac Toe, Memory und Dame. Große Schilder zeigen von überall, welche Ecke was ist.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/game-room.jpg" alt="The game room at night: a ring of tables with glowing rugs, the Croc Snap table in front, walkways on both sides" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-dark"><span data-lang="en">Game room</span><span data-lang="de">Spielzimmer</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">One floor up</h3><h3 data-lang="de">Eine Etage höher</h3><p data-lang="en">Chess, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe and Snakes &amp; Ladders around an open ring, with room to walk on both sides of the tables.</p><p data-lang="de">Schach, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe und Schlangen und Leitern rund um einen offenen Ring, mit Platz zum Gehen auf beiden Seiten der Tische.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/ludo-table.jpg" alt="The Ludo table: a square four-seat table with the board lying flat, seat pads on all four sides" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-dark"><span data-lang="en">Ludo · 2 to 4 players</span><span data-lang="de">Ludo · 2 bis 4 Spieler</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">A table for four</h3><h3 data-lang="de">Ein Tisch für vier</h3><p data-lang="en">The first to sit picks how many play. Friends fill the chairs, house bots fill what is left, and someone who leaves mid-round is replaced by a bot so the others can finish.</p><p data-lang="de">Wer zuerst sitzt, wählt die Spielerzahl. Freunde füllen die Stühle, Bots den Rest, und wer mitten in der Runde geht, wird durch einen Bot ersetzt, damit die anderen zu Ende spielen.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/rooftop-night.jpg" alt="The rooftop terrace at night: benches around the glowing oculus ring, light posts, both elevator shafts" loading="lazy" width="1600" height="1000"><div class="pills"><span class="pill pill-dark"><span data-lang="en">Rooftop</span><span data-lang="de">Dach</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">The terrace</h3><h3 data-lang="de">Die Terrasse</h3><p data-lang="en">Benches around the oculus, a view down through every floor to the plaza tree, and the sky room with Sea Strike and a Dice Royale duel one floor below.</p><p data-lang="de">Bänke rund um den Oculus, der Blick durch alle Etagen bis zum Baum auf dem Platz, und eine Etage tiefer das Himmelszimmer mit Sea Strike und einem Dice-Royale-Duell.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/connect-four.jpg" alt="Seated at Four in a Row in first person, controller docked to the right" loading="lazy" width="1400" height="875"><div class="pills"><span class="pill pill-dark"><span data-lang="en">At the table</span><span data-lang="de">Am Tisch</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">Seated at Four in a Row</h3><h3 data-lang="de">Am Vier-in-einer-Reihe-Tisch</h3><p data-lang="en">The frame is see-through like the real toy, the drop buttons sit on your screen, and everyone in the World sees the same discs fall.</p><p data-lang="de">Der Rahmen ist durchsichtig wie beim echten Spiel, die Wurf-Buttons liegen auf deinem Bildschirm, und alle in der World sehen dieselben Steine fallen.</p></div>
+        </article>
+        <article class="card reveal">
+          <div class="card-media"><img src="screenshots/how-to-play.jpg" alt="How to play panel with the language picker" loading="lazy" width="1400" height="875"><div class="pills"><span class="pill pill-dark"><span data-lang="en">19 languages</span><span data-lang="de">19 Sprachen</span></span></div></div>
+          <div class="card-body"><h3 data-lang="en">How to play, in your language</h3><h3 data-lang="de">Spielregeln in deiner Sprache</h3><p data-lang="en">Rules for every game in 19 languages from the info kiosk or the “?” button, and the lounge itself speaks English, German, Spanish, Portuguese and French.</p><p data-lang="de">Regeln für jedes Spiel in 19 Sprachen am Infoständer oder über den „?“-Button, und die Lounge selbst spricht Englisch, Deutsch, Spanisch, Portugiesisch und Französisch.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="phone" class="band band-b">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span data-lang="en">Built for the thumb</span><span data-lang="de">Für den Daumen gebaut</span></span>
+      <h2 class="reveal" data-lang="en">Why it works on a phone</h2>
+      <h2 class="reveal" data-lang="de">Warum es auf dem Handy funktioniert</h2>
+      <p class="sub reveal" data-lang="en">Most Decentraland scenes are desktop scenes squeezed onto a small screen. This one started from the thumb.</p>
+      <p class="sub reveal" data-lang="de">Die meisten Decentraland-Szenen sind Desktop-Szenen auf kleinem Bildschirm. Diese hier fängt beim Daumen an.</p>
+      <div class="grid2">
+        <article class="panel reveal">
+          <h3><span data-lang="en">The screen is the controller</span><span data-lang="de">Der Bildschirm ist der Controller</span></h3>
+          <p class="body" data-lang="en">On a phone, tapping a 3D object means aiming a crosshair first. Here you tap a bar at the bottom of the screen: drop buttons for Four in a Row, finger-sized boards for Chess, Checkers, Reversi and Dot Lines, a ring of teeth for Croc Snap, dice and a score sheet for the Dice Royale duel. While you sit, the phone’s own jump and pointer buttons step aside. The 3D table is the shared show.</p>
+          <p class="body" data-lang="de">Auf dem Handy heißt „3D-Objekt antippen“ erst mal zielen. Hier tippst du auf eine Leiste am unteren Rand: Wurf-Buttons bei Vier in einer Reihe, fingergroße Bretter bei Schach, Dame, Reversi und Käsekästchen, ein Zahnkranz bei Croc Snap, Würfel und Zettel beim Dice-Royale-Duell. Solange du sitzt, treten die Sprung- und Zeigetasten des Handys beiseite. Der 3D-Tisch ist die gemeinsame Bühne.</p>
+        </article>
+        <article class="panel reveal">
+          <h3><span data-lang="en">One tap to sit</span><span data-lang="de">Ein Tipp zum Hinsetzen</span></h3>
+          <p class="body" data-lang="en">Near a table a card offers “Take a seat” or “Play the house bot”, with the bot’s strength right there; colours are dealt at random every round, so nobody picks White by choosing a chair. Sitting snaps you onto the seat, facing the board, in first person. “Stand up” is always one tap away.</p>
+          <p class="body" data-lang="de">In Tischnähe bietet eine Karte „Platz nehmen“ oder „Gegen den Bot spielen“ an, die Bot-Stärke gleich daneben; die Farben werden jede Runde ausgelost, niemand sichert sich Weiß über den Stuhl. Beim Hinsetzen stellst du dich automatisch an den Platz, Blick aufs Brett, in der Ego-Perspektive. „Aufstehen“ ist immer einen Tipp entfernt.</p>
+        </article>
+        <article class="panel reveal">
+          <h3><span data-lang="en">Shared tables, really shared</span><span data-lang="de">Gemeinsame Tische, wirklich gemeinsam</span></h3>
+          <p class="body" data-lang="en">Seats, boards, series score and the 60-second turn timer are the same for everyone in the World, late arrivals included. Full table? Stand behind a player and watch the live board on your screen.</p>
+          <p class="body" data-lang="de">Plätze, Bretter, Serienstand und die 60-Sekunden-Zuguhr sind für alle in der World gleich, auch für Nachzügler. Tisch voll? Stell dich hinter einen Spieler und schau auf deinem Bildschirm live zu.</p>
+        </article>
+        <article class="panel reveal">
+          <h3><span data-lang="en">Small enough for 4G</span><span data-lang="de">Klein genug für 4G</span></h3>
+          <p class="body" data-lang="en">The tower, the facade and every prop are small GLBs written by a Python script; every texture is a small procedural image, every sound a synthesised WAV. Game pieces exist only while a round runs, so an idle World is about 500 entities and a 0.9 MB script on a 3x3 lot.</p>
+          <p class="body" data-lang="de">Turm, Fassade und alle Möbel sind kleine GLBs aus einem Python-Skript; jede Textur ein kleines, generiertes Bild, jeder Ton eine synthetisierte WAV. Spielsteine existieren nur, solange eine Runde läuft: eine leere World hat rund 500 Entities und ein 0,9-MB-Skript auf 3x3 Parzellen.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="games" class="band band-c">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span data-lang="en">Fourteen games</span><span data-lang="de">Vierzehn Spiele</span></span>
+      <h2 class="reveal" data-lang="en">Something on every floor</h2>
+      <h2 class="reveal" data-lang="de">Auf jeder Etage etwas</h2>
+      <p class="sub reveal" data-lang="en">Every game runs on a pure engine with its own tests. Names are the generic ones on purpose.</p>
+      <p class="sub reveal" data-lang="de">Jedes Spiel läuft auf einer puren Engine mit eigenen Tests. Die Namen sind absichtlich die generischen.</p>
+      <div class="grid2">
+        <article class="panel floor reveal">
+          <div class="floor-head"><h3><span data-lang="en">Lounge</span><span data-lang="de">Lounge</span></h3><span data-lang="en">Ground floor</span><span data-lang="de">Erdgeschoss</span></div>
+          <div class="chips"><span class="chip on"><span data-lang="en">Four in a Row</span><span data-lang="de">Vier in einer Reihe</span></span><span class="chip"><span data-lang="en">Dot Lines</span><span data-lang="de">Käsekästchen</span></span><span class="chip">Reversi</span><span class="chip">Tic Tac Toe</span><span class="chip"><span data-lang="en">Match Pairs</span><span data-lang="de">Memory</span></span><span class="chip"><span data-lang="en">Checkers</span><span data-lang="de">Dame</span></span></div>
+          <p class="body" data-lang="en">Six corners around the plaza, two tables of Four in a Row, sofas and two bars by the entrance.</p>
+          <p class="body" data-lang="de">Sechs Ecken um den Platz, zwei Tische Vier in einer Reihe, Sofas und zwei Bars am Eingang.</p>
+        </article>
+        <article class="panel floor reveal">
+          <div class="floor-head"><h3><span data-lang="en">Game room</span><span data-lang="de">Spielzimmer</span></h3><span>8 m</span></div>
+          <div class="chips"><span class="chip on"><span data-lang="en">Chess</span><span data-lang="de">Schach</span></span><span class="chip">Croc Snap</span><span class="chip">Backgammon</span><span class="chip">Ludo · 2–4</span><span class="chip">Super Tic Tac Toe</span><span class="chip"><span data-lang="en">Snakes &amp; Ladders</span><span data-lang="de">Schlangen und Leitern</span></span></div>
+          <p class="body" data-lang="en">A ring of six tables around the oculus. The chess bot thinks under a time budget, so a slow phone never freezes.</p>
+          <p class="body" data-lang="de">Ein Ring aus sechs Tischen um den Oculus. Der Schach-Bot rechnet mit Zeitbudget, damit ein langsames Handy nie einfriert.</p>
+        </article>
+        <article class="panel floor reveal">
+          <div class="floor-head"><h3><span data-lang="en">Sky room</span><span data-lang="de">Himmelszimmer</span></h3><span>16 m</span></div>
+          <div class="chips"><span class="chip on">Sea Strike</span><span class="chip"><span data-lang="en">Dice Royale duel</span><span data-lang="de">Dice-Royale-Duell</span></span></div>
+          <p class="body" data-lang="en">Two tables and two sofas looking down the oculus. Sea Strike keeps both fleets on public grids, so it stays fair without a server.</p>
+          <p class="body" data-lang="de">Zwei Tische und zwei Sofas mit Blick in den Oculus. Sea Strike zeigt beide Flotten auf öffentlichen Rastern, damit es ohne Server fair bleibt.</p>
+        </article>
+        <article class="panel floor reveal">
+          <div class="floor-head"><h3><span data-lang="en">Rooftop</span><span data-lang="de">Dach</span></h3><span>24 m</span></div>
+          <div class="chips"><span class="chip"><span data-lang="en">Benches</span><span data-lang="de">Bänke</span></span><span class="chip"><span data-lang="en">The view</span><span data-lang="de">Die Aussicht</span></span><span class="chip"><span data-lang="en">Leaderboard later</span><span data-lang="de">Bestenliste später</span></span></div>
+          <p class="body" data-lang="en">A terrace under the crown ring: the place to regroup after a series, and where a persistent leaderboard goes next.</p>
+          <p class="body" data-lang="de">Eine Terrasse unter dem Kronenring: der Treffpunkt nach einer Serie, und der Platz für die dauerhafte Bestenliste als Nächstes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="band band-a">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span data-lang="en">How to play</span><span data-lang="de">So geht’s</span></span>
+      <h2 class="reveal" data-lang="en">Ten seconds from door to first move</h2>
+      <h2 class="reveal" data-lang="de">Zehn Sekunden von der Tür zum ersten Zug</h2>
+      <div class="grid2 steps">
+        <article class="panel step reveal"><h3><span data-lang="en">Walk up</span><span data-lang="de">Hingehen</span></h3><p class="body" data-lang="en">Pick a table. The floating sign says who is waiting for a rival, and the big banners say which corner is which game.</p><p class="body" data-lang="de">Tisch aussuchen. Das schwebende Schild sagt, wer auf einen Gegner wartet, die großen Banner, welche Ecke welches Spiel ist.</p></article>
+        <article class="panel step reveal"><h3><span data-lang="en">Sit</span><span data-lang="de">Hinsetzen</span></h3><p class="body" data-lang="en">Tap “Take a seat”. Colours are dealt when the round starts. Alone? Pick the bot’s strength and tap “Play the house bot”, or tap the little robot on the table.</p><p class="body" data-lang="de">„Platz nehmen“ antippen. Die Farben werden beim Start der Runde ausgelost. Allein? Bot-Stärke wählen und „Gegen den Bot spielen“ antippen, oder den kleinen Roboter auf dem Tisch.</p></article>
+        <article class="panel step reveal"><h3><span data-lang="en">Play</span><span data-lang="de">Spielen</span></h3><p class="body" data-lang="en">Tap to move on the bar at the bottom of your screen. Sixty seconds per turn, a ding when it is yours.</p><p class="body" data-lang="de">Zum Ziehen auf die Leiste unten am Bildschirm tippen. Sechzig Sekunden pro Zug, ein Ton, wenn du dran bist.</p></article>
+        <article class="panel step reveal"><h3><span data-lang="en">Play again</span><span data-lang="de">Noch mal</span></h3><p class="body" data-lang="en">The series score stays with the pairing and the colours rotate. Or stand up and try the next table, or the next floor.</p><p class="body" data-lang="de">Der Serienstand bleibt beim Paar, die Farben wechseln. Oder aufstehen und den nächsten Tisch probieren, oder die nächste Etage.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="tech" class="band band-b tech">
+    <div class="wrap">
+      <span class="eyebrow reveal"><span data-lang="en">Under the hood</span><span data-lang="de">Unter der Haube</span></span>
+      <h2 class="reveal" data-lang="en">No server, and it still stays fair</h2>
+      <h2 class="reveal" data-lang="de">Kein Server, und trotzdem fair</h2>
+      <div class="grid2">
+        <ul class="panel reveal">
+          <li data-lang="en">Decentraland SDK7, TypeScript, React-ECS UI. Tables are CRDT-synced components, one per table, with a strict rule for who may write what: a seat is written by its holder, the board by the player to move.</li>
+          <li data-lang="de">Decentraland SDK7, TypeScript, React-ECS-UI. Tische sind CRDT-synchronisierte Komponenten, eine pro Tisch, mit klarer Regel, wer was schreiben darf: den Platz sein Inhaber, das Brett, wer am Zug ist.</li>
+          <li data-lang="en">Games are plugins: pure engines from Game Arena (fourteen games, 561 unit tests) plus a 3D view and a touch controller each. Ludo declares four seats and the table grows to match.</li>
+          <li data-lang="de">Spiele sind Plugins: pure Engines aus Game Arena (vierzehn Spiele, 561 Unit-Tests) plus je eine 3D-Ansicht und einen Touch-Controller. Ludo meldet vier Plätze an, und der Tisch wächst mit.</li>
+        </ul>
+        <ul class="panel reveal">
+          <li data-lang="en">The house bots (minimax and friends) are driven by the host at the table, the lowest human seat, so nobody needs a server to keep a table warm.</li>
+          <li data-lang="de">Die Bots (Minimax und Verwandte) werden vom Gastgeber am Tisch angetrieben, dem niedrigsten menschlichen Platz. So braucht niemand einen Server, um einen Tisch warmzuhalten.</li>
+          <li data-lang="en">Everything visible is generated by two Python scripts (16 GLBs, 1.8 MB; textures 0.9 MB) and the production script is 0.9 MB. Open source under MIT in September 2026. Built by Arsalan Khadim for the Friendzone Mobile Buildathon.</li>
+          <li data-lang="de">Alles Sichtbare erzeugen zwei Python-Skripte (16 GLBs, 1,8 MB; Texturen 0,9 MB), das Produktionsskript hat 0,9 MB. Open Source unter MIT ab September 2026. Gebaut von Arsalan Khadim für den Friendzone Mobile Buildathon.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <p class="wordmark">Arena Lounge</p>
+        <p class="foot-note" data-lang="en">A mobile-first social game lounge in Decentraland. Walk in, take a seat, play a friend or the house bot; every table is shared with everyone in the World.</p>
+        <p class="foot-note" data-lang="de">Eine mobile Spiel-Lounge in Decentraland. Reinkommen, hinsetzen, gegen Freunde oder den Bot spielen; jeder Tisch wird mit allen in der World geteilt.</p>
+        <a class="btn btn-primary btn-sm" href="https://decentraland.org/jump/?realm=arenalounge.dcl.eth" target="_blank" rel="noopener"><span data-lang="en">Open in Decentraland</span><span data-lang="de">In Decentraland öffnen</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <span class="eyebrow"><span data-lang="en">Connect</span><span data-lang="de">Kontakt</span></span>
+        <div class="social">
+          <a href="https://github.com/ArsalanRC" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg></a>
+          <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zm1.78 13.02H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <span class="eyebrow"><span data-lang="en">The World</span><span data-lang="de">Die World</span></span>
+        <a href="https://decentraland.org/jump/?realm=arenalounge.dcl.eth" target="_blank" rel="noopener">arenalounge.dcl.eth</a>
+        <a href="https://decentraland.org/download/" target="_blank" rel="noopener"><span data-lang="en">Get the Decentraland app</span><span data-lang="de">Decentraland-App holen</span></a>
+        <a href="https://dorahacks.io/hackathon/2353/detail" target="_blank" rel="noopener">Friendzone Mobile Buildathon</a>
+      </div>
+      <div class="foot-col">
+        <span class="eyebrow"><span data-lang="en">Elsewhere</span><span data-lang="de">Anderswo</span></span>
+        <a href="https://arsalanrc.github.io">Portfolio</a>
+        <a href="https://github.com/ArsalanRC" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-set="en" aria-pressed="true">EN</button>
+        <button type="button" data-set="de" aria-pressed="false">DE</button>
+      </div>
+      <span><span data-lang="en">Design concept inspired by <a href="https://decentraland.org/" target="_blank" rel="noopener">decentraland.org</a>. Built from scratch by hand, no code, assets or logos taken.</span><span data-lang="de">Gestaltungskonzept inspiriert von <a href="https://decentraland.org/" target="_blank" rel="noopener">decentraland.org</a>. Von Hand von Grund auf gebaut, kein Code, keine Assets und keine Logos übernommen.</span></span>
+      <span>© 2026 Arsalan Khadim</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // language: stored choice, else browser language, else English; both switches stay in step
+  (function () {
+    var root = document.documentElement;
+    var stored = null;
+    try { stored = localStorage.getItem('arena-lang'); } catch (e) {}
+    var lang = stored || ((navigator.language || 'en').slice(0, 2) === 'de' ? 'de' : 'en');
+    function apply(l) {
+      root.classList.remove('en', 'de'); root.classList.add(l); root.setAttribute('lang', l);
+      document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+      try { localStorage.setItem('arena-lang', l); } catch (e) {}
+    }
+    apply(lang);
+    document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.set); }); });
+  })();
+
+  // header turns solid once the hero is behind you
+  (function () {
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('is-scrolled', window.scrollY > 40); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // scroll reveals
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) { entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .08 });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+</body>
+</html>
