@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-17 03:35 (Europe/Berlin), first World deploy live at arenalounge.dcl.eth
+Last update: 2026-08-17 23:20 (Europe/Berlin), ring paths on every floor, sky at 04:30
 
 ## 1. What this is
 
@@ -133,10 +133,10 @@ version works as well", 16 Aug 11:30):
   plaza tree and two bar counters by the entrance (models/sofa.glb, bar.glb).
   Idle scene after this: 401 entities, 450 renderers.
 - Night lighting (Arsalan, 16 Aug 18:00: "very nice lighting inside and
-  outside for nighttime"): the World runs at a fixed 20:00 (scene.json
-  worldConfiguration.skyboxConfig.fixedTime 72000 + SkyboxTime on the root so
-  the preview matches; DCL night keeps everything readable; it was 21:00
-  until 19:21, see Gotchas for the moon artefact). Fixtures are one
+  outside for nighttime"): the World runs at a fixed 04:30 (scene.json
+  worldConfiguration.skyboxConfig.fixedTime 16200 + SkyboxTime on the root so
+  the preview matches; pre-dawn blue keeps everything readable; it was 21:00,
+  then 20:00, see Gotchas for the moon artefact). Fixtures are one
   warm-emissive mesh in decor.glb: beacons at every rib crossing and on the
   crown, uplight collars on all columns, string lights on the ground floor,
   in the game room and a ring over the rooftop; plus the glow rims, teal
@@ -419,13 +419,14 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 - Auto-height panels: a `height: 'auto'` panel whose children are auto-height
   wrappers loses its padding top and bottom; give the inner wrapper explicit
   vertical margins (see the phone bar in ui.tsx) or the last row a fixed height.
-- Fixed skybox time: at 21:00 (75600) and 22:00 the moon sits low in the
-  south and the client draws a large blocky black shape (staircase edges,
-  emissives shine through) around the moon's direction, visible from inside
-  the lounge behind the marquee. Not glass, not the sign, not point-light
-  shadows (all ruled out on 16 Aug). 20:00 (72000) has no artefact and the
-  same night look; if the time ever changes, screenshot the entrance from
-  inside first.
+- Fixed skybox time: the client draws a large blocky black shape (staircase
+  edges, emissives shine through) around the moon's direction whenever the
+  moon is in view; not glass, not the sign, not point lights (all ruled out).
+  21:00 / 22:00 / 00:00 / 02:00 / 03:30 show it looking south from inside,
+  20:00 shows it looking north from the entrance. 04:30 (16200) tested clean
+  from twelve viewpoints on all floors and still reads as night (pre-dawn
+  blue); that is the fixed time since 17 Aug 23:20. If the hour ever changes,
+  screenshot entrance-north, inside-south, plaza east/west and the rooftop.
 - Baked text: the client mirrors glTF x, so geometry letters must be laid
   out with negative arc length (see `sign_pt` in tools/gen-models.py);
   TextShapes read from their -Z side.
@@ -446,6 +447,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-17 23:20 walkable ring paths (Arsalan: "too many items around, nice walkable paths ... clear of any obstacles on each floor"): one runner plane per floor (images/path-a.png 0.786, path-b.png 0.654; ground r 6.0..7.6, game room 5.5..7.0, sky room 3.4..5.2, rooftop 4.7..6.0) with everything moved off it: sofas r 5.4, ground corners r 10.9..11.3 (double rug 6.8), bars flank the entrance path at (21.4/26.6, 11.9), gateway r 8.6, kiosk/directory to the west, spawn (24, 12.5), ground column 259 to 262, rooftop benches r 7.4 and planters r 9.4; sky fixed at 04:30 after the moon artefact showed up at 20:00 from the entrance
 - 2026-08-17 03:24 DEPLOYED: Arsalan bought `arenalounge.dcl.eth` (03:12, marketplace, cross-chain checkout hung on Polygon MANA, he got it done anyway) and signed the first World deploy at 03:24 (entity bafkreif6axhmmz33k2xj7bbkhavzkukkuhrzcmg6yemfqaxg4nyuwb5vmm; healthy, comms v3, skybox 20:00). Deploy gotchas (port 8000 clash, Node 25 linker header bug patched by tools/dev/patch-linker.py, 5-minute signing window, Sepolia badge) in docs/DEPLOY.md; `pnpm deploy:world` is the one-command redeploy
 - 2026-08-16 21:31 Ludo for two to four players (Arsalan: "the first person who sits decides how many play, minimum 2 ... this game needs space for players"): seat model generalised to four seats (state.ts TableSeatC/D, `sides` array instead of `swap`, `players`, wins per seat, Winner.Draw = 9), tables.ts host / target-count / bot-fill / mid-round bot replacement / host-played timeouts, table3d four pads + cams + N-name sign, ui.tsx multi-player header + Players 2/3/4 picker + "Fill with bots", Ludo plugin with 2..4 sides and a flat board on a square four-pad table (models/table4.glb), 5.6 m rug under four-seat tables; strings in five languages
 - 2026-08-16 21:03 phone HUD + bot strength (Arsalan: jump / hand icons cover "Stand up" on the phone; difficulty only choosable after losing a round): `TouchScreenControls.hideAll()` + hideCrosshair while the local player is seated, restored on standing (tables.ts touchControlsSystem, no-op on desktop); Easy/Medium/Hard picker now shows on the empty-table card and in the controller while waiting for an opponent, not only between rounds against the bot; "Dismiss bot" only when a bot is actually seated

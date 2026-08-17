@@ -168,7 +168,8 @@ function pathRing(y: number, outer: number, tex: string): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(PLAZA.x, y + 0.006, PLAZA.z), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(outer * 2, outer * 2, 1) })
   MeshRenderer.setPlane(e)
-  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5 })
+  // a touch of self-light keeps the runner cream under the purple night sky instead of turning it magenta
+  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: Color3.create(1, 0.96, 0.9), emissiveIntensity: 0.22 })
   return e
 }
 

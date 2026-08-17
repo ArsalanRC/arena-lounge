@@ -70,7 +70,7 @@
   "worldConfiguration": {
     "name": "arenalounge.dcl.eth",
     "skyboxConfig": {
-      "fixedTime": 72000
+      "fixedTime": 16200
     }
   }
 }
