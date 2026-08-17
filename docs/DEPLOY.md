@@ -4,7 +4,40 @@ Judges open the World in the Decentraland mobile app, so the scene has to be
 published to a **World** (not LAND) and stay online from submission until the
 end of judging (11 Sept 2026). Publishing is free; you only need to own a name.
 
-## 1. Own a name (one-time, ~10 minutes)
+**Status: live since 17 Aug 2026 03:24 at `arenalounge.dcl.eth`** (NAME bought
+16 Aug ~03:12 by 0x3451…5e9f, the same account as the Explorer login; first
+deploy entity `bafkreif6axhmmz33k2xj7bbkhavzkukkuhrzcmg6yemfqaxg4nyuwb5vmm`).
+Jump in: https://decentraland.org/jump/?realm=arenalounge.dcl.eth (works on the
+phone too, it hands over to the app). Health check:
+`curl https://worlds-content-server.decentraland.org/world/arenalounge.dcl.eth/about`.
+
+## Redeploy in one command (what actually worked)
+
+```bash
+pnpm deploy:world
+```
+
+That runs `tools/dev/patch-linker.py` and then
+`sdk-commands deploy --target-content https://worlds-content-server.decentraland.org --port 8010`.
+Then, in the browser tab it opens: CONNECT WALLET, sign in with MetaMask
+(account 0x3451…5e9f, network Ethereum Mainnet), SIGN & DEPLOY, confirm the
+signature. Three things bit us on the first deploy:
+
+- **Port**: the linker page wants port 8000, which the desktop preview holds;
+  `--port 8010` avoids the `EADDRINUSE` crash.
+- **Node 25 + sdk-commands 7.26.0**: CONNECT WALLET failed with
+  `Proxy error: Key Symbol(map) ... cannot be converted to a ByteString`. The
+  linker spreads a node-fetch Headers object into the proxied auth request;
+  `tools/dev/patch-linker.py` rewrites that one line in node_modules
+  (idempotent, re-run after every install; `deploy:world` does it).
+- **Five-minute window**: the upload is stamped when the command starts and
+  the World server rejects it after 300 s ("Deployment was created 386 secs
+  ago"). Sign within five minutes; if the wallet needs onboarding or a network
+  switch, do that first, then restart the command and sign at once.
+- Signing on Sepolia shows a SEPOLIA badge; switch the site's network to
+  Mainnet in MetaMask before signing. The signature itself costs nothing.
+
+## 1. Own a name (one-time, ~10 minutes; done 17 Aug)
 
 Two options. Pick one.
 
