@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-17 23:20 (Europe/Berlin), ring paths on every floor, sky at 04:30
+Last update: 2026-08-17 23:55 (Europe/Berlin), leaderboard code merged (dormant), waiting for the Supabase project
 
 ## 1. What this is
 
@@ -291,9 +291,18 @@ version works as well", 16 Aug 11:30):
    sdk-commands/start/server/realm.js): stop the 8000/8001 pair and run one
    `pnpm start:pair` (desktop Explorer + MCP + phone QR on one port).
 3. (done 17 Aug 03:24) NAME bought + first deploy live at
-   arenalounge.dcl.eth. Now: both test it from the real app; redeploy with
+   arenalounge.dcl.eth; redeployed 22:27 and 23:20 the same day. Redeploy with
    `pnpm deploy:world` after every merged change (Arsalan signs, five-minute
-   window).
+   window). Phone: QR `decentraland://open?realm=arenalounge.dcl.eth&position=1,1`
+   works (the decentraland.org/jump page bounced to the App Store); desktop:
+   `open 'decentraland://"realm=https://worlds-content-server.decentraland.org/world/arenalounge.dcl.eth&position=1,1&dclenv=org&mcp=true&skip-auth-screen=true"'`
+   into a fresh Explorer instance.
+3b. Arsalan: create the personal Supabase project and run the migration
+   (docs/LEADERBOARD-SETUP.md), paste URL + publishable key; Claude plugs them
+   in, tests two identities, redeploys.
+3c. Then: sprite atlases (fewer texture requests, the 525 hiccup), README
+   refresh with phone screenshots, marble interior pass, submission ~1 to
+   3 Sept once everything is polished (secrecy no longer matters to him).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
    does, switch the main UI to `screenInset: 'interactable'` or narrow the
@@ -447,6 +456,7 @@ input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
 
+- 2026-08-17 23:55 leaderboard (Arsalan: "go, supabase leaderboard, new project ... make sure our keys are safe"): supabase/001_leaderboard.sql (RLS-locked tables + record_result / leaderboard / my_stats RPCs, publishable key only), src/lounge/leaderboard.ts, reporting on round end for rounds with a human opponent, rooftop board, Leaderboard tab in the "?" panel, five languages, USE_FETCH; dormant until LEADERBOARD.url/key are set. Arsalan creates the personal Supabase project tomorrow (docs/LEADERBOARD-SETUP.md) and hands over URL + publishable key; then end-to-end test + redeploy
 - 2026-08-17 23:20 walkable ring paths (Arsalan: "too many items around, nice walkable paths ... clear of any obstacles on each floor"): one runner plane per floor (images/path-a.png 0.786, path-b.png 0.654; ground r 6.0..7.6, game room 5.5..7.0, sky room 3.4..5.2, rooftop 4.7..6.0) with everything moved off it: sofas r 5.4, ground corners r 10.9..11.3 (double rug 6.8), bars flank the entrance path at (21.4/26.6, 11.9), gateway r 8.6, kiosk/directory to the west, spawn (24, 12.5), ground column 259 to 262, rooftop benches r 7.4 and planters r 9.4; sky fixed at 04:30 after the moon artefact showed up at 20:00 from the entrance
 - 2026-08-17 03:24 DEPLOYED: Arsalan bought `arenalounge.dcl.eth` (03:12, marketplace, cross-chain checkout hung on Polygon MANA, he got it done anyway) and signed the first World deploy at 03:24 (entity bafkreif6axhmmz33k2xj7bbkhavzkukkuhrzcmg6yemfqaxg4nyuwb5vmm; healthy, comms v3, skybox 20:00). Deploy gotchas (port 8000 clash, Node 25 linker header bug patched by tools/dev/patch-linker.py, 5-minute signing window, Sepolia badge) in docs/DEPLOY.md; `pnpm deploy:world` is the one-command redeploy
 - 2026-08-16 21:31 Ludo for two to four players (Arsalan: "the first person who sits decides how many play, minimum 2 ... this game needs space for players"): seat model generalised to four seats (state.ts TableSeatC/D, `sides` array instead of `swap`, `players`, wins per seat, Winner.Draw = 9), tables.ts host / target-count / bot-fill / mid-round bot replacement / host-played timeouts, table3d four pads + cams + N-name sign, ui.tsx multi-player header + Players 2/3/4 picker + "Fill with bots", Ludo plugin with 2..4 sides and a flat board on a square four-pad table (models/table4.glb), 5.6 m rug under four-seat tables; strings in five languages
