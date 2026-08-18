@@ -2,7 +2,7 @@
 # Supabase CLI against Arsalan's PERSONAL project (arena-lounge, ref vpizpihqwkmxtidqduos), not the
 # game-platform session the CLI is logged into. The personal access token lives outside the repo
 # in ~/.config/arena-lounge/supabase-token (mode 600) and is only ever passed through the environment.
-#   tools/dev/supa functions deploy report --no-verify-jwt
+#   tools/dev/supa functions deploy report --no-verify-jwt --project-ref vpizpihqwkmxtidqduos
 TOKEN_FILE="$HOME/.config/arena-lounge/supabase-token"
 [ -r "$TOKEN_FILE" ] || { echo "missing $TOKEN_FILE (see docs/LEADERBOARD-SETUP.md)" >&2; exit 1; }
-exec env SUPABASE_ACCESS_TOKEN="$(tr -d '[:space:]' < "$TOKEN_FILE")" supabase --project-ref vpizpihqwkmxtidqduos "$@"
+exec env SUPABASE_ACCESS_TOKEN="$(tr -d '[:space:]' < "$TOKEN_FILE")" supabase "$@"
