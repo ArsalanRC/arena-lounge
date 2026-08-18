@@ -22,6 +22,7 @@ import {
   type MatchPairsGameState
 } from '../../engine/matchpairs'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { COLS, OWNER_TINTS, ROWS, createMatchPairsView, symbolIndex, symbolSprite, symbolTint, type PairsAction } from '../views/matchpairs3d'
@@ -33,7 +34,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const REVEAL_MS = 1200
-const IMG = { ring: 'images/ui/ring.png', chipA: 'images/ui/disc-yellow.png', chipB: 'images/ui/disc-red.png' }
+const IMG = { chipA: 'disc-yellow', chipB: 'disc-red' } as const
 
 interface Wire {
   /** one char per card: symbol index 0-7 */
@@ -127,7 +128,7 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; phone: boo
             if (ctx.myTurn && !up && state.flippedIndices.length < 2) ctx.act({ flip: i } as PairsAction)
           }}
         >
-          {up && <UiEntity uiTransform={{ width: cell * 0.6, height: cell * 0.6 }} uiBackground={{ texture: { src: symbolSprite(sym) }, textureMode: 'stretch', color: symbolTint(sym) }} />}
+          {up && <UiEntity uiTransform={{ width: cell * 0.6, height: cell * 0.6 }} uiBackground={uiSprite(symbolSprite(sym), symbolTint(sym))} />}
         </UiEntity>
       )
     }

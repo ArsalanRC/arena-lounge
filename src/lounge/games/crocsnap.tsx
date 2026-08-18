@@ -11,6 +11,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { TEETH_COUNT, applyMove, createInitialState, getValidMoves, selectBotMove, type CrocSnapGameState } from '../../engine/crocsnap'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { CROC_COLORS, createCrocSnapView, toothAngle, type CrocAction } from '../views/crocsnap3d'
@@ -20,7 +21,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { tooth: 'images/ui/disc.png', ring: 'images/ui/ring.png', yellow: 'images/ui/disc-yellow.png', red: 'images/ui/disc-red.png' }
+const IMG = { tooth: 'disc', ring: 'ring', yellow: 'disc-yellow', red: 'disc-red' } as const
 
 interface Wire {
   t: string // 12 chars '0' open '1' pressed
@@ -91,12 +92,12 @@ function Ring(props: { state: CrocSnapGameState; ctx: GameContext; phone: boolea
       <UiEntity
         key={`t${i}`}
         uiTransform={{ positionType: 'absolute', position: { left: cx - btn / 2, top: cy - btn / 2 }, width: btn, height: btn, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block', opacity: pressed ? 0.45 : 1 }}
-        uiBackground={{ texture: { src: IMG.tooth }, textureMode: 'stretch', color: i === snapAt ? CROC_COLORS.snap : pressed ? CROC_COLORS.pressed : CROC_COLORS.tooth }}
+        uiBackground={uiSprite(IMG.tooth, i === snapAt ? CROC_COLORS.snap : pressed ? CROC_COLORS.pressed : CROC_COLORS.tooth)}
         onMouseDown={() => {
           if (open) ctx.act({ tooth: i } as CrocAction)
         }}
       >
-        {open && <UiEntity uiTransform={{ width: btn - 6, height: btn - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
+        {open && <UiEntity uiTransform={{ width: btn - 6, height: btn - 6 }} uiBackground={uiSprite(IMG.ring, UI.accentTint)} />}
       </UiEntity>
     )
   }

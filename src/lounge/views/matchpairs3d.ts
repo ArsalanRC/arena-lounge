@@ -6,6 +6,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import { SYMBOL_POOL, type MatchPairsGameState } from '../../engine/matchpairs'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -24,12 +25,12 @@ const CENTER_Y = TABLE_TOP_Y + 0.08 + BOARD / 2
 const HALF_T = 0.02
 
 /** Symbol i (0..7): shape = i % 4, colour = i < 4 ? warm : cool. */
-export const SHAPE_SPRITES = ['images/ui/disc.png', 'images/ui/button.png', 'images/ui/mark-o.png', 'images/ui/mark-x.png']
+export const SHAPE_SPRITES: SpriteName[] = ['disc', 'button', 'mark-o', 'mark-x']
 export const SYMBOL_TINTS: [Color4, Color4] = [PALETTE.yellow, Color4.fromHexString('#3fc1d9ff')]
 export const OWNER_TINTS: [Color4, Color4] = [Color4.fromHexString('#f2d98cff'), Color4.fromHexString('#e8a29aff')]
 const CARD_BACK = Color4.fromHexString('#2f4858ff')
 
-export function symbolSprite(sym: number): string {
+export function symbolSprite(sym: number): SpriteName {
   return SHAPE_SPRITES[sym % 4]
 }
 export function symbolTint(sym: number): Color4 {
@@ -66,9 +67,9 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
     for (let i = 0; i < ROWS * COLS; i++) {
       const sym = engine.addEntity()
       Transform.create(sym, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.6, CELL * 0.6, HALF_T * 2 + 0.014) })
-      MeshRenderer.setBox(sym)
+      spriteBox(sym, SHAPE_SPRITES[0])
       Material.setPbrMaterial(sym, {
-        texture: Material.Texture.Common({ src: SHAPE_SPRITES[0] }),
+        texture: Material.Texture.Common({ src: ATLAS }),
         albedoColor: SYMBOL_TINTS[0],
         transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
         alphaTest: 0.5,
@@ -100,9 +101,10 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
     if (mode === 0 && !symbolPool.live) return
     const symbols = symbolPool.get()
     VisibilityComponent.getMutable(symbols[i]).visible = mode !== 0
-    if (mode !== 0)
+    if (mode !== 0) {
+      spriteBox(symbols[i], symbolSprite(sym))
       Material.setPbrMaterial(symbols[i], {
-        texture: Material.Texture.Common({ src: symbolSprite(sym) }),
+        texture: Material.Texture.Common({ src: ATLAS }),
         albedoColor: symbolTint(sym),
         transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
         alphaTest: 0.5,
@@ -110,6 +112,7 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
         metallic: 0,
         castShadows: false
       })
+    }
   }
 
   return {

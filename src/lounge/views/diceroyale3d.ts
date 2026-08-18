@@ -7,6 +7,7 @@
  */
 import { Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import type { DiceFace } from '../../engine/diceroyale'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -34,8 +35,9 @@ export interface DuelView {
 }
 
 function dieMaterial(e: Entity, face: DiceFace, held: boolean): void {
+  spriteBox(e, `die-${face}` as SpriteName)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: `images/ui/die-${face}.png` }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.5,
@@ -66,7 +68,6 @@ export function createDiceRoyaleView(root: Entity, onTap: () => void): View3DHan
     for (let i = 0; i < 5; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: Vector3.create(-0.4 + i * 0.2, CENTER_Y, 0), scale: Vector3.create(DIE, DIE, HALF_T * 2 + 0.012) })
-      MeshRenderer.setBox(e)
       dieMaterial(e, 1, false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

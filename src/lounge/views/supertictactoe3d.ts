@@ -6,6 +6,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox } from '../atlas'
 import type { SuperTTTGameState } from '../../engine/supertictactoe'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -40,8 +41,9 @@ function subCentre(board: number): Vector3 {
 
 function markMaterial(e: Entity, mark: 'X' | 'O', glow: boolean, alpha = 1): void {
   const tint = mark === 'X' ? STTT_COLORS[0] : STTT_COLORS[1]
+  spriteBox(e, mark === 'X' ? 'mark-x' : 'mark-o')
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: mark === 'X' ? 'images/ui/mark-x.png' : 'images/ui/mark-o.png' }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     albedoColor: Color4.create(tint.r, tint.g, tint.b, alpha),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
@@ -94,7 +96,6 @@ export function createSuperTTTView(root: Entity, onAction: (a: SuperTTTAction) =
       const big = i >= 81
       const size = big ? SUB * 0.8 : CELL * 0.72
       Transform.create(e, { parent: root, position: big ? subCentre(i - 81) : sttCellLocal(Math.floor(i / 9), i % 9), scale: Vector3.create(size, size, HALF_T * 2 + (big ? 0.02 : 0.01)) })
-      MeshRenderer.setBox(e)
       markMaterial(e, 'X', false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

@@ -29,6 +29,7 @@ import {
   type ValidMove
 } from '../../engine/ludo'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { seatLabel, t as L } from '../i18n'
 import { LUDO_COLORS, LUDO_SPRITES, createLudoView, type LudoAction } from '../views/ludo3d'
@@ -40,7 +41,7 @@ function enginePlayers(n: number): PlayerInfo[] {
   const count = Math.max(2, Math.min(4, n))
   return LUDO_COLORS.slice(0, count).map((color, i) => ({ id: `${i + 1}`, color, playerOrder: i }))
 }
-const IMG = { button: 'images/ui/button.png', ring: 'images/ui/ring.png' }
+const IMG = { button: 'button', ring: 'ring' } as const
 const N = 15
 const YARD: PiecePositions = [YARD_POSITION, YARD_POSITION, YARD_POSITION, YARD_POSITION]
 
@@ -170,9 +171,9 @@ function MiniBoard(props: { state: LudoGameState; cell: number }) {
         <UiEntity
           key={`p${ci}${pi}`}
           uiTransform={{ positionType: 'absolute', position: { left: col * cell + 1 + sharing * 3, top: row * cell + 1 - sharing * 3 }, width: cell - 2, height: cell - 2, justifyContent: 'center', alignItems: 'center' }}
-          uiBackground={{ texture: { src: LUDO_SPRITES[ci] }, textureMode: 'stretch' }}
+          uiBackground={uiSprite(LUDO_SPRITES[ci])}
         >
-          {glow && <UiEntity uiTransform={{ width: cell - 2, height: cell - 2 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.win }} />}
+          {glow && <UiEntity uiTransform={{ width: cell - 2, height: cell - 2 }} uiBackground={uiSprite(IMG.ring, UI.win)} />}
         </UiEntity>
       )
     }
@@ -217,7 +218,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
       <UiEntity
         key="roll"
         uiTransform={{ width: 200, height: 56, margin: 4, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-        uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
+        uiBackground={uiSprite(IMG.button, UI.accent)}
         uiText={{ value: g.rollDie, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
         onMouseDown={() => ctx.act({ roll: d6() } as LudoAction)}
       />
@@ -230,7 +231,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
         <UiEntity
           key={`m${m.pieceIndex}`}
           uiTransform={{ width: props.phone ? 200 : 176, height: 52, margin: 4, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: tint }}
+          uiBackground={uiSprite(IMG.button, tint)}
           uiText={{ value: moveLabel(m), fontSize: 18, color: UI.text, textAlign: 'middle-center' }}
           onMouseDown={() => ctx.act({ piece: m.pieceIndex } as LudoAction)}
         />

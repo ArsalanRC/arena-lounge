@@ -18,6 +18,7 @@ import {
   type ConnectFourGameState
 } from '../../engine/connectfour'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { createConnectFourView, type C4Action } from '../views/connectfour3d'
 import { WIN_DRAW, WIN_NONE, type GameContext, type SeatNo, type TableGame } from './types'
@@ -29,12 +30,12 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
 ]
 
 const IMG = {
-  button: 'images/ui/button.png',
-  yellow: 'images/ui/disc-yellow.png',
-  red: 'images/ui/disc-red.png',
-  hole: 'images/ui/hole.png',
-  ring: 'images/ui/ring.png'
-}
+  button: 'button',
+  yellow: 'disc-yellow',
+  red: 'disc-red',
+  hole: 'hole',
+  ring: 'ring'
+} as const
 const CELL = 40
 const CELL_GAP = 4
 
@@ -117,10 +118,10 @@ function Cell(props: { key?: string; v: number; highlight: boolean }) {
   return (
     <UiEntity
       uiTransform={{ width: CELL, height: CELL, margin: CELL_GAP / 2, justifyContent: 'center', alignItems: 'center' }}
-      uiBackground={{ texture: { src: props.v === 0 ? IMG.hole : props.v === 1 ? IMG.yellow : IMG.red }, textureMode: 'stretch' }}
+      uiBackground={uiSprite(props.v === 0 ? IMG.hole : props.v === 1 ? IMG.yellow : IMG.red)}
     >
       {props.highlight && (
-        <UiEntity uiTransform={{ width: CELL, height: CELL }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch' }} />
+        <UiEntity uiTransform={{ width: CELL, height: CELL }} uiBackground={uiSprite(IMG.ring)} />
       )}
     </UiEntity>
   )
@@ -169,12 +170,12 @@ function DropStrip(props: { state: ConnectFourGameState; ctx: GameContext }) {
       <UiEntity
         key={`d${c}`}
         uiTransform={{ width: 70, height: 76, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block', opacity: playable ? 1 : 0.35 }}
-        uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.boardBg }}
+        uiBackground={uiSprite(IMG.button, UI.boardBg)}
         onMouseDown={() => {
           if (playable) ctx.act({ col: c } as C4Action)
         }}
       >
-        <UiEntity uiTransform={{ width: 46, height: 46 }} uiBackground={{ texture: { src: sprite }, textureMode: 'stretch' }} />
+        <UiEntity uiTransform={{ width: 46, height: 46 }} uiBackground={uiSprite(sprite)} />
       </UiEntity>
     )
   }

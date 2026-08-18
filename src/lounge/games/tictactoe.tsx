@@ -7,6 +7,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getValidMoves, selectBotMove, type Mark, type TTTBoard, type TTTGameState } from '../../engine/tictactoe'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { TTT_COLORS, createTicTacToeView, type TTTAction } from '../views/tictactoe3d'
@@ -16,7 +17,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { x: 'images/ui/mark-x.png', o: 'images/ui/mark-o.png' }
+const IMG = { x: 'mark-x', o: 'mark-o' } as const
 
 interface Wire {
   b: string // 9 chars: X, O or .
@@ -75,7 +76,7 @@ function Board(props: { state: TTTGameState; ctx: GameContext; phone: boolean })
           }}
         >
           {v !== null && (
-            <UiEntity uiTransform={{ width: cell - 22, height: cell - 22 }} uiBackground={{ texture: { src: v === 'X' ? IMG.x : IMG.o }, textureMode: 'stretch', color: v === 'X' ? TTT_COLORS[0] : TTT_COLORS[1] }} />
+            <UiEntity uiTransform={{ width: cell - 22, height: cell - 22 }} uiBackground={uiSprite(v === 'X' ? IMG.x : IMG.o, v === 'X' ? TTT_COLORS[0] : TTT_COLORS[1])} />
           )}
         </UiEntity>
       )

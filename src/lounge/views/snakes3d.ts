@@ -5,6 +5,7 @@
  */
 import { EasingFunction, Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import type { SnakesLaddersGameState } from '../../engine/snakesladders'
 import { squareToCoords } from '../../engine/snakesladders'
 import type { PlayerColor } from '../../engine/types'
@@ -22,7 +23,7 @@ const HALF_T = 0.02
 const PIECE = CELL * 0.62
 
 export const SNAKES_COLORS: [PlayerColor, PlayerColor] = ['red', 'blue']
-export const SNAKES_SPRITES: [string, string] = ['images/ui/disc-red.png', 'images/ui/disc-blue.png']
+export const SNAKES_SPRITES: [SpriteName, SpriteName] = ['disc-red', 'disc-blue']
 
 /** Table-local centre of a square (0 = off board, below the first row); the two pieces sit side by side. */
 export function squareLocal(square: number, side: 0 | 1): Vector3 {
@@ -33,8 +34,9 @@ export function squareLocal(square: number, side: 0 | 1): Vector3 {
 }
 
 function pieceMaterial(e: Entity, side: 0 | 1): void {
+  spriteBox(e, SNAKES_SPRITES[side])
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: SNAKES_SPRITES[side] }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,
@@ -67,7 +69,6 @@ export function createSnakesView(root: Entity, onTap: () => void): View3DHandle 
     for (let i = 0; i < 2; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: squareLocal(0, i as 0 | 1), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.012 + i * 0.004) })
-      MeshRenderer.setBox(e)
       pieceMaterial(e, i as 0 | 1)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

@@ -10,6 +10,7 @@
  */
 import { Billboard, BillboardMode, EasingFunction, Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import type { LudoGameState } from '../../engine/ludo'
 import { positionToXY } from '../../engine/ludo'
 import type { PlayerColor } from '../../engine/types'
@@ -28,7 +29,7 @@ const PIECE_H = 0.022
 
 /** Lounge side order: side 1 red, 2 green (opposite), 3 blue, 4 yellow. */
 export const LUDO_COLORS: PlayerColor[] = ['red', 'green', 'blue', 'yellow']
-export const LUDO_SPRITES: string[] = ['images/ui/disc-red.png', 'images/ui/disc-green.png', 'images/ui/disc-blue.png', 'images/ui/disc-yellow.png']
+export const LUDO_SPRITES: SpriteName[] = ['disc-red', 'disc-green', 'disc-blue', 'disc-yellow']
 
 /** Table-local centre of a board cell (row 0 at the far edge from seat A, col 0 on its left). */
 export function cellLocal(row: number, col: number, jitter = 0): Vector3 {
@@ -36,8 +37,9 @@ export function cellLocal(row: number, col: number, jitter = 0): Vector3 {
 }
 
 function pieceMaterial(e: Entity, color: PlayerColor, glow: boolean): void {
+  spriteBox(e, LUDO_SPRITES[LUDO_COLORS.indexOf(color)])
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: LUDO_SPRITES[LUDO_COLORS.indexOf(color)] }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,
@@ -72,7 +74,6 @@ export function createLudoView(root: Entity, onTap: (row: number, col: number) =
     for (let i = 0; i < 16; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE_H + (i % 4) * 0.002, PIECE) })
-      MeshRenderer.setBox(e)
       pieceMaterial(e, LUDO_COLORS[Math.floor(i / 4)], false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

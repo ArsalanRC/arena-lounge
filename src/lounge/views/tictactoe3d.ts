@@ -3,8 +3,9 @@
  * and one pooled thin box per cell whose alpha-tested texture switches
  * between the X and O sprites. Visible from both sides.
  */
-import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
+import { Entity, Material, MaterialTransparencyMode, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox } from '../atlas'
 import type { TTTGameState } from '../../engine/tictactoe'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -29,8 +30,9 @@ function cellLocal(i: number): Vector3 {
 
 function markMaterial(e: Entity, mark: 'X' | 'O', glow: boolean): void {
   const tint = mark === 'X' ? TTT_COLORS[0] : TTT_COLORS[1]
+  spriteBox(e, mark === 'X' ? 'mark-x' : 'mark-o')
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: mark === 'X' ? 'images/ui/mark-x.png' : 'images/ui/mark-o.png' }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     albedoColor: tint,
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
@@ -63,7 +65,6 @@ export function createTicTacToeView(root: Entity, onAction: (a: TTTAction) => vo
     for (let i = 0; i < N * N; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.72, CELL * 0.72, HALF_T * 2 + 0.01) })
-      MeshRenderer.setBox(e)
       markMaterial(e, 'X', false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

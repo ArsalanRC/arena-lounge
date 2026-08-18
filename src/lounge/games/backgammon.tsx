@@ -25,6 +25,7 @@ import {
   type BackgammonPoint
 } from '../../engine/backgammon'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { BG_SPRITES, bgSelection, createBackgammonView, pointColumn, setBgSelection, type BgAction, type BgTarget } from '../views/backgammon3d'
@@ -34,7 +35,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { button: 'images/ui/button.png', ring: 'images/ui/ring.png' }
+const IMG = { button: 'button', ring: 'ring' } as const
 const FELT = Color4.fromHexString('#5a3e2bff')
 const PT_LIGHT = Color4.fromHexString('#e8d9bdff')
 const PT_DARK = Color4.fromHexString('#8f2f2aff')
@@ -134,8 +135,8 @@ function Stack(props: { pt: BackgammonPoint; size: number; top: boolean; highlig
   const discs: ReactEcs.JSX.Element[] = []
   for (let k = 0; k < shown; k++) {
     discs.push(
-      <UiEntity key={`d${k}`} uiTransform={{ width: size - 4, height: size - 4, margin: 0 }} uiBackground={{ texture: { src: pt.owner === 'white' ? BG_SPRITES[0] : BG_SPRITES[1] }, textureMode: 'stretch' }}>
-        {props.highlight && k === shown - 1 && <UiEntity uiTransform={{ width: size - 4, height: size - 4 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
+      <UiEntity key={`d${k}`} uiTransform={{ width: size - 4, height: size - 4, margin: 0 }} uiBackground={uiSprite(pt.owner === 'white' ? BG_SPRITES[0] : BG_SPRITES[1])}>
+        {props.highlight && k === shown - 1 && <UiEntity uiTransform={{ width: size - 4, height: size - 4 }} uiBackground={uiSprite(IMG.ring, UI.accentTint)} />}
       </UiEntity>
     )
   }
@@ -191,7 +192,7 @@ function Board(props: { state: BackgammonGameState; ctx: GameContext; phone: boo
       uiBackground={{ color: sel === 'bar' ? UI.accent : Color4.fromHexString('#2b1e14ff') }}
       onMouseDown={() => tap('bar')}
     >
-      {barCount > 0 && <UiEntity uiTransform={{ width: barW - 6, height: barW - 6 }} uiBackground={{ texture: { src: me === 'white' ? BG_SPRITES[0] : BG_SPRITES[1] }, textureMode: 'stretch' }} />}
+      {barCount > 0 && <UiEntity uiTransform={{ width: barW - 6, height: barW - 6 }} uiBackground={uiSprite(me === 'white' ? BG_SPRITES[0] : BG_SPRITES[1])} />}
       {barCount > 1 && <UiEntity uiTransform={{ width: barW, height: 18 }} uiText={{ value: `${barCount}`, fontSize: 14, color: UI.text, textAlign: 'middle-center' }} />}
     </UiEntity>
   )
@@ -250,7 +251,7 @@ function Controls(props: { state: BackgammonGameState; ctx: GameContext; phone: 
       {props.ctx.myTurn && !rolled && !finished && (
         <UiEntity
           uiTransform={{ width: 220, height: 52, margin: { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
+          uiBackground={uiSprite(IMG.button, UI.accent)}
           uiText={{ value: g.rollDice, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
           onMouseDown={() => props.ctx.act({ roll: [d6(), d6()] } as BgAction)}
         />

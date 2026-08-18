@@ -17,15 +17,17 @@
  *  - Help    "How to play": one tab per game, rules overview in the chosen
  *            language, lounge tips, language picker behind a toggle
  *
- * Visuals come from pre-shaded sprites in images/ui (tools/gen-textures.py)
- * because mobile has no borderRadius / nine-slice; every panel and button is
- * a stretched rounded texture. React hooks are not available in React-ECS;
- * the renderer runs every frame and reads module state + synced components.
+ * Visuals come from pre-shaded sprites packed into one atlas (see atlas.ts,
+ * built by tools/gen-atlas.py) because mobile has no borderRadius /
+ * nine-slice; every panel and button is a stretched rounded texture.
+ * React hooks are not available in React-ECS; the renderer runs every frame
+ * and reads module state + synced components.
  */
 import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
+import { uiSprite, type SpriteName } from './atlas'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { board, leaderboardEnabled, refreshLeaderboard } from './leaderboard'
@@ -78,11 +80,6 @@ function phone(): boolean {
 
 // ---------------------------------------------------------------- tokens
 
-const IMG = {
-  panel: 'images/ui/panel.png',
-  pill: 'images/ui/pill.png',
-  button: 'images/ui/button.png'
-}
 const WHITE = Color4.White()
 const BTN_H = 52
 const T = { title: 26, body: 20, small: 17, status: 22 }
@@ -126,7 +123,7 @@ function Btn(props: {
         alignItems: 'center',
         pointerFilter: 'block'
       }}
-      uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: props.color ?? (props.quiet ? UI.panelSoft : UI.accent) }}
+      uiBackground={uiSprite('button', props.color ?? (props.quiet ? UI.panelSoft : UI.accent))}
       uiText={{ value: props.label, fontSize: props.fontSize ?? 20, color: props.textColor ?? (props.quiet ? UI.muted : UI.text), textAlign: 'middle-center' }}
       onMouseDown={props.onClick}
     />
@@ -155,9 +152,9 @@ function Para(props: { value: string; size?: number; color?: Color4; margin?: Ma
   )
 }
 
-function Chip(props: { key?: string; sprite: string; label: string; reverse?: boolean; tint?: Color4; dim?: boolean; small?: boolean }) {
+function Chip(props: { key?: string; sprite: SpriteName; label: string; reverse?: boolean; tint?: Color4; dim?: boolean; small?: boolean }) {
   const d = props.small ? 20 : 26
-  const disc = <UiEntity uiTransform={{ width: d, height: d, margin: props.reverse ? { left: 6 } : { right: 6 } }} uiBackground={{ texture: { src: props.sprite }, textureMode: 'stretch', color: props.tint ?? WHITE }} />
+  const disc = <UiEntity uiTransform={{ width: d, height: d, margin: props.reverse ? { left: 6 } : { right: 6 } }} uiBackground={uiSprite(props.sprite, props.tint ?? WHITE)} />
   const label = <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: props.label, fontSize: props.small ? 15 : 19, color: props.dim ? UI.muted : UI.text }} />
   return (
     <UiEntity uiTransform={{ width: 'auto', height: 30, flexDirection: 'row', alignItems: 'center' }}>
@@ -180,7 +177,7 @@ function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]
   return (
     <UiEntity
       uiTransform={{ ...props.place, width: props.width, height: 'auto', padding: props.padding ?? 16, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
-      uiBackground={{ texture: { src: IMG.panel }, textureMode: 'stretch' }}
+      uiBackground={uiSprite('panel')}
     >
       {props.children}
     </UiEntity>
@@ -195,7 +192,7 @@ function Segmented(props: { options: Array<{ key: string; label: string }>; acti
         <UiEntity
           key={o.key}
           uiTransform={{ width: props.width ?? 92, height: 40, margin: 2, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: props.active === o.key ? UI.accent : UI.panelSoft }}
+          uiBackground={uiSprite('button', props.active === o.key ? UI.accent : UI.panelSoft)}
           uiText={{ value: o.label, fontSize: props.fontSize ?? 16, color: props.active === o.key ? UI.text : UI.muted, textAlign: 'middle-center' }}
           onMouseDown={() => props.onPick(o.key)}
         />
@@ -256,7 +253,7 @@ function Hint() {
   return (
     <UiEntity
       uiTransform={{ positionType: 'absolute', position: { top: 16, left: '50%' }, margin: { left: -260 }, width: 520, height: 52, justifyContent: 'center', alignItems: 'center' }}
-      uiBackground={{ texture: { src: IMG.pill }, textureMode: 'stretch', color: WHITE }}
+      uiBackground={uiSprite('pill', WHITE)}
       uiText={{ value, fontSize: T.body, color: UI.muted, textAlign: 'middle-center' }}
     />
   )
@@ -268,7 +265,7 @@ function Toast() {
   return (
     <UiEntity
       uiTransform={{ positionType: 'absolute', position: { top, left: '50%' }, margin: { left: -260 }, width: 520, height: 56, justifyContent: 'center', alignItems: 'center' }}
-      uiBackground={{ texture: { src: IMG.pill }, textureMode: 'stretch', color: UI.accentTint }}
+      uiBackground={uiSprite('pill', UI.accentTint)}
       uiText={{ value: local.toast.text, fontSize: T.body, color: Color4.Black(), textAlign: 'middle-center' }}
     />
   )
@@ -684,7 +681,7 @@ function HelpPanel() {
               <UiEntity
                 key={l.code}
                 uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 38, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-                uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: uiLang.code === l.code ? UI.accent : UI.panelSoft }}
+                uiBackground={uiSprite('button', uiLang.code === l.code ? UI.accent : UI.panelSoft)}
                 uiText={{ value: l.name, fontSize: 16, color: UI.text, textAlign: 'middle-center' }}
                 onMouseDown={() => ((uiLang.code = l.code), (local.langPickerOpen = false))}
               />

@@ -27,6 +27,7 @@ import {
   type GameResult
 } from '../../engine/chess'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { CHESS_SEAT_SPRITES, chessSelection, chessSprite, createChessView, setChessSelection, type ChessAction } from '../views/chess3d'
@@ -37,7 +38,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const N = 8
-const IMG = { ring: 'images/ui/ring.png', dot: 'images/ui/disc.png' }
+const IMG = { ring: 'ring', dot: 'disc' } as const
 const LIGHT = Color4.fromHexString('#e8d9bdff')
 const DARK = Color4.fromHexString('#6b4a35ff')
 const PIECE_CHARS = 'KQRBNP'
@@ -190,12 +191,12 @@ function Board(props: { state: ChessGameState; ctx: GameContext; phone: boolean 
           }}
         >
           {p !== null && (
-            <UiEntity uiTransform={{ width: cell - 4, height: cell - 4, justifyContent: 'center', alignItems: 'center' }} uiBackground={{ texture: { src: chessSprite(p) }, textureMode: 'stretch' }}>
-              {movable.has(sq) && sel === undefined && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
-              {targets.has(sq) && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.danger }} />}
+            <UiEntity uiTransform={{ width: cell - 4, height: cell - 4, justifyContent: 'center', alignItems: 'center' }} uiBackground={uiSprite(chessSprite(p))}>
+              {movable.has(sq) && sel === undefined && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={uiSprite(IMG.ring, UI.accentTint)} />}
+              {targets.has(sq) && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={uiSprite(IMG.ring, UI.danger)} />}
             </UiEntity>
           )}
-          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={{ texture: { src: IMG.dot }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.75) }} />}
+          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={uiSprite(IMG.dot, Color4.create(1, 1, 1, 0.75))} />}
         </UiEntity>
       )
     }
