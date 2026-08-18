@@ -11,7 +11,7 @@ token = open(sys.argv[2]).read().strip()
 req = urllib.request.Request(
     "https://api.supabase.com/v1/projects/vpizpihqwkmxtidqduos/database/query",
     data=json.dumps({"query": sql}).encode(), method="POST",
-    headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+    headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "User-Agent": "arena-lounge-tools/1.0"})
 try:
     with urllib.request.urlopen(req) as r:
         print(r.status, r.read().decode()[:2000])

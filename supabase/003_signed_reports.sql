@@ -111,7 +111,8 @@ begin
 end;
 $$;
 
-revoke all on function public.apply_report(bigint) from public;
-revoke all on function public.submit_report(text, text, text, text, text, text[]) from public;
+-- Supabase's default privileges grant execute to anon + authenticated on new public functions: take it back
+revoke all on function public.apply_report(bigint) from public, anon, authenticated;
+revoke all on function public.submit_report(text, text, text, text, text, text[]) from public, anon, authenticated;
 -- the public key loses the direct, unverified path; the Edge Function reaches submit_report as service role
 revoke execute on function public.record_result(text, text, text, text) from anon, authenticated;
