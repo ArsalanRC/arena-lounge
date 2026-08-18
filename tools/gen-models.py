@@ -2,6 +2,8 @@
 """Generate the scene's GLB models (pure Python, no Blender):
 
   models/tower.glb   the twisted tower over the plaza: a diagrid of 12 + 12
+                     (models/tower-palace.glb: same geometry, marble slabs + brass posts,
+                     used when config INTERIOR = 'palace')
                      box-section ribs on opposite helices (a woven, tapering
                      hyperboloid), two annular slabs (game room y=8, rooftop
                      y=16) with an open oculus over the plaza tree, railings
@@ -41,15 +43,18 @@ CIRC_SEGS = 48
 # ------------------------------------------------------------------ mesh builder
 class Mesh:
     def __init__(self):
-        self.pos, self.nor, self.idx = [], [], []
+        self.pos, self.nor, self.idx, self.uv = [], [], [], []
+        self.textured = False   # set once any quad carries UVs; then TEXCOORD_0 is written
 
-    def quad(self, a, b, c, d):
-        """Flat quad a-b-c-d (counter-clockwise seen from the outside)."""
+    def quad(self, a, b, c, d, uv=None):
+        """Flat quad a-b-c-d (counter-clockwise seen from the outside); uv = four (u, v) pairs, optional."""
         n = normal(a, b, c)
         base = len(self.pos)
-        for p in (a, b, c, d):
+        for k, p in enumerate((a, b, c, d)):
             self.pos.append(p)
             self.nor.append(n)
+            self.uv.append(uv[k] if uv else (0.0, 0.0))
+        if uv: self.textured = True
         self.idx += [base, base + 1, base + 2, base, base + 2, base + 3]
 
 def sub(a, b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
@@ -103,18 +108,25 @@ def ring_frames(y, r):
         out.append((c, tan, rad))
     return out
 
-def annulus(mesh, y, r_in, r_out, th):
-    """Slab between r_in and r_out, top face at y, thickness th downwards."""
+def annulus(mesh, y, r_in, r_out, th, uv_period=None, under=None):
+    """Slab between r_in and r_out, top face at y, thickness th downwards.
+    With uv_period T (metres per texture repeat) the top/bottom faces get planar UVs (x/T, z/T)
+    and the bands cylindrical ones (arc/T, y/T), so a tiling texture reads undistorted.
+    `under`: optional second Mesh that receives the bottom faces (a ceiling material of its own)."""
     y0, y1 = y - th, y
+    T = uv_period
+    below = under if under is not None else mesh
     for i in range(CIRC_SEGS):
         a0, a1 = 2 * math.pi * i / CIRC_SEGS, 2 * math.pi * (i + 1) / CIRC_SEGS
         ci = [(r_in * math.cos(a0), 0, r_in * math.sin(a0)), (r_in * math.cos(a1), 0, r_in * math.sin(a1))]
         co = [(r_out * math.cos(a0), 0, r_out * math.sin(a0)), (r_out * math.cos(a1), 0, r_out * math.sin(a1))]
         at = lambda p, yy: (p[0], yy, p[2])
-        mesh.quad(at(ci[0], y1), at(ci[1], y1), at(co[1], y1), at(co[0], y1))   # top (+y)
-        mesh.quad(at(co[0], y0), at(co[1], y0), at(ci[1], y0), at(ci[0], y0))   # bottom (-y)
-        mesh.quad(at(co[0], y1), at(co[1], y1), at(co[1], y0), at(co[0], y0))   # outer band
-        mesh.quad(at(ci[1], y1), at(ci[0], y1), at(ci[0], y0), at(ci[1], y0))   # inner band
+        pl = (lambda p: (p[0] / T, p[2] / T)) if T else None
+        cyl = (lambda a, r, yy: (a * r / T, yy / T)) if T else None
+        mesh.quad(at(ci[0], y1), at(ci[1], y1), at(co[1], y1), at(co[0], y1), [pl(ci[0]), pl(ci[1]), pl(co[1]), pl(co[0])] if T else None)   # top (+y)
+        below.quad(at(co[0], y0), at(co[1], y0), at(ci[1], y0), at(ci[0], y0), [pl(co[0]), pl(co[1]), pl(ci[1]), pl(ci[0])] if T else None)   # bottom (-y)
+        mesh.quad(at(co[0], y1), at(co[1], y1), at(co[1], y0), at(co[0], y0), [cyl(a0, r_out, y1), cyl(a1, r_out, y1), cyl(a1, r_out, y0), cyl(a0, r_out, y0)] if T else None)   # outer band
+        mesh.quad(at(ci[1], y1), at(ci[0], y1), at(ci[0], y0), at(ci[1], y0), [cyl(a1, r_in, y1), cyl(a0, r_in, y1), cyl(a0, r_in, y0), cyl(a1, r_in, y0)] if T else None)   # inner band
 
 def band(mesh, y0, y1, r):
     """Vertical cylinder wall (railing collider)."""
@@ -137,6 +149,10 @@ for direction in (1, -1):
 floors = Mesh()
 for (y, r_in, r_out, th) in FLOORS:
     annulus(floors, y, r_in, r_out, th)
+# palace slabs: marble on top and on the bands (planar / cylindrical UVs, 4 m repeat), plain cream plaster underneath (ceilings)
+floors_marble, floors_under = Mesh(), Mesh()
+for (y, r_in, r_out, th) in FLOORS:
+    annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_under)
 
 rings = Mesh()
 posts = Mesh()
@@ -202,15 +218,20 @@ def pack(mesh):
     mx = [max(v[k] for v in mesh.pos) for k in range(3)]
     return p, n, i, mn, mx, (5123 if small else 5125)
 
-def write_glb(out, parts, materials):
-    """parts: list of (node name, Mesh, material index). Names ending in _collider are DCL colliders."""
+def write_glb(out, parts, materials, images=None):
+    """parts: list of (node name, Mesh, material index). Names ending in _collider are DCL colliders.
+    images: optional list of texture URIs relative to the GLB (one glTF texture each, repeat
+    sampler); materials reference them as {"baseColorTexture": {"index": k}}."""
     bin_data = bytearray()
     bufferViews, accessors, meshes, nodes = [], [], [], []
     tris = coll_tris = 0
     for name, mesh, mat in parts:
         p, n, i, mn, mx, itype = pack(mesh)
         views = []
-        for blob, target in ((p, 34962), (n, 34962), (i, 34963)):
+        blobs = [(p, 34962), (n, 34962), (i, 34963)]
+        if mesh.textured:
+            blobs.append((b''.join(struct.pack('<ff', u, v) for u, v in mesh.uv), 34962))
+        for blob, target in blobs:
             while len(bin_data) % 4: bin_data += b'\0'
             views.append(len(bufferViews))
             bufferViews.append({"buffer": 0, "byteOffset": len(bin_data), "byteLength": len(blob), "target": target})
@@ -218,7 +239,11 @@ def write_glb(out, parts, materials):
         ap = len(accessors); accessors.append({"bufferView": views[0], "componentType": 5126, "count": len(mesh.pos), "type": "VEC3", "min": mn, "max": mx})
         an = len(accessors); accessors.append({"bufferView": views[1], "componentType": 5126, "count": len(mesh.nor), "type": "VEC3"})
         ai = len(accessors); accessors.append({"bufferView": views[2], "componentType": itype, "count": len(mesh.idx), "type": "SCALAR"})
-        meshes.append({"name": name, "primitives": [{"attributes": {"POSITION": ap, "NORMAL": an}, "indices": ai, "material": mat, "mode": 4}]})
+        attrs = {"POSITION": ap, "NORMAL": an}
+        if mesh.textured:
+            at = len(accessors); accessors.append({"bufferView": views[3], "componentType": 5126, "count": len(mesh.uv), "type": "VEC2"})
+            attrs["TEXCOORD_0"] = at
+        meshes.append({"name": name, "primitives": [{"attributes": attrs, "indices": ai, "material": mat, "mode": 4}]})
         nodes.append({"name": name, "mesh": len(meshes) - 1})
         if name.endswith("_collider"): coll_tris += len(mesh.idx) // 3
         else: tris += len(mesh.idx) // 3
@@ -234,6 +259,10 @@ def write_glb(out, parts, materials):
         "bufferViews": bufferViews,
         "buffers": [{"byteLength": len(bin_data)}],
     }
+    if images:
+        gltf["images"] = [{"uri": u} for u in images]
+        gltf["samplers"] = [{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}]
+        gltf["textures"] = [{"sampler": 0, "source": k} for k in range(len(images))]
     js = json.dumps(gltf, separators=(',', ':')).encode()
     while len(js) % 4: js += b' '
     glb = struct.pack('<III', 0x46546C67, 2, 12 + 8 + len(js) + 8 + len(bin_data))
@@ -250,6 +279,17 @@ TOWER_MATERIALS = [
     {"name": "collider", "pbrMetallicRoughness": {"baseColorFactor": [1, 0, 1, 1]}},
 ]
 write_glb('models/tower.glb', [("ribs", ribs, 0), ("floors", floors, 1), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], TOWER_MATERIALS)
+# palace variant (config INTERIOR = 'palace'): the same tower with polished marble slabs
+# (models/palace/floor.png from tools/gen-marble.py, planar 4 m tiles) and brass railing posts
+PALACE_TOWER_MATERIALS = [
+    TOWER_MATERIALS[0],
+    {"name": "marble", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.35}},
+    TOWER_MATERIALS[2],
+    {"name": "brass", "pbrMetallicRoughness": {"baseColorFactor": [0.85, 0.66, 0.30, 1], "metallicFactor": 0.8, "roughnessFactor": 0.35}},
+    TOWER_MATERIALS[4],
+    {"name": "plaster", "pbrMetallicRoughness": {"baseColorFactor": [0.90, 0.87, 0.81, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}},
+]
+write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png'])
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])

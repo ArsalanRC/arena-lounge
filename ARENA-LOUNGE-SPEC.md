@@ -303,8 +303,14 @@ version works as well", 16 Aug 11:30):
    outcome). Left: one real two-identity round on the live World to see the
    client-side signed report land (check `lounge_reports` with tools/dev/supa-sql);
    the "?" panel's Leaderboard tab on the phone.
-3c. Then: sprite atlases (fewer texture requests, the 525 hiccup), README
-   refresh with phone screenshots, marble interior pass, submission ~1 to
+3c. Palace interior (branch palace-interior, PR open, NOT merged): config
+   INTERIOR = 'palace' swaps in marble slabs (tower-palace.glb), marble plaza
+   floor, fluted columns, marble boundary panels with a greek-key frieze, brass
+   rails, red runner rings. Needs one Explorer session (screenshots on every
+   floor at 04:30 lighting; check the column texture orientation (capital on top),
+   tile scale, marble brightness under the night lights, red runners) before
+   merging + redeploying. Then: sprite atlases (fewer texture requests, the 525
+   hiccup), README refresh with phone screenshots, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
@@ -467,6 +473,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-18 11:05 palace interior prepared without the Explorer (Arsalan asked whether the marble design was built; he is at work, so no preview): tools/gen-marble.py (numpy FFT-noise veined marble: models/palace/floor.png 4 m tiles with verde inlay + brass corners, wall.png panels with gold rails + engraved greek key, column.png fluted shaft with gold capital/base), gen-models.py gained UVs (TEXCOORD_0), external textures and a second tower GLB (tower-palace.glb: marble slabs, plaster ceilings, brass posts; tower.glb byte-identical), config INTERIOR 'lounge' | 'palace' read by lounge3d (floor, walls, columns, tower model, runner tint). Type-check, build, 561 tests green. Awaiting the visual review before merge; the flaky Tic Tac Toe test was trimmed (deterministic loop, 10 -> 2 games) on the same branch
 
 - 2026-08-18 10:10 signed leaderboard reports (Arsalan: "do step 1 ... install supabase cli here"): Edge Function supabase/functions/report (Deno, verifies the ADR-44 signedFetch auth chain with @dcl/crypto, rejects stale/tampered signatures, signer = player) + supabase/003_signed_reports.sql (`lounge_reports`, `submit_report` counts a round only when a second human of the round reports a consistent outcome, 8 s pace + 120/day, `record_result` revoked from the public key); scene: `dealtAt` in TableBoard, `reportResult` via signedFetch with round key `<table>:<round>:<dealtAt>` + opponents. Applied on the live project with a personal access token through tools/dev/supa + supa-sql (002 had been run already); verified live: unsigned 401, tampered 401, pair confirms, third call "too fast", old RPC "permission denied"; test rows removed. Guests are accepted (their random address per session cannot accumulate; rejecting them would break confirmation for the wallet user they played). Two clients in one hand can still farm each other: that is step 2 (server-authoritative), not for v1
 

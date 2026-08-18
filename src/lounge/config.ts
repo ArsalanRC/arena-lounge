@@ -205,6 +205,17 @@ export const LEADERBOARD = {
 
 export const DEBUG_MOBILE_UI = false
 
+/**
+ * Interior finish of the tower and the lounge floor.
+ *   'lounge'  the original warm wood + parquet look
+ *   'palace'  royal marble: veined cream tiles with verde inlay and brass corners on every
+ *             slab and on the plaza floor, fluted white marble columns with gold capitals,
+ *             marble boundary panels with an engraved greek-key frieze, red runner rings,
+ *             brass railing posts (models/tower-palace.glb + models/palace/*.png from
+ *             tools/gen-marble.py). Same triangle count; three extra textures.
+ */
+export const INTERIOR: 'lounge' | 'palace' = 'palace'
+
 // ---------------------------------------------------------------- palette
 export const PALETTE = {
   floor: Color4.fromHexString('#2b2320ff'),
@@ -225,7 +236,10 @@ export const PALETTE = {
   pot: Color4.fromHexString('#8b5a3cff'),
   lawn: Color4.fromHexString('#4a7d3fff'),
   path: Color4.fromHexString('#b8a284ff'),
-  column: Color4.fromHexString('#6b4a33ff')
+  column: Color4.fromHexString('#6b4a33ff'),
+  /** Palace finish: brass rails, the red of the runner rings. */
+  brass: Color4.fromHexString('#d9a84cff'),
+  runnerRed: Color4.fromHexString('#8e1f2aff')
 }
 
 export const EMISSIVE_YELLOW = Color3.fromHexString('#f5c518')
