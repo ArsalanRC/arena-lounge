@@ -347,7 +347,8 @@ export function buildLounge(): void {
     // upper floors get tighter rugs (the annular slabs need a walkway inside and outside the
     // tables), except under a four-seat table, which needs room on every side
     const fourSeats = (getGame(z.gameId).seats ?? 2) > 2
-    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? 6.8 : z.floor > 0 && !fourSeats ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
+    // rug sizes keep clear of the walking ring inside the seats: 6.8 m for a ground pair, 5.4 m for a pair on a slab
+    if (BUILT_GAMES.includes(z.gameId)) rug(z.position, z.tables > 1 ? (z.floor > 0 ? 5.4 : 6.8) : z.floor > 0 && !fourSeats ? 4.4 : 5.6, z.rug, z.position.y + 0.012, z.banner)
     zoneBanner(z)
   }
   const ground = ZONES.filter((z) => z.floor === 0)
@@ -404,17 +405,18 @@ function buildTower(): void {
   // flanking the entrance path just inside the portal
   for (const deg of [22, 158, 202, 338]) {
     const t = (deg * Math.PI) / 180
-    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 5.4, 0, PLAZA.z + Math.cos(t) * 5.4)
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 4.6, 0, PLAZA.z + Math.cos(t) * 4.6)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true)
   prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
 
-  // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture
+  // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture and seats,
+  // 2 m+ wide (path-a inner/outer 0.705: ground 5.4..7.6, game room 5.2..7.4, rooftop 4.65..6.6; path-b 0.60: sky room 3.4..5.7)
   pathRing(FLOORS[0].y, 7.6, 'images/path-a.png')
-  pathRing(FLOORS[1].y, 7.0, 'images/path-a.png')
-  pathRing(FLOORS[2].y, 5.2, 'images/path-b.png')
-  pathRing(FLOORS[3].y, 6.0, 'images/path-a.png')
+  pathRing(FLOORS[1].y, 7.4, 'images/path-a.png')
+  pathRing(FLOORS[2].y, 5.7, 'images/path-b.png')
+  pathRing(FLOORS[3].y, 6.6, 'images/path-a.png')
 
   // columns carrying the slabs, between the corners so they never block a table
   const columnAt = (deg: number, r: number, y0: number, y1: number, thick: number) => {
@@ -436,7 +438,7 @@ function buildTower(): void {
   for (const deg of [45, 120, 225]) columnAt(deg, 9.5, 16, 24, 0.5)
   for (const deg of [90, 270]) {
     const t = (deg * Math.PI) / 180
-    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 6.2, y2, PLAZA.z + Math.cos(t) * 6.2)
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.0, y2, PLAZA.z + Math.cos(t) * 7.0)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
