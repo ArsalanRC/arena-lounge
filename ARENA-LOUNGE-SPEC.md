@@ -312,9 +312,9 @@ version works as well", 16 Aug 11:30):
 3d. (done 18 Aug 21:20) two tables per game, wider rings, palace rooftop, music,
    suggestion box. Next: the mobile pass on the live World (controller bar with the
    new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
-   on the phone keyboard, music toggle), then (sprite atlas done 21:50)
-   ceiling medallion artwork (PD fresco, needs his OK to download), elevator shafts /
-   kiosk / directory / gateway still wood, README refresh with phone screenshots, submission ~1 to
+   on the phone keyboard, music toggle). FIRST THING TOMORROW: `pnpm deploy:world`
+   for the palace-finish merge (fresco ceilings, ornate props, card padding), his signature.
+   Then README refresh with phone screenshots, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
@@ -477,6 +477,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-18 22:35 palace finish (Arsalan before sleeping: "download the fresco and use it, make everything the theme, UI popup buttons at the edge, the games board still wooden"): models/palace/fresco.jpg = 2048² crop of Wilfredor's CC0 photo of Pozzo's Sant'Ignazio ceiling (models/palace/CREDITS.md) on the ground-floor and sky-room ceilings (planar over the whole ring, oculus cuts the centre; annulus `under_span`), coffers stay on the game-room ceiling; palace variants of board (marble frame, brass moulding + rosettes, pediment, finial), kiosk, shaft (brass, warm glow), gateway, lamp, planter, plazatree; brass banner poles; lounge3d `finish(name)` picks the variant. UI: table card 600/540 wide with padding 18, "Take a seat" + "Play the house bot" on one row, "?" + "Not now" on a second (buttons no longer touch the panel edge; checked on the phone canvas with DEBUG_MOBILE_UI, seated controller bar checked too). Merged to main, NOT deployed (needs his signature in the morning). Explorer + preview closed afterwards
 
 - 2026-08-18 21:50 sprite atlas: tools/gen-atlas.py packs the 36 UI sprites (now sources in tools/sprites/, not deployed) into images/ui/atlas.png (1024x1024, 148 KB) + src/lounge/atlas.gen.ts; src/lounge/atlas.ts (spriteRect / spriteUvs / spritePlane / spriteBox / uiSprite, UV convention v = 1 at the top, verified in the preview: table card, controller chips + mini board, 3D discs of a live round vs the bot). All 14 game views and every UI background converted; `seatSprites` are SpriteName now. .dclignore also drops supabase/ and deno.lock from deployments. Purpose: textures were 29/33 of the client's budget and the 525 hiccup hit small texture fetches
 

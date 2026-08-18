@@ -318,9 +318,12 @@ function TableCard() {
   const state = bothTaken ? gameStateOf(t) : null
   const emptyTable = seated.length === 0
   const canSit = !full && !(t.seats > 2 && b.status === Status.Playing)
-  const W = 480
+  // wide enough for "Take a seat" + "Play the house bot" side by side inside the padding; "?" and
+  // "Not now" get their own row so nothing ever touches the panel edge (phone canvas included)
+  const W = phone() ? 600 : 540
+  const mainW = phone() ? 250 : 220
   return (
-    <Panel width={W} place={bottomCentre(W, 36)}>
+    <Panel width={W} place={bottomCentre(W, 36)} padding={18}>
       <Text value={`${tableTitle(t)}`} size={T.title} />
       <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
       {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
@@ -331,11 +334,15 @@ function TableCard() {
           <DifficultyPicker width={phone() ? 74 : 88} fontSize={16} />
         </Row>
       )}
-      <Row>
-        {canSit && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={220} />}
-        {emptyTable && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} />}
-        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
-        <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} />
+      {(canSit || emptyTable) && (
+        <Row height={58}>
+          {canSit && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={mainW} />}
+          {emptyTable && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} width={mainW} />}
+        </Row>
+      )}
+      <Row height={54}>
+        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={56} />
+        <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} width={160} />
       </Row>
     </Panel>
   )

@@ -108,14 +108,17 @@ def ring_frames(y, r):
         out.append((c, tan, rad))
     return out
 
-def annulus(mesh, y, r_in, r_out, th, uv_period=None, under=None):
+def annulus(mesh, y, r_in, r_out, th, uv_period=None, under=None, under_span=None):
     """Slab between r_in and r_out, top face at y, thickness th downwards.
     With uv_period T (metres per texture repeat) the top/bottom faces get planar UVs (x/T, z/T)
     and the bands cylindrical ones (arc/T, y/T), so a tiling texture reads undistorted.
-    `under`: optional second Mesh that receives the bottom faces (a ceiling material of its own)."""
+    `under`: optional second Mesh that receives the bottom faces (a ceiling material of its own);
+    `under_span`: if set, the bottom faces map one whole texture across a square of that side,
+    centred on the axis (u = x/span + 0.5): a single painting over the ceiling."""
     y0, y1 = y - th, y
     T = uv_period
     below = under if under is not None else mesh
+    plu = (lambda p: (p[0] / under_span + 0.5, p[2] / under_span + 0.5)) if under_span else None
     for i in range(CIRC_SEGS):
         a0, a1 = 2 * math.pi * i / CIRC_SEGS, 2 * math.pi * (i + 1) / CIRC_SEGS
         ci = [(r_in * math.cos(a0), 0, r_in * math.sin(a0)), (r_in * math.cos(a1), 0, r_in * math.sin(a1))]
@@ -124,7 +127,8 @@ def annulus(mesh, y, r_in, r_out, th, uv_period=None, under=None):
         pl = (lambda p: (p[0] / T, p[2] / T)) if T else None
         cyl = (lambda a, r, yy: (a * r / T, yy / T)) if T else None
         mesh.quad(at(ci[0], y1), at(ci[1], y1), at(co[1], y1), at(co[0], y1), [pl(ci[0]), pl(ci[1]), pl(co[1]), pl(co[0])] if T else None)   # top (+y)
-        below.quad(at(co[0], y0), at(co[1], y0), at(ci[1], y0), at(ci[0], y0), [pl(co[0]), pl(co[1]), pl(ci[1]), pl(ci[0])] if T else None)   # bottom (-y)
+        uvb = [plu(co[0]), plu(co[1]), plu(ci[1]), plu(ci[0])] if plu else ([pl(co[0]), pl(co[1]), pl(ci[1]), pl(ci[0])] if T else None)
+        below.quad(at(co[0], y0), at(co[1], y0), at(ci[1], y0), at(ci[0], y0), uvb)   # bottom (-y)
         mesh.quad(at(co[0], y1), at(co[1], y1), at(co[1], y0), at(co[0], y0), [cyl(a0, r_out, y1), cyl(a1, r_out, y1), cyl(a1, r_out, y0), cyl(a0, r_out, y0)] if T else None)   # outer band
         mesh.quad(at(ci[1], y1), at(ci[0], y1), at(ci[0], y0), at(ci[1], y0), [cyl(a1, r_in, y1), cyl(a0, r_in, y1), cyl(a0, r_in, y0), cyl(a1, r_in, y0)] if T else None)   # inner band
 
@@ -149,10 +153,16 @@ for direction in (1, -1):
 floors = Mesh()
 for (y, r_in, r_out, th) in FLOORS:
     annulus(floors, y, r_in, r_out, th)
-# palace slabs: marble on top and on the bands (planar / cylindrical UVs, 4 m repeat), plain cream plaster underneath (ceilings)
-floors_marble, floors_under = Mesh(), Mesh()
-for (y, r_in, r_out, th) in FLOORS:
-    annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_under)
+# palace slabs: marble on top and on the bands (planar / cylindrical UVs, 4 m repeat); underneath, the
+# ceilings: the ground-floor and sky-room ceilings carry the Pozzo fresco (models/palace/fresco.jpg, CC0,
+# one painting spread over the whole ring, the oculus cuts out its centre), the game-room ceiling the
+# coffered lapis-and-gold texture (4 m repeat)
+floors_marble, floors_under, floors_fresco = Mesh(), Mesh(), Mesh()
+for k, (y, r_in, r_out, th) in enumerate(FLOORS):
+    if k == 1:
+        annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_under)
+    else:
+        annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_fresco, under_span=2 * r_out + 0.4)
 
 rings = Mesh()      # lounge look: wire railing rails + glowing rims + crown ring (one glow material)
 posts = Mesh()
@@ -317,9 +327,10 @@ PALACE_TOWER_MATERIALS = [
     BRASS_MAT,
     TOWER_MATERIALS[4],
     {"name": "ceiling", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 1}, "metallicFactor": 0.1, "roughnessFactor": 0.6}, "emissiveTexture": {"index": 1}, "emissiveFactor": [0.35, 0.35, 0.35]},
+    {"name": "fresco", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 2}, "metallicFactor": 0.0, "roughnessFactor": 0.8}, "emissiveTexture": {"index": 2}, "emissiveFactor": [0.55, 0.55, 0.55]},
 ]
 PALACE_TOWER_MATERIALS.append({"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]})
-write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("glow", glow_only, 2), ("balustrade", balustrade, 6), ("cornice", cornice, 6), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png'])
+write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("frescoes", floors_fresco, 6), ("glow", glow_only, 2), ("balustrade", balustrade, 7), ("cornice", cornice, 7), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png', 'palace/fresco.jpg'])
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])
@@ -857,3 +868,59 @@ for a, b in ((c00, c10), (c10, c11), (c11, c01), (c01, c00)):
 prism(pv_roof, 0, 0, 0.06, 3.7, 4.1, 8)   # finial
 MARBLE_CREAM = {"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]}
 write_glb('models/pavilion.glb', [("columns", pv_cols, 0), ("beams", pv_beams, 0), ("roof", pv_roof, 1)], [MARBLE_CREAM, BRASS_MAT])
+
+# ------------------------------------------------------------------ palace props (the rest of the theme)
+# Same geometry as the lounge props in marble + brass, with warm (not cyan) glow so every light in the
+# palace finish reads gold: directory / leaderboard board, kiosk, elevator shaft, gateway, lamp, planters.
+WARM_GLOW = {"name": "warmGlow", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.92, 0.75, 1], "metallicFactor": 0.1, "roughnessFactor": 0.4}, "emissiveFactor": [1.0, 0.82, 0.5]}
+
+# board: dark plate, cream marble frame with a brass inner moulding, brass corner rosettes, a pediment with a
+# brass finial, marble post
+pbd_plate, pbd_frame, pbd_brass = Mesh(), Mesh(), Mesh()
+box_mesh(pbd_plate, (0, 0, 0), (2.6, 1.9, 0.08))
+for (c, size) in [((0, 1.02, 0), (2.96, 0.16, 0.18)), ((0, -1.02, 0), (2.96, 0.16, 0.18)), ((-1.40, 0, 0), (0.16, 2.2, 0.18)), ((1.40, 0, 0), (0.16, 2.2, 0.18))]:
+    box_mesh(pbd_frame, c, size)
+for (c, size) in [((0, 0.93, -0.02), (2.7, 0.03, 0.12)), ((0, -0.93, -0.02), (2.7, 0.03, 0.12)), ((-1.31, 0, -0.02), (0.03, 1.9, 0.12)), ((1.31, 0, -0.02), (0.03, 1.9, 0.12))]:
+    box_mesh(pbd_brass, c, size)
+for (x, y) in [(-1.40, 1.02), (1.40, 1.02), (-1.40, -1.02), (1.40, -1.02)]:
+    prism(pbd_brass, x, -0.11, 0.09, y - 0.09, y + 0.09, 10)   # rosettes on the corners (front side is -z)
+# pediment: a shallow triangle above the top rail
+apex = (0, 1.42, 0)
+for a, b in (((-1.5, 1.10, -0.09), (1.5, 1.10, -0.09)), ((1.5, 1.10, 0.09), (-1.5, 1.10, 0.09))):
+    n = normal(a, b, apex); base = len(pbd_frame.pos)
+    for pnt in (a, b, apex):
+        pbd_frame.pos.append(pnt); pbd_frame.nor.append(n)
+    pbd_frame.idx += [base, base + 1, base + 2]
+box_mesh(pbd_frame, (-0.76, 1.24, 0), (1.62, 0.06, 0.18))   # eaves (two slanted boxes approximated flat)
+box_mesh(pbd_frame, (0.76, 1.24, 0), (1.62, 0.06, 0.18))
+prism(pbd_brass, 0, 0, 0.05, 1.40, 1.62, 8)                 # finial
+prism(pbd_frame, 0, 0, 0.07, -2.2, -1.0, 10)                # post
+write_glb('models/board-palace.glb', [("plate", pbd_plate, 0), ("frame", pbd_frame, 1), ("brass", pbd_brass, 2)], [DECOR_MATERIALS[4], MARBLE_CREAM_M, BRASS_MAT])
+
+# kiosk: marble post, warm glowing cube
+pk_post, pk_cube, pk_coll = Mesh(), Mesh(), Mesh()
+prism(pk_post, 0, 0, 0.07, 0, 1.2, 8)
+prism(pk_post, 0, 0, 0.16, 0, 0.06, 10)
+box_mesh(pk_cube, (0, 1.45, 0), (0.42, 0.42, 0.42))
+box_mesh(pk_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
+write_glb('models/kiosk-palace.glb', [("post", pk_post, 0), ("cube", pk_cube, 1), ("kiosk_collider", pk_coll, 2)], [MARBLE_CREAM_M, WARM_GLOW, COLLIDER])
+
+# elevator shaft: brass posts and roof, glass, warm pads and rings
+write_glb('models/shaft-palace.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [BRASS_MAT, GLASS, WARM_GLOW, WARM_GLOW, COLLIDER])
+
+# gateway: marble posts with brass caps, brass beam, warm lanterns
+pg_marble, pg_brass, pg_light = Mesh(), Mesh(), Mesh()
+for x in (-3.2, 3.2):
+    prism(pg_marble, x, 0, 0.13, 0, 3.3, 12)
+    prism(pg_marble, x, 0, 0.22, 0, 0.1, 12)
+    prism(pg_brass, x, 0, 0.18, 3.3, 3.42, 12)
+    box_mesh(pg_light, (x, 3.75, 0), (0.34, 0.34, 0.34))
+box_mesh(pg_brass, (0, 3.5, 0), (6.9, 0.22, 0.3))
+write_glb('models/gateway-palace.glb', [("marble", pg_marble, 0), ("brass", pg_brass, 1), ("lights", pg_light, 2)], [MARBLE_CREAM_M, BRASS_MAT, LAMP])
+
+# lamp: brass post, same lantern
+write_glb('models/lamp-palace.glb', [("post", lp_post, 0), ("light", lp_light, 1)], [BRASS_MAT, LAMP])
+
+# planters and the plaza tree: marble pots
+write_glb('models/planter-palace.glb', [("pot", pl_pot, 0), ("leaves", pl_leaves, 1)], [MARBLE_CREAM_M, PLANT])
+write_glb('models/plazatree-palace.glb', [("pot", pt_pot, 0), ("trunk", pt_trunk, 1), ("leaves", pt_leaves, 2)], [MARBLE_CREAM_M, WOOD_DARK, PLANT])
