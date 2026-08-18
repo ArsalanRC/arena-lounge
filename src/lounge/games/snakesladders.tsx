@@ -9,6 +9,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { WIN_POSITION, applyMove, calculateMove, createInitialState, squareToCoords, type SnakeOrLadder, type SnakesLaddersGameState } from '../../engine/snakesladders'
 import type { PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { SNAKES_COLORS, SNAKES_SPRITES, createSnakesView, type SnakesAction } from '../views/snakes3d'
@@ -18,7 +19,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { button: 'images/ui/button.png' }
+const IMG = { button: 'button' } as const
 
 interface Wire {
   r: number
@@ -93,7 +94,7 @@ function MiniBoard(props: { state: SnakesLaddersGameState; cell: number }) {
       <UiEntity
         key={`p${i}`}
         uiTransform={{ positionType: 'absolute', position: { left: col * cell + (i === 0 ? 1 : cell * 0.35), top: row * cell + 1 + (i === 0 ? 0 : cell * 0.3) }, width: cell * 0.7, height: cell * 0.7 }}
-        uiBackground={{ texture: { src: SNAKES_SPRITES[i] }, textureMode: 'stretch' }}
+        uiBackground={uiSprite(SNAKES_SPRITES[i])}
       />
     )
   }
@@ -124,7 +125,7 @@ function Controls(props: { state: SnakesLaddersGameState; ctx: GameContext; phon
         {ctx.myTurn && !finished && (
           <UiEntity
             uiTransform={{ width: 200, height: 56, margin: props.phone ? { left: 10 } : { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-            uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
+            uiBackground={uiSprite(IMG.button, UI.accent)}
             uiText={{ value: g.rollDie, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
             onMouseDown={() => ctx.act({ roll: d6() } as SnakesAction)}
           />

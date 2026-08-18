@@ -23,6 +23,7 @@ import {
   type DiceRoyaleScores
 } from '../../engine/diceroyale'
 import type { BotDifficulty } from '../../engine/types'
+import { uiSprite, type SpriteName } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { createDiceRoyaleView, type DuelView } from '../views/diceroyale3d'
@@ -38,7 +39,7 @@ export interface DuelState {
   view: DuelView
 }
 
-const IMG = { button: 'images/ui/button.png' }
+const IMG = { button: 'button' } as const
 const CAT_KEYS = CATEGORIES
 
 function sheet(d: DuelState, side: SeatNo): DiceRoyaleGameState {
@@ -195,7 +196,7 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
       <UiEntity
         key={`d${i}`}
         uiTransform={{ width: dieSize, height: dieSize, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block', opacity: cur.hasRolledThisTurn ? 1 : 0.35 }}
-        uiBackground={{ texture: { src: `images/ui/die-${cur.dice[i]}.png` }, textureMode: 'stretch', color: held ? Color4.fromHexString('#ffd27aff') : Color4.White() }}
+        uiBackground={uiSprite(`die-${cur.dice[i]}` as SpriteName, held ? Color4.fromHexString('#ffd27aff') : Color4.White())}
         onMouseDown={() => {
           if (canHold) ctx.act({ hold: i } as RoyaleAction)
         }}
@@ -212,7 +213,7 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
       <UiEntity
         key={c}
         uiTransform={{ width: w, height: 34, margin: 2, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', padding: { left: 8, right: 8 }, pointerFilter: 'block' }}
-        uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: filled !== null ? UI.panelSoft : open ? UI.accent : Color4.create(0.2, 0.18, 0.17, 0.9) }}
+        uiBackground={uiSprite(IMG.button, filled !== null ? UI.panelSoft : open ? UI.accent : Color4.create(0.2, 0.18, 0.17, 0.9))}
         onMouseDown={() => {
           if (open) ctx.act({ score: c } as RoyaleAction)
         }}
@@ -233,7 +234,7 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
         {canRoll && (
           <UiEntity
             uiTransform={{ width: 130, height: 52, margin: { left: 8 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-            uiBackground={{ texture: { src: IMG.button }, textureMode: 'stretch', color: UI.accent }}
+            uiBackground={uiSprite(IMG.button, UI.accent)}
             uiText={{ value: `${g.rollDice} (${cur.rollsLeft})`, fontSize: 17, color: UI.text, textAlign: 'middle-center' }}
             onMouseDown={() => ctx.act({ roll: cur.dice.map((f, i) => (cur.held[i] ? f : d6())) } as RoyaleAction)}
           />
@@ -250,7 +251,7 @@ export const diceRoyaleGame: TableGame<DuelState, RoyaleAction> = {
   id: 'diceroyale',
   label: 'Dice Royale',
   seatNames: ['Red', 'Blue'],
-  seatSprites: ['images/ui/disc-red.png', 'images/ui/disc-blue.png'],
+  seatSprites: ['disc-red', 'disc-blue'],
   seatColors: [UI.red, Color4.fromHexString('#3a7bd5ff')],
 
   newGame(opening) {

@@ -8,6 +8,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getBotMove, getLegalMoves, score, type ReversiCell, type ReversiGameState } from '../../engine/reversi'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { createReversiView, type ReversiAction } from '../views/reversi3d'
@@ -19,12 +20,12 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
 ]
 const N = 8
 const IMG = {
-  dark: 'images/ui/disc-dark.png',
-  light: 'images/ui/disc-light.png',
-  ring: 'images/ui/ring.png',
+  dark: 'disc-dark',
+  light: 'disc-light',
+  ring: 'ring',
   
-  disc: 'images/ui/disc.png'
-}
+  disc: 'disc'
+} as const
 const FELT = Color4.fromHexString('#2f6b46ff')
 const FELT_LINE = Color4.fromHexString('#1d452cff')
 
@@ -101,12 +102,12 @@ function Board(props: { state: ReversiGameState; ctx: GameContext; phone: boolea
           }}
         >
           {v !== 'empty' && (
-            <UiEntity uiTransform={{ width: cell - 6, height: cell - 6, justifyContent: 'center', alignItems: 'center' }} uiBackground={{ texture: { src: v === 'black' ? IMG.dark : IMG.light }, textureMode: 'stretch' }}>
-              {idx === last && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
+            <UiEntity uiTransform={{ width: cell - 6, height: cell - 6, justifyContent: 'center', alignItems: 'center' }} uiBackground={uiSprite(v === 'black' ? IMG.dark : IMG.light)}>
+              {idx === last && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={uiSprite(IMG.ring, UI.accentTint)} />}
             </UiEntity>
           )}
           {v === 'empty' && legal.has(idx) && (
-            <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={{ texture: { src: IMG.disc }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.55) }} />
+            <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={uiSprite(IMG.disc, Color4.create(1, 1, 1, 0.55))} />
           )}
         </UiEntity>
       )

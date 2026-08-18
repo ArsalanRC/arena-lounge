@@ -11,6 +11,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getBotMove, getLegalMoves, type DotLinesGameState } from '../../engine/dotlines'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { createDotLinesView, dotSelection, tapDot, type DotAction } from '../views/dotlines3d'
@@ -24,11 +25,11 @@ const ROWS = 5
 const COLS = 5
 
 const IMG = {
-  dot: 'images/ui/hole.png',
-  ring: 'images/ui/ring.png',
-  yellow: 'images/ui/disc-yellow.png',
-  red: 'images/ui/disc-red.png'
-}
+  dot: 'hole',
+  ring: 'ring',
+  yellow: 'disc-yellow',
+  red: 'disc-red'
+} as const
 
 interface Wire {
   h: string // (ROWS+1)*COLS chars '0'/'1'
@@ -172,7 +173,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boole
         >
           <UiEntity
             uiTransform={{ width: selected ? dot + 10 : dot, height: selected ? dot + 10 : dot }}
-            uiBackground={{ texture: { src: selected ? IMG.ring : IMG.dot }, textureMode: 'stretch', color: selected ? UI.win : Color4.create(0.15, 0.13, 0.12, 1) }}
+            uiBackground={uiSprite(selected ? IMG.ring : IMG.dot, selected ? UI.win : Color4.create(0.15, 0.13, 0.12, 1))}
           />
         </UiEntity>
       )

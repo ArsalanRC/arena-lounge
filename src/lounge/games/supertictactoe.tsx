@@ -9,6 +9,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { applyMove, createInitialState, getValidMoves, selectBotMove, type MetaBoard, type SubBoard, type SuperTTTGameState } from '../../engine/supertictactoe'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { STTT_COLORS, createSuperTTTView, type SuperTTTAction } from '../views/supertictactoe3d'
@@ -18,7 +19,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'A', color: 'red', playerOrder: 0 },
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
-const IMG = { x: 'images/ui/mark-x.png', o: 'images/ui/mark-o.png' }
+const IMG = { x: 'mark-x', o: 'mark-o' } as const
 
 interface Wire {
   b: string // 81 chars: X, O or .
@@ -114,7 +115,7 @@ function Board(props: { state: SuperTTTGameState; ctx: GameContext; phone: boole
                 if (playable) ctx.act({ board: b, cell: c } as SuperTTTAction)
               }}
             >
-              {v !== null && <UiEntity uiTransform={{ width: cell - 10, height: cell - 10 }} uiBackground={{ texture: { src: v === 'X' ? IMG.x : IMG.o }, textureMode: 'stretch', color: v === 'X' ? STTT_COLORS[0] : STTT_COLORS[1] }} />}
+              {v !== null && <UiEntity uiTransform={{ width: cell - 10, height: cell - 10 }} uiBackground={uiSprite(v === 'X' ? IMG.x : IMG.o, v === 'X' ? STTT_COLORS[0] : STTT_COLORS[1])} />}
             </UiEntity>
           )
         }
@@ -133,7 +134,7 @@ function Board(props: { state: SuperTTTGameState; ctx: GameContext; phone: boole
           {cells}
           {(won === 'X' || won === 'O') && (
             <UiEntity uiTransform={{ positionType: 'absolute', position: { top: 2, left: 2 }, width: cell * 3 + 6, height: cell * 3 + 6, justifyContent: 'center', alignItems: 'center' }}>
-              <UiEntity uiTransform={{ width: cell * 2.2, height: cell * 2.2 }} uiBackground={{ texture: { src: won === 'X' ? IMG.x : IMG.o }, textureMode: 'stretch', color: metaWin.has(b) ? UI.win : won === 'X' ? STTT_COLORS[0] : STTT_COLORS[1] }} />
+              <UiEntity uiTransform={{ width: cell * 2.2, height: cell * 2.2 }} uiBackground={uiSprite(won === 'X' ? IMG.x : IMG.o, metaWin.has(b) ? UI.win : won === 'X' ? STTT_COLORS[0] : STTT_COLORS[1])} />
             </UiEntity>
           )}
         </UiEntity>

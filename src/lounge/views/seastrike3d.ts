@@ -8,6 +8,7 @@
  */
 import { Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spritePlane } from '../atlas'
 import type { CellState, SeaStrikeGameState } from '../../engine/seastrike'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -49,8 +50,9 @@ export function seaCellLocal(grid: 0 | 1, cell: number, face: 0 | 1): Vector3 {
 
 function markerMaterial(e: Entity, state: CellState): void {
   const c = state === 'hit' ? HIT : state === 'sunk' ? SUNK : MISS
+  spritePlane(e, state === 'miss' ? 'disc' : 'ring')
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: state === 'miss' ? 'images/ui/disc.png' : 'images/ui/ring.png' }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     albedoColor: c,
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
@@ -100,7 +102,6 @@ export function createSeaStrikeView(root: Entity, onTap: (grid: 0 | 1, cell: num
       const face = (i < 2 * N * N ? 0 : 1) as 0 | 1
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: seaCellLocal(grid, i % (N * N), face), scale: Vector3.create(CELL * 0.7, CELL * 0.7, 1) })
-      MeshRenderer.setPlane(e)
       markerMaterial(e, 'miss')
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

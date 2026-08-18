@@ -8,6 +8,7 @@
  */
 import { EasingFunction, Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import type { ChessGameState, ChessPiece } from '../../engine/chess'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -25,11 +26,11 @@ const CENTER_Y = TABLE_TOP_Y + 0.06 + BOARD / 2
 const HALF_T = 0.02
 const PIECE = CELL * 0.86
 
-/** Sprite path for a piece: images/ui/chess-{w|b}{K|Q|R|B|N|P}.png */
-export function chessSprite(p: ChessPiece): string {
-  return `images/ui/chess-${p.color === 'white' ? 'w' : 'b'}${p.type}.png`
+/** Atlas sprite of a piece: chess-{w|b}{K|Q|R|B|N|P}. */
+export function chessSprite(p: ChessPiece): SpriteName {
+  return `chess-${p.color === 'white' ? 'w' : 'b'}${p.type}` as SpriteName
 }
-export const CHESS_SEAT_SPRITES: [string, string] = ['images/ui/chess-wK.png', 'images/ui/chess-bK.png']
+export const CHESS_SEAT_SPRITES: [SpriteName, SpriteName] = ['chess-wK', 'chess-bK']
 
 /** Square index -> table-local position (file left to right, rank bottom to top). */
 export function chessSquareLocal(sq: number): Vector3 {
@@ -38,9 +39,10 @@ export function chessSquareLocal(sq: number): Vector3 {
   return Vector3.create(-BOARD / 2 + CELL * (file + 0.5), CENTER_Y - BOARD / 2 + CELL * (rank + 0.5), 0)
 }
 
-function pieceMaterial(e: Entity, sprite: string, glow: boolean): void {
+function pieceMaterial(e: Entity, sprite: SpriteName, glow: boolean): void {
+  spriteBox(e, sprite)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: sprite }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.5,
@@ -82,7 +84,6 @@ export function createChessView(root: Entity, onTap: (sq: number) => void): View
     for (let i = 0; i < 32; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(PIECE, PIECE, HALF_T * 2 + 0.01) })
-      MeshRenderer.setBox(e)
       pieceMaterial(e, CHESS_SEAT_SPRITES[0], false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)
@@ -98,7 +99,7 @@ export function createChessView(root: Entity, onTap: (sq: number) => void): View
   })
 
   const entityAt = new Map<number, Entity>()
-  const spriteAt = new Map<number, string>()
+  const spriteAt = new Map<number, SpriteName>()
   const free: Entity[] = []
   let selectedSq = -1
 

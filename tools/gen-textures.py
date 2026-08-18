@@ -14,18 +14,20 @@
   images/rug-ring.png      256  ring mask, emissive on rugs (tinted per corner)
   images/path-a.png, path-b.png 1024 ring runners (walkable path per floor)
 UI (all alpha):
-  images/ui/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
-  images/ui/die-1..6.png    128  die faces with pips (Dice Royale)
-  images/ui/disc-yellow.png / disc-red.png  128  shaded discs
-  images/ui/hole.png        128  recessed empty cell
-  images/ui/ring.png        128  white ring (win / last-move highlight)
-  images/ui/panel.png       256  rounded dark panel
-  images/ui/pill.png        512x128 rounded pill (banner)
-  images/ui/button.png      256x64 rounded white button with gloss (tinted)
-  images/ui/board.png       256  rounded teal board background
-  images/ui/disc.png / pixel.png  legacy plain sprites
+  tools/sprites/chess-{w,b}{K,Q,R,B,N,P}.png  128  flat chess piece silhouettes
+  tools/sprites/die-1..6.png    128  die faces with pips (Dice Royale)
+  tools/sprites/disc-yellow.png / disc-red.png  128  shaded discs
+  tools/sprites/hole.png        128  recessed empty cell
+  tools/sprites/ring.png        128  white ring (win / last-move highlight)
+  tools/sprites/panel.png       256  rounded dark panel
+  tools/sprites/pill.png        512x128 rounded pill (banner)
+  tools/sprites/button.png      256x64 rounded white button with gloss (tinted)
+  tools/sprites/board.png       256  rounded teal board background
+  tools/sprites/disc.png / pixel.png  legacy plain sprites
 
-Run: python3 tools/gen-textures.py
+Run: python3 tools/gen-textures.py, then python3 tools/gen-atlas.py (the scene reads the UI
+sprites from tools/sprites/atlas.png; the single files stay as the generator's output and as the
+atlas input).
 """
 import math, struct, zlib, os, random
 
@@ -297,7 +299,7 @@ def gen_king_disc(path, base, dark, light, crown):
         return (*col, cov)
     write_png(path, S, S, px)
 
-def gen_mark_x(path='images/ui/mark-x.png', rgb=(1, 1, 1)):
+def gen_mark_x(path='tools/sprites/mark-x.png', rgb=(1, 1, 1)):
     S = 128
     def px(x, y):
         # two diagonal bars, anti-aliased, with rounded ends via distance-to-segment
@@ -310,7 +312,7 @@ def gen_mark_x(path='images/ui/mark-x.png', rgb=(1, 1, 1)):
         return (*rgb, a)
     write_png(path, S, S, px)
 
-def gen_mark_o(path='images/ui/mark-o.png', rgb=(1, 1, 1)):
+def gen_mark_o(path='tools/sprites/mark-o.png', rgb=(1, 1, 1)):
     S = 128
     def px(x, y):
         d = math.hypot(x + .5 - S / 2, y + .5 - S / 2)
@@ -334,7 +336,7 @@ def gen_ui_hole():
         col = mix(base, dark, 0.55 - 0.45 * shade)
         col = mix(col, dark, 0.6 * smoothstep(0.75, 1.0, d))
         return (*col, cov)
-    write_png('images/ui/hole.png', S, S, px)
+    write_png('tools/sprites/hole.png', S, S, px)
 
 def gen_ui_ring():
     S = 128
@@ -345,7 +347,7 @@ def gen_ui_ring():
         outer = 1 - smoothstep(R - 0.7, R + 0.7, d)
         inner = smoothstep(R - 12, R - 10.6, d)
         return (1, 1, 1, outer * inner)
-    write_png('images/ui/ring.png', S, S, px)
+    write_png('tools/sprites/ring.png', S, S, px)
 
 def gen_ui_panel(path, w, h, radius, fill_hex, alpha, border_hex, border_alpha=0.9, gloss=0.0):
     fill, border = hex_rgb(fill_hex), hex_rgb(border_hex)
@@ -377,13 +379,13 @@ def gen_ui_button():
         inner = rounded_rect_cov(x, y, W, H, 16, inset=2)
         v = v * (0.72 + 0.28 * inner)             # slightly darker 2px edge
         return (v, v, v, cov)
-    write_png('images/ui/button.png', W, H, px)
+    write_png('tools/sprites/button.png', W, H, px)
 
 def gen_ui_plain():
     S = 64
     def disc(x, y):
         return (1, 1, 1, circle_cov(x, y, S / 2, S / 2, S / 2 - 1.5))
-    write_png('images/ui/disc.png', S, S, disc)
+    write_png('tools/sprites/disc.png', S, S, disc)
 
 # ------------------------------------------------------------------ snakes & ladders board
 _DIGITS = {  # 3x5 bitmap font for the square numbers
@@ -494,7 +496,7 @@ def gen_sea_grid(path='images/sea-grid.png'):
 
 # ------------------------------------------------------------------ die faces
 def gen_die_faces():
-    """images/ui/die-1.png .. die-6.png: rounded cream die faces with dark pips (Dice Royale)."""
+    """tools/sprites/die-1.png .. die-6.png: rounded cream die faces with dark pips (Dice Royale)."""
     S = 128
     pips = {1: [(0.5, 0.5)], 2: [(0.28, 0.28), (0.72, 0.72)], 3: [(0.28, 0.28), (0.5, 0.5), (0.72, 0.72)],
             4: [(0.28, 0.28), (0.72, 0.28), (0.28, 0.72), (0.72, 0.72)],
@@ -511,7 +513,7 @@ def gen_die_faces():
             for (cx, cy) in pips[n]:
                 col = mix(col, pip, circle_cov(x, y, cx * S, cy * S, 0.09 * S))
             return (*col, cov)
-        write_png(f'images/ui/die-{n}.png', S, S, px)
+        write_png(f'tools/sprites/die-{n}.png', S, S, px)
 
 # ------------------------------------------------------------------ rug ring (emissive mask)
 def gen_rug_ring(path='images/rug-ring.png'):
@@ -761,8 +763,8 @@ def gen_chess_piece(path, kind, fill, edge):
 
 def gen_chess_pieces():
     for k in 'KQRBNP':
-        gen_chess_piece(f'images/ui/chess-w{k}.png', k, '#f4ecd8', '#2b2320')
-        gen_chess_piece(f'images/ui/chess-b{k}.png', k, '#2b2320', '#d8ccb4')
+        gen_chess_piece(f'tools/sprites/chess-w{k}.png', k, '#f4ecd8', '#2b2320')
+        gen_chess_piece(f'tools/sprites/chess-b{k}.png', k, '#2b2320', '#d8ccb4')
 
 if __name__ == '__main__':
     gen_board_face()
@@ -771,22 +773,22 @@ if __name__ == '__main__':
     gen_rug()
     gen_path_ring('images/path-a.png', 0.705)   # ground 5.4..7.6, game room 5.2..7.4, rooftop 4.65..6.6
     gen_path_ring('images/path-b.png', 0.60)    # sky room 3.4..5.7
-    gen_ui_disc('images/ui/disc-yellow.png', '#f5c518', '#b8890a', '#ffe680')
-    gen_ui_disc('images/ui/disc-red.png', '#e2453d', '#961f1a', '#ff8a7a')
-    gen_ui_disc('images/ui/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')
-    gen_ui_disc('images/ui/disc-light.png', '#f2e8d5', '#b9ab92', '#ffffff')
+    gen_ui_disc('tools/sprites/disc-yellow.png', '#f5c518', '#b8890a', '#ffe680')
+    gen_ui_disc('tools/sprites/disc-red.png', '#e2453d', '#961f1a', '#ff8a7a')
+    gen_ui_disc('tools/sprites/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')
+    gen_ui_disc('tools/sprites/disc-light.png', '#f2e8d5', '#b9ab92', '#ffffff')
     gen_reversi_board()
     gen_mark_x()
     gen_mark_o()
-    gen_mark_x('images/ui/mark-x-yellow.png', hex_rgb('#f5c518'))
+    gen_mark_x('tools/sprites/mark-x-yellow.png', hex_rgb('#f5c518'))
     gen_checkers_board()
-    gen_king_disc('images/ui/disc-light-king.png', '#f2e8d5', '#b9ab92', '#ffffff', '#c9931a')
-    gen_king_disc('images/ui/disc-dark-king.png', '#2a2422', '#0d0b0a', '#6a5f5a', '#f0c040')
-    gen_mark_o('images/ui/mark-o-red.png', hex_rgb('#e2453d'))
+    gen_king_disc('tools/sprites/disc-light-king.png', '#f2e8d5', '#b9ab92', '#ffffff', '#c9931a')
+    gen_king_disc('tools/sprites/disc-dark-king.png', '#2a2422', '#0d0b0a', '#6a5f5a', '#f0c040')
+    gen_mark_o('tools/sprites/mark-o-red.png', hex_rgb('#e2453d'))
     gen_ui_hole()
     gen_ui_ring()
-    gen_ui_panel('images/ui/panel.png', 256, 256, 26, '#17130f', 0.88, '#5a4a3c', 0.9)
-    gen_ui_panel('images/ui/pill.png', 512, 128, 60, '#17130f', 0.86, '#5a4a3c', 0.9)
+    gen_ui_panel('tools/sprites/panel.png', 256, 256, 26, '#17130f', 0.88, '#5a4a3c', 0.9)
+    gen_ui_panel('tools/sprites/pill.png', 512, 128, 60, '#17130f', 0.86, '#5a4a3c', 0.9)
     gen_ui_button()
     gen_ui_plain()
     gen_chess_pieces()
@@ -797,5 +799,5 @@ if __name__ == '__main__':
     gen_snakes_board()
     gen_die_faces()
     gen_sea_grid()
-    gen_ui_disc('images/ui/disc-blue.png', '#3a7bd5', '#1f4b8f', '#8fc0ff')
-    gen_ui_disc('images/ui/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')
+    gen_ui_disc('tools/sprites/disc-blue.png', '#3a7bd5', '#1f4b8f', '#8fc0ff')
+    gen_ui_disc('tools/sprites/disc-green.png', '#3fa35a', '#1f6b35', '#8fe0a0')

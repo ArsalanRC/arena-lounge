@@ -27,6 +27,7 @@ import {
   type SeaStrikeGameState
 } from '../../engine/seastrike'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { SEA_COLORS, createSeaStrikeView, type SeaAction } from '../views/seastrike3d'
@@ -37,7 +38,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const N = 10
-const IMG = { yellow: 'images/ui/disc-red.png', blue: 'images/ui/disc-blue.png', ring: 'images/ui/ring.png', dot: 'images/ui/disc.png' }
+const IMG = { yellow: 'disc-red', blue: 'disc-blue', ring: 'ring', dot: 'disc' } as const
 const WATER = Color4.fromHexString('#1f4e7fff')
 const WATER_MINE = Color4.fromHexString('#2b5f8fff')
 const SHIP = Color4.fromHexString('#8fa3b8ff')
@@ -141,8 +142,8 @@ function Grid(props: { board: PlayerBoard; cell: number; mine: boolean; myTurn: 
             if (open && props.onFire) props.onFire(i)
           }}
         >
-          {st === 'hit' && <UiEntity uiTransform={{ width: cell * 0.8, height: cell * 0.8 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: HIT }} />}
-          {st === 'miss' && <UiEntity uiTransform={{ width: cell * 0.35, height: cell * 0.35 }} uiBackground={{ texture: { src: IMG.dot }, textureMode: 'stretch', color: MISS }} />}
+          {st === 'hit' && <UiEntity uiTransform={{ width: cell * 0.8, height: cell * 0.8 }} uiBackground={uiSprite(IMG.ring, HIT)} />}
+          {st === 'miss' && <UiEntity uiTransform={{ width: cell * 0.35, height: cell * 0.35 }} uiBackground={uiSprite(IMG.dot, MISS)} />}
         </UiEntity>
       )
     }

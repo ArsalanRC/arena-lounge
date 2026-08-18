@@ -8,6 +8,7 @@
  */
 import { ColliderLayer, Entity, Font, InputAction, Material, MaterialTransparencyMode, MeshCollider, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox, type SpriteName } from '../atlas'
 import type { BackgammonColor, BackgammonGameState } from '../../engine/backgammon'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -26,7 +27,7 @@ const HALF_T = 0.02
 const DISC = 0.068
 const STEP = 0.07
 
-export const BG_SPRITES: [string, string] = ['images/ui/disc-light.png', 'images/ui/disc-dark.png']
+export const BG_SPRITES: [SpriteName, SpriteName] = ['disc-light', 'disc-dark']
 
 /** Column (0..11, left to right in white's view) and row (top/bottom) of a point. */
 export function pointColumn(p: number): { col: number; top: boolean } {
@@ -52,8 +53,9 @@ function barLocal(color: BackgammonColor, k: number): Vector3 {
 }
 
 function discMaterial(e: Entity, color: BackgammonColor, glow: boolean): void {
+  spriteBox(e, color === 'white' ? BG_SPRITES[0] : BG_SPRITES[1])
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: color === 'white' ? BG_SPRITES[0] : BG_SPRITES[1] }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,
@@ -110,7 +112,6 @@ export function createBackgammonView(root: Entity, onTap: (target: BgTarget) => 
     for (let i = 0; i < 30; i++) {
       const e = engine.addEntity()
       Transform.create(e, { parent: root, position: Vector3.create(0, -5, 0), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.01) })
-      MeshRenderer.setBox(e)
       discMaterial(e, 'white', false)
       VisibilityComponent.create(e, { visible: false })
       out.push(e)

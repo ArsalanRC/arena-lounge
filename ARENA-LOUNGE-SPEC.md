@@ -312,7 +312,7 @@ version works as well", 16 Aug 11:30):
 3d. (done 18 Aug 21:20) two tables per game, wider rings, palace rooftop, music,
    suggestion box. Next: the mobile pass on the live World (controller bar with the
    new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
-   on the phone keyboard, music toggle), then the sprite atlas (textures 29/33),
+   on the phone keyboard, music toggle), then (sprite atlas done 21:50)
    ceiling medallion artwork (PD fresco, needs his OK to download), elevator shafts /
    kiosk / directory / gateway still wood, README refresh with phone screenshots, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
@@ -477,6 +477,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-18 21:50 sprite atlas: tools/gen-atlas.py packs the 36 UI sprites (now sources in tools/sprites/, not deployed) into images/ui/atlas.png (1024x1024, 148 KB) + src/lounge/atlas.gen.ts; src/lounge/atlas.ts (spriteRect / spriteUvs / spritePlane / spriteBox / uiSprite, UV convention v = 1 at the top, verified in the preview: table card, controller chips + mini board, 3D discs of a live round vs the bot). All 14 game views and every UI background converted; `seatSprites` are SpriteName now. .dclignore also drops supabase/ and deno.lock from deployments. Purpose: textures were 29/33 of the client's budget and the 525 hiccup hit small texture fetches
 
 - 2026-08-18 21:20 evening batch (Arsalan's list, all built and reviewed in the preview): two tables per game except Ludo (27 tables; ground zones r 11.3, game room r 10.2, sky room r 8.5; rugs 5.4 m on slabs), walking rings widened to 2 m+ on every floor (path-a 0.705, path-b 0.60; sofas ground r 4.6, sky r 7.0), palace rooftop (marble balustrades + two-step cornices on every slab edge in tower-palace.glb, four pavilions models/pavilion.glb at 45/135/225/315 r 8.0, benches re-spaced), background music (tools/gen-music.py: original 96 s lounge loop, ogg 630 KB, global AudioSource 0.3, "Music: on/off" in the ? panel, five languages; Arsalan: "sounds great"), suggestion box at the entrance (models/postbox.glb at (27.7,16), click -> panel with UI Input -> signedFetch -> Edge Function `feedback` -> `lounge_feedback` (migration 004, five notes per wallet per day; read with tools/dev/supa-sql supabase/list-feedback.sql); shared verifier supabase/functions/_shared/dcl-auth.ts, both functions redeployed and checked live). Stats after: 777 entities (43 %), 72.6k tris (81 %), textures 29/33 (88 %: the sprite atlas is now the next optimisation)
 

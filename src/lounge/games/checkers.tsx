@@ -9,6 +9,7 @@ import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import type { Entity } from '@dcl/sdk/ecs'
 import { applyMove, createInitialState, getValidMoves, selectBotMove, type CheckersBoard, type CheckersGameState, type CheckersMove, type CheckersPiece } from '../../engine/checkers'
 import type { BotDifficulty, PlayerInfo } from '../../engine/types'
+import { uiSprite } from '../atlas'
 import { UI } from '../config'
 import { t as L } from '../i18n'
 import { PIECE_SPRITES, checkersSelection, createCheckersView, setCheckersSelection, type CheckersAction } from '../views/checkers3d'
@@ -19,7 +20,7 @@ const ENGINE_PLAYERS: PlayerInfo[] = [
   { id: 'B', color: 'blue', playerOrder: 1 }
 ]
 const N = 8
-const IMG = { ring: 'images/ui/ring.png', dot: 'images/ui/disc.png' }
+const IMG = { ring: 'ring', dot: 'disc' } as const
 const LIGHT = Color4.fromHexString('#e8d9bdff')
 const DARK = Color4.fromHexString('#6b4a35ff')
 
@@ -131,12 +132,12 @@ function Board(props: { state: CheckersGameState; ctx: GameContext; phone: boole
           {p !== null && (
             <UiEntity
               uiTransform={{ width: cell - 6, height: cell - 6, justifyContent: 'center', alignItems: 'center' }}
-              uiBackground={{ texture: { src: p.color === 'white' ? (p.type === 'king' ? PIECE_SPRITES.whiteKing : PIECE_SPRITES.white) : p.type === 'king' ? PIECE_SPRITES.blackKing : PIECE_SPRITES.black }, textureMode: 'stretch' }}
+              uiBackground={uiSprite(p.color === 'white' ? (p.type === 'king' ? PIECE_SPRITES.whiteKing : PIECE_SPRITES.white) : p.type === 'king' ? PIECE_SPRITES.blackKing : PIECE_SPRITES.black)}
             >
-              {movable.has(sq) && sel === undefined && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={{ texture: { src: IMG.ring }, textureMode: 'stretch', color: UI.accentTint }} />}
+              {movable.has(sq) && sel === undefined && <UiEntity uiTransform={{ width: cell - 6, height: cell - 6 }} uiBackground={uiSprite(IMG.ring, UI.accentTint)} />}
             </UiEntity>
           )}
-          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={{ texture: { src: IMG.dot }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.75) }} />}
+          {p === null && targets.has(sq) && <UiEntity uiTransform={{ width: cell / 3, height: cell / 3 }} uiBackground={uiSprite(IMG.dot, Color4.create(1, 1, 1, 0.75))} />}
         </UiEntity>
       )
     }

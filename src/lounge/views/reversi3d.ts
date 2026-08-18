@@ -6,6 +6,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
+import { ATLAS, spriteBox } from '../atlas'
 import type { ReversiGameState } from '../../engine/reversi'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -35,8 +36,9 @@ function boardPlane(parent: Entity, z: number): void {
 }
 
 function discMaterial(e: Entity, v: number, glow: boolean): void {
+  spriteBox(e, v === 1 ? 'disc-dark' : 'disc-light')
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: v === 1 ? 'images/ui/disc-dark.png' : 'images/ui/disc-light.png' }),
+    texture: Material.Texture.Common({ src: ATLAS }),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,
@@ -67,7 +69,6 @@ export function createReversiView(root: Entity, onAction: (a: ReversiAction) => 
       for (let c = 0; c < N; c++) {
         const e = engine.addEntity()
         Transform.create(e, { parent: root, position: cellLocal(r, c), scale: Vector3.create(DISC, DISC, HALF_T * 2 + 0.008) })
-        MeshRenderer.setBox(e)
         discMaterial(e, 1, false)
         VisibilityComponent.create(e, { visible: false })
         out.push(e)

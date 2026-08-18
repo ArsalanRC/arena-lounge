@@ -14,6 +14,7 @@
 import type { Entity } from '@dcl/sdk/ecs'
 import type { Color4 } from '@dcl/sdk/math'
 import type ReactEcs from '@dcl/sdk/react-ecs'
+import type { SpriteName } from '../atlas'
 import type { BotDifficulty } from '../../engine/types'
 
 /** Hosted games plus the ids reserved for the game-room corners (banner until the plugin lands). */
@@ -63,8 +64,8 @@ export interface TableGame<S = unknown, A = unknown> {
   label: string
   /** Names of the sides in side order, e.g. ['Yellow', 'Red'] (as many as `seats`). */
   seatNames: string[]
-  /** UI sprite paths for the sides (disc / chip images). */
-  seatSprites: string[]
+  /** Atlas sprite names for the sides (disc / chip images). */
+  seatSprites: SpriteName[]
   /** Optional tints applied to seatSprites in chips (for white sprites). */
   seatSpriteTints?: Color4[]
   /** Button tints for the sides (seat buttons, turn colour). */

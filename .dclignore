@@ -34,3 +34,5 @@ pnpm-workspace.yaml
 vitest.config.mts
 skills-lock.json
 ARENA-LOUNGE-SPEC.md
+supabase
+deno.lock
