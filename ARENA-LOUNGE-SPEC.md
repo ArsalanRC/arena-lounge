@@ -297,9 +297,12 @@ version works as well", 16 Aug 11:30):
    works (the decentraland.org/jump page bounced to the App Store); desktop:
    `open 'decentraland://"realm=https://worlds-content-server.decentraland.org/world/arenalounge.dcl.eth&position=1,1&dclenv=org&mcp=true&skip-auth-screen=true"'`
    into a fresh Explorer instance.
-3b. (done 18 Aug 08:50) Supabase project + leaderboard live. Left: Arsalan
-   runs supabase/002_tighten_and_cleanup.sql; one real two-identity round to
-   confirm the client-side report; the "?" panel's Leaderboard tab on the phone.
+3b. (done 18 Aug 10:10) Supabase project + leaderboard live and hardened:
+   reports go through the signed Edge Function `report` (wallet verified,
+   round counted only when a second human of the round reports a consistent
+   outcome). Left: one real two-identity round on the live World to see the
+   client-side signed report land (check `lounge_reports` with tools/dev/supa-sql);
+   the "?" panel's Leaderboard tab on the phone.
 3c. Then: sprite atlases (fewer texture requests, the 525 hiccup), README
    refresh with phone screenshots, marble interior pass, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
@@ -415,6 +418,15 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
 
 ## 8. Gotchas (verified)
 
+- Supabase (personal project): the CLI on this Mac is logged into the game-platform
+  account and is too old for `--profile`; use `tools/dev/supa` / `tools/dev/supa-sql`,
+  which pass a personal access token from `~/.config/arena-lounge/supabase-token`
+  (docs/LEADERBOARD-SETUP.md § 5). The Management API blocks Python's default
+  User-Agent (Cloudflare 1010): set one. New functions in `public` are executable
+  by anon + authenticated by default (Supabase default privileges): revoke
+  explicitly, `from public` is not enough. Edge Functions called with the
+  publishable key need `--no-verify-jwt` (that key is not a JWT).
+
 - React-ECS: text with `height: 'auto'` ignores textAlign; nested auto-height
   wrappers eat panel padding. Give explicit heights.
 - `movePlayerTo` measures cameraTarget/avatarTarget from the avatar's base
@@ -455,6 +467,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-18 10:10 signed leaderboard reports (Arsalan: "do step 1 ... install supabase cli here"): Edge Function supabase/functions/report (Deno, verifies the ADR-44 signedFetch auth chain with @dcl/crypto, rejects stale/tampered signatures, signer = player) + supabase/003_signed_reports.sql (`lounge_reports`, `submit_report` counts a round only when a second human of the round reports a consistent outcome, 8 s pace + 120/day, `record_result` revoked from the public key); scene: `dealtAt` in TableBoard, `reportResult` via signedFetch with round key `<table>:<round>:<dealtAt>` + opponents. Applied on the live project with a personal access token through tools/dev/supa + supa-sql (002 had been run already); verified live: unsigned 401, tampered 401, pair confirms, third call "too fast", old RPC "permission denied"; test rows removed. Guests are accepted (their random address per session cannot accumulate; rejecting them would break confirmation for the wallet user they played). Two clients in one hand can still farm each other: that is step 2 (server-authoritative), not for v1
 
 - 2026-08-18 08:50 leaderboard LIVE: Arsalan created the personal Supabase project (vpizpihqwkmxtidqduos, eu-central-1) and ran 001; publishable key in config (public by design; RLS-locked tables, three RPCs; verified from the CLI: direct insert 401, bad address rejected, rate limit works); rooftop board fixed (readable from the south, 1.5x, primed at start), ROOFTOP label moved south; deployed 08:50. Open: he runs supabase/002_tighten_and_cleanup.sql (revoke table privileges, delete the test row); a real two-identity round to see the client-side report land
 - 2026-08-17 23:55 leaderboard (Arsalan: "go, supabase leaderboard, new project ... make sure our keys are safe"): supabase/001_leaderboard.sql (RLS-locked tables + record_result / leaderboard / my_stats RPCs, publishable key only), src/lounge/leaderboard.ts, reporting on round end for rounds with a human opponent, rooftop board, Leaderboard tab in the "?" panel, five languages, USE_FETCH; dormant until LEADERBOARD.url/key are set. Arsalan creates the personal Supabase project tomorrow (docs/LEADERBOARD-SETUP.md) and hands over URL + publishable key; then end-to-end test + redeploy

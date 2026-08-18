@@ -65,3 +65,29 @@ row-level security from step 2, not the secrecy of the key.
 - Reset the board: SQL Editor → `truncate public.lounge_results, public.lounge_players;`
 - Rate limit or names: edit the functions in `supabase/001_leaderboard.sql` and
   re-run only the changed `create or replace function` block.
+
+## 5. Signed reports (18 Aug 2026): Edge Function + migration 003
+
+Results no longer arrive through a public RPC. Each client sends its report with
+Decentraland's `signedFetch`; the Edge Function `report` verifies the signature,
+takes the signer as the player, and a round is only counted when a second human of
+that round reports a consistent outcome (`supabase/003_signed_reports.sql`).
+
+One-time setup, without touching the CLI session of the game-platform project:
+
+1. Dashboard (personal account) → https://supabase.com/dashboard/account/tokens →
+   **Generate new token**, name `arena-lounge-cli`, copy it.
+2. In a plain terminal (never in the chat, so it is not printed):
+   `mkdir -p ~/.config/arena-lounge && pbpaste > ~/.config/arena-lounge/supabase-token && chmod 600 ~/.config/arena-lounge/supabase-token`
+3. From the repo: `tools/dev/supa-sql supabase/002_tighten_and_cleanup.sql` (if not run yet),
+   `tools/dev/supa-sql supabase/003_signed_reports.sql`,
+   `tools/dev/supa functions deploy report --no-verify-jwt --project-ref vpizpihqwkmxtidqduos`.
+   The wrappers read the token from that file and pass it only through the environment.
+4. Revoke the token in the dashboard when the work is done; generate a new one next time.
+
+`--no-verify-jwt` is intended: the function does its own authentication (the DCL
+signature); the publishable key is not a JWT and could not pass the gateway check anyway.
+Local check of the signature path without a scene:
+`deno run --node-modules-dir=none --allow-net --allow-env supabase/functions/report/index.ts`
+(env `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set to dummies) and
+`deno run --node-modules-dir=none --allow-net --allow-env tools/dev/report-fn/signed-call.ts http://127.0.0.1:8000/functions/v1/report`.

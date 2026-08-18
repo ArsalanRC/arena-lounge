@@ -1,13 +1,17 @@
 /**
  * Persistent leaderboard: wins against real players, kept in a Supabase
- * project (config LEADERBOARD). Two RPCs behind row-level security, called
- * with the public key over HTTPS:
- *   record_result(p_address, p_name, p_game, p_result) -> the player's totals
- *   leaderboard(p_limit)                                -> ranked rows
+ * project (config LEADERBOARD).
+ *   Reads: two RPCs behind row-level security, called with the public key.
+ *     leaderboard(p_limit) -> ranked rows, my_stats(p_address) -> own totals
+ *   Writes: an Edge Function `report`, called with Decentraland's signedFetch,
+ *     so the server knows which wallet is speaking; the address is never part
+ *     of the body. A round counts once a second participant of the same round
+ *     reports a consistent outcome (see supabase/003_signed_reports.sql).
  * Rounds against the house bot are not reported: the board is about people
  * playing people. Everything here degrades to "no board" when the config is
  * empty or the network is down; the game never waits on it.
  */
+import { signedFetch } from '~system/SignedFetch'
 import { LEADERBOARD } from './config'
 
 export interface LeaderRow {
@@ -77,12 +81,25 @@ export async function refreshLeaderboard(force = false): Promise<void> {
   }
 }
 
-/** Report one finished round for the local player; refreshes the board afterwards. Never throws. */
-export async function reportResult(address: string, name: string, gameId: string, result: 'win' | 'loss' | 'draw'): Promise<void> {
-  if (!leaderboardEnabled() || !address) return
+/**
+ * Report one finished round for the local player through the signed Edge Function.
+ * `roundKey` = "<table>:<round>:<dealtAt>" (identical on every client of that round),
+ * `opponents` = the other human addresses of the round. Refreshes the board afterwards. Never throws.
+ */
+export async function reportResult(name: string, gameId: string, result: 'win' | 'loss' | 'draw', roundKey: string, opponents: string[]): Promise<void> {
+  if (!leaderboardEnabled() || opponents.length === 0) return
   try {
-    const rows = await rpc<MyStats[]>('record_result', { p_address: address, p_name: name, p_game: gameId, p_result: result })
-    if (Array.isArray(rows) && rows[0]) board.me = rows[0]
+    const res = await signedFetch({
+      url: `${LEADERBOARD.url}/functions/v1/report`,
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: LEADERBOARD.key },
+        body: JSON.stringify({ name, game: gameId, result, round_key: roundKey, opponents })
+      }
+    })
+    if (!res.ok) throw new Error(`report ${res.status} ${res.body}`)
+    const stats = JSON.parse(res.body) as (MyStats & { confirmed?: boolean }) | null
+    if (stats && typeof stats.wins === 'number') board.me = stats
     board.version++
     board.fetchedAt = 0
     void refreshLeaderboard(true)

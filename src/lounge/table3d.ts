@@ -255,11 +255,14 @@ export function updateTableVisual(vis: TableVisual): void {
       if (mine && b.winner !== mine && b.winner !== Winner.Draw) playPersonal('lose')
       // the leaderboard counts rounds against people: report my result once when a human sat with me
       if (mine && b.sides[mine - 1] > 0) {
-        const humanRival = otherSeats(t, mine).some((x) => {
-          const sd = seatOf(t, x)
-          return sd.addr !== '' && !sd.bot && b.sides[x - 1] > 0
-        })
-        if (humanRival) void reportResult(me.addr, me.name, t.game.id, b.winner === Winner.Draw ? 'draw' : b.winner === mine ? 'win' : 'loss')
+        const rivals = otherSeats(t, mine)
+          .map((x) => seatOf(t, x))
+          .filter((sd, k) => sd.addr !== '' && !sd.bot && b.sides[otherSeats(t, mine)[k] - 1] > 0)
+          .map((sd) => sd.addr)
+        if (rivals.length > 0) {
+          const outcome = b.winner === Winner.Draw ? 'draw' : b.winner === mine ? 'win' : 'loss'
+          void reportResult(me.name, t.game.id, outcome, `${t.def.id}:${b.round}:${b.dealtAt}`, rivals)
+        }
       }
     }
     r.moveCount = b.moveCount

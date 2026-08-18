@@ -188,8 +188,9 @@ export const SEAT_PAD_OFFSET = 1.8
 /**
  * Leaderboard backend: a Supabase project (personal account, region eu-central-1)
  * reached over HTTPS with its publishable key. The key is public by design; row-level
- * security on the server only lets it call `record_result` and `leaderboard`
- * (supabase/001_leaderboard.sql). Empty url = feature hidden.
+ * security on the server only lets it read (`leaderboard`, `my_stats`); results are
+ * written through the signed Edge Function `report` (supabase/003_signed_reports.sql,
+ * supabase/functions/report). Empty url = feature hidden.
  */
 export const LEADERBOARD = {
   // Arsalan's personal Supabase project "arena-lounge" (eu-central-1), NOT the Game Arena

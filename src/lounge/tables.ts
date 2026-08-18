@@ -333,6 +333,7 @@ export function maybeStart(t: Table): void {
   b.winner = Winner.None
   b.moveCount = 0
   b.updatedAt = Date.now()
+  b.dealtAt = b.updatedAt
 }
 
 /** Take a seat. Stands up from any other seat first. */
