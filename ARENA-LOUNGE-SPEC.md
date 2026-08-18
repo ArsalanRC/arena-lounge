@@ -309,12 +309,12 @@ version works as well", 16 Aug 11:30):
    velvet furniture). Open polish: floor brightness at night, elevator shafts +
    kiosk + directory still wood, ceiling medallion artwork (public-domain fresco
    needs his OK to download).
-3d. Next (his 18 Aug list, in order): two tables per game except Ludo + wider
-   walking rings on every floor (entity/material budget check on mobile),
-   royalty-free background music (generated loop or a CC0 track he picks),
-   suggestions + bugs box at the entrance (UI input -> signed Edge Function ->
-   `lounge_feedback` table), then the mobile pass. Then: sprite atlases (fewer
-   texture requests, the 525 hiccup), README refresh with phone screenshots, submission ~1 to
+3d. (done 18 Aug 22:30) two tables per game, wider rings, palace rooftop, music,
+   suggestion box. Next: the mobile pass on the live World (controller bar with the
+   new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
+   on the phone keyboard, music toggle), then the sprite atlas (textures 29/33),
+   ceiling medallion artwork (PD fresco, needs his OK to download), elevator shafts /
+   kiosk / directory / gateway still wood, README refresh with phone screenshots, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
@@ -477,6 +477,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-18 22:30 evening batch (Arsalan's list, all built and reviewed in the preview): two tables per game except Ludo (27 tables; ground zones r 11.3, game room r 10.2, sky room r 8.5; rugs 5.4 m on slabs), walking rings widened to 2 m+ on every floor (path-a 0.705, path-b 0.60; sofas ground r 4.6, sky r 7.0), palace rooftop (marble balustrades + two-step cornices on every slab edge in tower-palace.glb, four pavilions models/pavilion.glb at 45/135/225/315 r 8.0, benches re-spaced), background music (tools/gen-music.py: original 96 s lounge loop, ogg 630 KB, global AudioSource 0.3, "Music: on/off" in the ? panel, five languages; Arsalan: "sounds great"), suggestion box at the entrance (models/postbox.glb at (27.7,16), click -> panel with UI Input -> signedFetch -> Edge Function `feedback` -> `lounge_feedback` (migration 004, five notes per wallet per day; read with tools/dev/supa-sql supabase/list-feedback.sql); shared verifier supabase/functions/_shared/dcl-auth.ts, both functions redeployed and checked live). Stats after: 777 entities (43 %), 72.6k tris (81 %), textures 29/33 (88 %: the sprite atlas is now the next optimisation)
 
 - 2026-08-18 21:20 palace reviewed live + sky fix (Arsalan home; asked for marble tables/chairs and ceiling artwork): the Explorer updated itself at 20:15 (client build of 18 Aug) and now renders 04:30 and 19:00 as a pink dawn/sunset (the live World looked pink on desktop); 22:00 (79200) is a clean purple night, set in scene.json + SkyboxTime (the moon-artefact hours may differ in this build; five sky views at 22:00 were clean). Palace additions: coffered lapis-and-gold ceilings with rosettes on every slab underside (models/palace/ceiling.png), marble furniture variants table/table4/bench/sofa/bar-palace.glb (marble tops with UVs, brass frames, red velvet), self-lit marble (emissive = own texture, ~0.18) so the purple ambient does not turn it lavender. Verified in the preview on the ground floor, game room, sky room, rooftop. Merged PR #57, deployed. Next (his list): two tables per game except Ludo + wider walking rings, royalty-free background music, a suggestions/bugs box at the entrance, then the mobile pass
 
