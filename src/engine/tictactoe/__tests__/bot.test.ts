@@ -90,8 +90,10 @@ describe("minimax", () => {
 
 describe("hard bot vs hard bot", () => {
   it("always draws when both play optimally", () => {
-    // Play 10 games of hard vs hard
-    for (let game = 0; game < 10; game++) {
+    // Minimax has no randomness, so every hard-vs-hard game is the same game: two runs
+    // prove determinism, and stay well under the test timeout on a loaded machine
+    // (ten runs took ~0.5 s alone and timed out now and then in the full parallel suite).
+    for (let game = 0; game < 2; game++) {
       let state = createInitialState(PLAYERS);
 
       while (state.status === "playing") {
