@@ -417,7 +417,7 @@ function buildTower(): void {
   }
   planter(PLAZA.x - 8.9, PLAZA.z + 3, y3)
   planter(PLAZA.x + 8.9, PLAZA.z + 3, y3)
-  liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z + 7.0), () => L().rooftop, 2.6, Color4.White(), 8)
+  liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z - 7.0), () => L().rooftop, 2.6, Color4.White(), 8) // south, clear of the board
   if (leaderboardEnabled()) leaderboardBoard(Vector3.create(PLAZA.x, y3, PLAZA.z + 8.4))
   else liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)
 }
@@ -428,13 +428,15 @@ function buildTower(): void {
  * leaderboardSystem). Faces south (readers come from the elevators / oculus).
  */
 function leaderboardBoard(pos: Vector3): void {
-  prop('models/board.glb', Vector3.create(pos.x, pos.y + 2.4, pos.z), 0, 1.35, true)
+  // board.glb is a 2.6 x 1.9 plate on a 2.2 m pole; at 1.5x the plate is 3.9 x 2.85 with its
+  // centre 2.6 m up. TextShapes read from their -Z side, and the readers stand south (-Z).
+  prop('models/board.glb', Vector3.create(pos.x, pos.y + 2.6, pos.z), 0, 1.5, true)
   const title = engine.addEntity()
-  Transform.create(title, { parent: undefined, position: Vector3.create(pos.x, pos.y + 3.55, pos.z - 0.14), rotation: Quaternion.fromEulerDegrees(0, 180, 0) })
-  TextShape.create(title, { text: '', fontSize: 1.5, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 5, height: 0.6 })
+  Transform.create(title, { position: Vector3.create(pos.x, pos.y + 3.72, pos.z - 0.14) })
+  TextShape.create(title, { text: '', fontSize: 2.2, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 5, height: 0.7 })
   const body = engine.addEntity()
-  Transform.create(body, { position: Vector3.create(pos.x, pos.y + 2.25, pos.z - 0.14), rotation: Quaternion.fromEulerDegrees(0, 180, 0) })
-  TextShape.create(body, { text: '', fontSize: 0.78, font: Font.F_MONOSPACE, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), width: 5.6, height: 3.4, lineSpacing: 6 })
+  Transform.create(body, { position: Vector3.create(pos.x, pos.y + 2.35, pos.z - 0.14) })
+  TextShape.create(body, { text: '', fontSize: 1.35, font: Font.F_MONOSPACE, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), width: 4.2, height: 2.4 })
   let shownVersion = -1
   let shownLang = ''
   engine.addSystem((dt) => {
