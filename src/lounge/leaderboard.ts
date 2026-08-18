@@ -105,9 +105,12 @@ export async function loadMyStats(address: string): Promise<void> {
 
 /** Refresh the board every so often while something shows it (rooftop, open panel); the caller decides when. */
 let timer = 0
+let primed = false
 export function leaderboardTicker(dt: number, wanted: boolean): void {
   timer += dt
   if (timer < 5) return
   timer = 0
-  if (wanted) void refreshLeaderboard(false)
+  // one fetch shortly after start so the rooftop board is filled before anyone climbs; then only on demand
+  if (wanted || !primed) void refreshLeaderboard(false)
+  primed = true
 }
