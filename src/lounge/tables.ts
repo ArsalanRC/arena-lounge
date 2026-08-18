@@ -99,6 +99,10 @@ export const local = {
   /** Help panel tab: the rules or the leaderboard. */
   helpTab: 'rules' as 'rules' | 'board',
   langPickerOpen: false,
+  /** Suggestion box at the entrance: panel open, the note being typed, and the send state. */
+  feedbackOpen: false,
+  feedbackText: '',
+  feedbackState: 'idle' as 'idle' | 'sending' | 'sent' | 'failed',
   /** Last time the local player did something at a table (sit / act / rematch). */
   lastActionAt: 0,
   /** Set when the CRDT room never connected; local play is still allowed. */

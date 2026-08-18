@@ -769,8 +769,8 @@ if __name__ == '__main__':
     gen_wood()
     gen_floor()
     gen_rug()
-    gen_path_ring('images/path-a.png', 0.786)   # ground 6.0..7.6, game room 5.5..7.0, rooftop 4.7..6.0
-    gen_path_ring('images/path-b.png', 0.654)   # sky room 3.4..5.2
+    gen_path_ring('images/path-a.png', 0.705)   # ground 5.4..7.6, game room 5.2..7.4, rooftop 4.65..6.6
+    gen_path_ring('images/path-b.png', 0.60)    # sky room 3.4..5.7
     gen_ui_disc('images/ui/disc-yellow.png', '#f5c518', '#b8890a', '#ffe680')
     gen_ui_disc('images/ui/disc-red.png', '#e2453d', '#961f1a', '#ff8a7a')
     gen_ui_disc('images/ui/disc-dark.png', '#2a2422', '#0d0b0a', '#6a5f5a')

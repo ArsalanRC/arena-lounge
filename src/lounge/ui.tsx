@@ -23,12 +23,14 @@
  * the renderer runs every frame and reads module state + synced components.
  */
 import { Color4 } from '@dcl/sdk/math'
-import ReactEcs, { ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
+import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { board, leaderboardEnabled, refreshLeaderboard } from './leaderboard'
+import { feedbackEnabled, sendFeedback } from './feedback'
+import { music, toggleMusic } from './music'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
 import { LOCALES, localeInfo, t as L, uiLang } from './i18n'
@@ -571,6 +573,55 @@ function LeaderboardBody() {
   )
 }
 
+/**
+ * Suggestion box panel (opened from the brass box at the entrance): one text
+ * field, Send / Cancel, and a status line; the note goes out signed (feedback.ts).
+ */
+function FeedbackPanel() {
+  if (!local.feedbackOpen || !feedbackEnabled()) return null
+  const str = L()
+  const info = localeInfo(uiLang.code)
+  const mobile = phone()
+  const width = mobile ? 900 : 640
+  const close = () => {
+    local.feedbackOpen = false
+    if (local.feedbackState !== 'sending') local.feedbackState = 'idle'
+  }
+  const status = local.feedbackState === 'sent' ? str.feedbackThanks : local.feedbackState === 'failed' ? str.feedbackFailed : local.feedbackState === 'sending' ? '...' : ''
+  return (
+    <UiEntity
+      uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+      uiBackground={{ color: Color4.create(0, 0, 0, 0.5) }}
+      onMouseDown={close}
+    >
+      <Panel width={width} place={{}} padding={20}>
+        <Text value={str.feedbackTitle} size={T.title} />
+        <Para value={str.feedbackHint} color={UI.muted} margin={{ top: 4, bottom: 10 }} rtl={info.rtl} />
+        <UiEntity uiTransform={{ width: '100%', height: mobile ? 64 : 52, margin: { bottom: 10 } }} uiBackground={{ color: Color4.create(1, 1, 1, 0.94) }}>
+          <Input
+            uiTransform={{ width: '100%', height: '100%', padding: { left: 12, right: 12 } }}
+            placeholder={str.feedbackPlaceholder}
+            placeholderColor={Color4.create(0.45, 0.42, 0.4, 1)}
+            color={Color4.create(0.08, 0.07, 0.07, 1)}
+            fontSize={mobile ? 22 : 19}
+            value={local.feedbackText}
+            onChange={(v) => {
+              local.feedbackText = v.slice(0, 600)
+              if (local.feedbackState !== 'sending') local.feedbackState = 'idle'
+            }}
+            onSubmit={() => void sendFeedback()}
+          />
+        </UiEntity>
+        {status !== '' && <Text value={status} size={T.body} color={local.feedbackState === 'failed' ? UI.red : UI.accentTint} margin={{ bottom: 8 }} />}
+        <Row height={48}>
+          <Btn label={str.send} color={UI.accent} onClick={() => void sendFeedback()} width={170} />
+          <Btn label={local.feedbackState === 'sent' ? str.gotIt : str.cancel} quiet onClick={close} width={170} />
+        </Row>
+      </Panel>
+    </UiEntity>
+  )
+}
+
 function HelpPanel() {
   if (!local.helpOpen) return null
   if (local.helpGame === '') local.helpGame = defaultHelpGame()
@@ -623,8 +674,9 @@ function HelpPanel() {
           </UiEntity>
         )}
         <Row height={48} margin={{ bottom: 6 }}>
-          <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={260} />
-          <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={170} />
+          <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={230} />
+          <Btn label={music.on ? str.musicOn : str.musicOff} quiet onClick={toggleMusic} width={mobile ? 170 : 150} />
+          <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={150} />
         </Row>
         {local.langPickerOpen && (
           <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', margin: { top: 6 } }}>
@@ -660,5 +712,6 @@ const LoungeUi = () => (
     <ElevatorPanel />
     <Controller />
     <HelpPanel />
+    <FeedbackPanel />
   </UiEntity>
 )
