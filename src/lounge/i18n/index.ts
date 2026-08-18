@@ -99,6 +99,14 @@ export interface LoungeStrings {
   leaderboardTab: string
   musicOn: string
   musicOff: string
+  feedbackTitle: string
+  feedbackHint: string
+  feedbackPlaceholder: string
+  send: string
+  cancel: string
+  feedbackThanks: string
+  feedbackFailed: string
+  feedbackSign: string
   howToPlayTab: string
   winsShort: string
   streakShort: string
@@ -262,6 +270,14 @@ const EN: LoungeStrings = {
   leaderboardTab: 'Leaderboard',
   musicOn: 'Music: on',
   musicOff: 'Music: off',
+  feedbackTitle: 'Ideas & bugs',
+  feedbackHint: 'Something to improve, something broken? Write it here; the note is saved with your name and read by the builder.',
+  feedbackPlaceholder: 'Type your note...',
+  send: 'Send',
+  cancel: 'Cancel',
+  feedbackThanks: 'Thanks, saved!',
+  feedbackFailed: 'Could not save. Try again in a moment.',
+  feedbackSign: 'IDEAS\nBUGS',
   howToPlayTab: 'How to play',
   winsShort: 'wins',
   streakShort: 'streak',
@@ -423,6 +439,14 @@ const DE: LoungeStrings = {
   leaderboardTab: 'Bestenliste',
   musicOn: 'Musik: an',
   musicOff: 'Musik: aus',
+  feedbackTitle: 'Ideen & Fehler',
+  feedbackHint: 'Etwas zu verbessern, etwas kaputt? Hier eintippen; die Notiz wird mit deinem Namen gespeichert und vom Erbauer gelesen.',
+  feedbackPlaceholder: 'Deine Notiz...',
+  send: 'Senden',
+  cancel: 'Abbrechen',
+  feedbackThanks: 'Danke, gespeichert!',
+  feedbackFailed: 'Konnte nicht speichern. Versuch es gleich noch einmal.',
+  feedbackSign: 'IDEEN\nFEHLER',
   howToPlayTab: 'So geht’s',
   winsShort: 'Siege',
   streakShort: 'Serie',
@@ -584,6 +608,14 @@ const ES: LoungeStrings = {
   leaderboardTab: 'Clasificación',
   musicOn: 'Música: sí',
   musicOff: 'Música: no',
+  feedbackTitle: 'Ideas y fallos',
+  feedbackHint: '¿Algo que mejorar, algo roto? Escríbelo aquí; la nota se guarda con tu nombre y la lee el creador.',
+  feedbackPlaceholder: 'Escribe tu nota...',
+  send: 'Enviar',
+  cancel: 'Cancelar',
+  feedbackThanks: '¡Gracias, guardado!',
+  feedbackFailed: 'No se pudo guardar. Inténtalo de nuevo en un momento.',
+  feedbackSign: 'IDEAS\nFALLOS',
   howToPlayTab: 'Cómo se juega',
   winsShort: 'victorias',
   streakShort: 'racha',
@@ -745,6 +777,14 @@ const PT: LoungeStrings = {
   leaderboardTab: 'Ranking',
   musicOn: 'Música: ligada',
   musicOff: 'Música: desligada',
+  feedbackTitle: 'Ideias e bugs',
+  feedbackHint: 'Algo a melhorar, algo quebrado? Escreva aqui; a nota fica guardada com o seu nome e é lida pelo criador.',
+  feedbackPlaceholder: 'Escreva a sua nota...',
+  send: 'Enviar',
+  cancel: 'Cancelar',
+  feedbackThanks: 'Obrigado, guardado!',
+  feedbackFailed: 'Não foi possível guardar. Tente de novo daqui a pouco.',
+  feedbackSign: 'IDEIAS\nBUGS',
   howToPlayTab: 'Como jogar',
   winsShort: 'vitórias',
   streakShort: 'série',
@@ -906,6 +946,14 @@ const FR: LoungeStrings = {
   leaderboardTab: 'Classement',
   musicOn: 'Musique : oui',
   musicOff: 'Musique : non',
+  feedbackTitle: 'Idées et bugs',
+  feedbackHint: 'Quelque chose à améliorer, quelque chose de cassé ? Écrivez-le ici ; la note est enregistrée avec votre nom et lue par le créateur.',
+  feedbackPlaceholder: 'Votre note...',
+  send: 'Envoyer',
+  cancel: 'Annuler',
+  feedbackThanks: 'Merci, enregistré !',
+  feedbackFailed: 'Enregistrement impossible. Réessayez dans un instant.',
+  feedbackSign: 'IDÉES\nBUGS',
   howToPlayTab: 'Comment jouer',
   winsShort: 'victoires',
   streakShort: 'série',

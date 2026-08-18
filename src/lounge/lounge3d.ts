@@ -33,6 +33,7 @@ import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
 import { board, leaderboardEnabled, leaderboardTicker } from './leaderboard'
+import { feedbackEnabled } from './feedback'
 
 /**
  * Text labels that follow the UI language: each entry re-renders its text
@@ -269,6 +270,22 @@ function infoKiosk(x: number, z: number): void {
   })
 }
 
+/**
+ * Suggestion box (ideas + bugs) beside the entrance: a brass letter box on a
+ * marble pedestal (models/postbox.glb); clicking it opens the feedback panel.
+ */
+function feedbackBox(x: number, z: number): void {
+  if (!feedbackEnabled()) return
+  const e = engine.addEntity()
+  Transform.create(e, { position: Vector3.create(x, 0, z), rotation: Quaternion.fromEulerDegrees(0, -45, 0) })
+  GltfContainer.create(e, { src: 'models/postbox.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
+  liveLabel(Vector3.create(x, 2.05, z), () => L().feedbackSign, 1.1, PALETTE.brass, 4)
+  pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'Ideas & bugs', maxDistance: 10 } }, () => {
+    local.feedbackOpen = true
+    local.feedbackState = 'idle'
+  })
+}
+
 // ---------------------------------------------------------------- scene
 
 export function buildLounge(): void {
@@ -374,6 +391,7 @@ export function buildLounge(): void {
   prop('models/gateway.glb', Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
   liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
   infoKiosk(20.3, 16.0)
+  feedbackBox(27.7, 16.0)
   directoryBoard(18.9, 14.9)
 
   buildTower()

@@ -462,6 +462,21 @@ box_mesh(ks_cube, (0, 1.45, 0), (0.42, 0.42, 0.42))
 box_mesh(ks_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
 write_glb('models/kiosk.glb', [("post", ks_post, 0), ("cube", ks_cube, 1), ("kiosk_collider", ks_coll, 2)], [WOOD_DARK, GLOW_CYAN, COLLIDER])
 
+# suggestion box (ideas + bugs) at the entrance: marble pedestal, brass letter box with a dark slot and a
+# small ball finial; pointer collider around the box (lounge3d opens the feedback panel on click)
+pb_ped, pb_box, pb_slot, pb_coll = Mesh(), Mesh(), Mesh(), Mesh()
+prism(pb_ped, 0, 0, 0.30, 0, 0.08, 12)
+prism(pb_ped, 0, 0, 0.22, 0.08, 0.95, 12)
+prism(pb_ped, 0, 0, 0.30, 0.95, 1.02, 12)
+box_mesh(pb_box, (0, 1.24, 0), (0.56, 0.44, 0.40))
+box_mesh(pb_box, (0, 1.48, 0), (0.60, 0.05, 0.44))            # lid
+prism(pb_box, 0, 0, 0.06, 1.50, 1.62, 8)                       # finial
+box_mesh(pb_slot, (0, 1.36, -0.205), (0.34, 0.035, 0.02))     # slot on the front (-z)
+box_mesh(pb_coll, (0, 1.25, 0), (0.7, 0.6, 0.55))
+MARBLE_CREAM_M = {"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]}
+SLOT_DARK = {"name": "slot", "pbrMetallicRoughness": {"baseColorFactor": [0.05, 0.04, 0.04, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}}
+write_glb('models/postbox.glb', [("pedestal", pb_ped, 0), ("box", pb_box, 1), ("slot", pb_slot, 2), ("postbox_collider", pb_coll, 3)], [MARBLE_CREAM_M, BRASS_MAT, SLOT_DARK, COLLIDER])
+
 # gateway: two posts + beam + two lanterns (spans x -3.2..3.2 at z 0)
 gw_wood, gw_light = Mesh(), Mesh()
 for x in (-3.2, 3.2):

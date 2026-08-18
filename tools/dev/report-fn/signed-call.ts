@@ -4,6 +4,7 @@
 //   PAIR=1     two identities report the same round (win / loss) naming each other: the second call must confirm
 //   TAMPER=1   change the timestamp after signing (must be rejected)      STALE=1  sign a ten-minute-old timestamp
 //   APIKEY=... adds the publishable key header like the scene does
+//   FEEDBACK="text"  posts a suggestion-box note instead of a result (url = .../functions/v1/feedback)
 import { Authenticator } from "npm:@dcl/crypto@3";
 import { createUnsafeIdentity } from "npm:@dcl/crypto@3/dist/crypto.js";
 
@@ -31,7 +32,9 @@ async function send(who: Awaited<ReturnType<typeof makeIdentity>>, body: Record<
 }
 
 const a = await makeIdentity();
-if (Deno.env.get("PAIR")) {
+if (Deno.env.get("FEEDBACK")) {
+  await send(a, { name: "Dev Helper", text: Deno.env.get("FEEDBACK"), lang: "en", where: "dev" });
+} else if (Deno.env.get("PAIR")) {
   const b = await makeIdentity();
   const key = `2:1:${Date.now()}`;
   await send(a, { name: "Dev A", game: "tictactoe", result: "win", round_key: key, opponents: [b.address] });
