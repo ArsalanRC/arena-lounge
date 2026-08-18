@@ -161,7 +161,7 @@ function prop(src: string, pos: Vector3, rotY = 0, scale = 1, collide = false): 
 }
 
 function planter(x: number, z: number, y = 0): void {
-  prop('models/planter.glb', Vector3.create(x, y, z), 0, 1, true)
+  prop(finish('planter'), Vector3.create(x, y, z), 0, 1, true)
 }
 
 /** Garden tree (trunk + two leaf balls), `size` scales the whole tree. */
@@ -170,15 +170,15 @@ function tree(x: number, z: number, size = 1): void {
 }
 
 function lamp(x: number, z: number, y = 0): void {
-  prop('models/lamp.glb', Vector3.create(x, y, z), 45)
+  prop(finish('lamp'), Vector3.create(x, y, z), 45)
 }
 
 /** A bench facing `toward` (models/bench.glb). */
 function bench(pos: Vector3, toward: Vector3): void {
-  prop(PALACE ? 'models/bench-palace.glb' : 'models/bench.glb', pos, yawToward(pos, toward), 1, true)
+  prop(finish('bench'), pos, yawToward(pos, toward), 1, true)
 }
-/** Model path of a lounge prop in the current finish (sofa / bar have palace variants). */
-function finish(name: 'sofa' | 'bar'): string {
+/** Model path of a lounge prop in the current finish (every prop below has a marble + brass palace variant). */
+function finish(name: 'sofa' | 'bar' | 'bench' | 'board' | 'kiosk' | 'shaft' | 'gateway' | 'lamp' | 'planter' | 'plazatree'): string {
   return PALACE ? `models/${name}-palace.glb` : `models/${name}.glb`
 }
 
@@ -206,7 +206,7 @@ function zoneBanner(z: ZoneDef): void {
   const centre = Vector3.create(PLAZA.x, y, PLAZA.z)
   const away = Vector3.normalize(Vector3.subtract(z.position, centre))
   const pos = Vector3.add(z.position, Vector3.scale(away, 2.6))
-  cylinder(Vector3.create(pos.x, y + 1.7, pos.z), Vector3.create(0.12, 3.4, 0.12), PALETTE.woodDark, true)
+  cylinder(Vector3.create(pos.x, y + 1.7, pos.z), Vector3.create(0.12, 3.4, 0.12), PALACE ? PALETTE.brass : PALETTE.woodDark, true)
   const cloth = engine.addEntity()
   Transform.create(cloth, {
     position: Vector3.create(pos.x, y + 2.35, pos.z),
@@ -230,7 +230,7 @@ function zoneBanner(z: ZoneDef): void {
  */
 function elevatorShaft(pad: Vector3): void {
   // models/shaft.glb: posts, glass on three sides (open towards -Z = the plaza), roof, pads + light rings on every floor
-  prop('models/shaft.glb', Vector3.create(pad.x, 0, pad.z), yawToward(pad, PLAZA))
+  prop(finish('shaft'), Vector3.create(pad.x, 0, pad.z), yawToward(pad, PLAZA))
   for (const f of FLOORS) {
     liveLabel(Vector3.create(pad.x, f.y + 3.05, pad.z), () => L().elevator, 2.0, Color4.White(), 6)
     liveLabel(Vector3.create(pad.x, f.y + 2.35, pad.z), () => L().floors.join(' · '), 0.9, PALETTE.cream, 6)
@@ -242,7 +242,7 @@ function directoryBoard(x: number, z: number): void {
   const yaw = 90 // plate faces east, towards the spawn
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(x, 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  GltfContainer.create(e, { src: 'models/board.glb' })
+  GltfContainer.create(e, { src: finish('board') })
   const text = (): string => {
     const names = (floor: number) =>
       ZONES.filter((zn) => zn.floor === floor && BUILT_GAMES.includes(zn.gameId))
@@ -262,7 +262,7 @@ function directoryBoard(x: number, z: number): void {
 function infoKiosk(x: number, z: number): void {
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(x, 0, z), rotation: Quaternion.fromEulerDegrees(0, 45, 0) })
-  GltfContainer.create(e, { src: 'models/kiosk.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
+  GltfContainer.create(e, { src: finish('kiosk'), invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
   label(Vector3.create(x, 1.45, z), '?', 4, Color4.White(), 2)
   liveLabel(Vector3.create(x, 2.05, z), () => L().howToPlay, 1.4, Color4.White(), 4)
   pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'How to play', maxDistance: 10 } }, () => {
@@ -351,7 +351,7 @@ export function buildLounge(): void {
   // the plaza: a big warm rug, a tree in the middle as the landmark, four
   // benches facing in, lamps at the corners
   rug(PLAZA, 9.5, Color4.fromHexString('#e3c9a3ff'), 0.008, Color4.fromHexString('#ffd27aff'))
-  prop('models/plazatree.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
+  prop(finish('plazatree'), Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
   for (const [x, z] of [[PLAZA.x - 3.6, PLAZA.z + 2.6], [PLAZA.x + 3.6, PLAZA.z + 2.6], [PLAZA.x - 3.6, PLAZA.z - 2.6], [PLAZA.x + 3.6, PLAZA.z - 2.6]]) {
     bench(Vector3.create(x, 0, z), PLAZA)
   }
@@ -388,7 +388,7 @@ export function buildLounge(): void {
   // entrance sequence (south to north): portal, bars flanking the path, gateway with the
   // welcome sign, then the ring path; kiosk and directory sit off the path to the west
   const gz = PLAZA.z - 8.6
-  prop('models/gateway.glb', Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
+  prop(finish('gateway'), Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
   liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
   infoKiosk(20.3, 16.0)
   feedbackBox(27.7, 16.0)
@@ -491,7 +491,7 @@ function buildTower(): void {
 function leaderboardBoard(pos: Vector3): void {
   // board.glb is a 2.6 x 1.9 plate on a 2.2 m pole; at 1.5x the plate is 3.9 x 2.85 with its
   // centre 2.6 m up. TextShapes read from their -Z side, and the readers stand south (-Z).
-  prop('models/board.glb', Vector3.create(pos.x, pos.y + 2.6, pos.z), 0, 1.5, true)
+  prop(finish('board'), Vector3.create(pos.x, pos.y + 2.6, pos.z), 0, 1.5, true)
   const title = engine.addEntity()
   Transform.create(title, { position: Vector3.create(pos.x, pos.y + 3.72, pos.z - 0.14) })
   TextShape.create(title, { text: '', fontSize: 2.2, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 5, height: 0.7 })
