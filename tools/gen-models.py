@@ -154,8 +154,9 @@ floors_marble, floors_under = Mesh(), Mesh()
 for (y, r_in, r_out, th) in FLOORS:
     annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_under)
 
-rings = Mesh()
+rings = Mesh()      # lounge look: wire railing rails + glowing rims + crown ring (one glow material)
 posts = Mesh()
+glow_only = Mesh()  # palace look: only the glowing rims + crown ring (the railing is a marble balustrade)
 def railing(y, r, n_posts):
     box_strip(rings, ring_frames(y + RAIL_H, r), 0.12, 0.12)          # top rail
     box_strip(rings, ring_frames(y + RAIL_H * 0.5, r), 0.06, 0.06)    # mid rail
@@ -167,9 +168,34 @@ def railing(y, r, n_posts):
 for (y, r_in, r_out, th) in FLOORS:
     railing(y, r_out - 0.15, 24)          # outer edge
     railing(y, r_in + 0.15, 12)           # oculus edge
-    box_strip(rings, ring_frames(y - th / 2, r_out + 0.06), 0.16, 0.14)   # glowing rim on the slab edge
+    for m in (rings, glow_only):
+        box_strip(m, ring_frames(y - th / 2, r_out + 0.06), 0.16, 0.14)   # glowing rim on the slab edge
 # crown ring where the ribs end
-box_strip(rings, ring_frames(H, R_TOP), 0.5, 0.5)
+for m in (rings, glow_only):
+    box_strip(m, ring_frames(H, R_TOP), 0.5, 0.5)
+
+# palace railings: marble balustrades (base rail, square balusters every ~0.36 m, wide top rail) on every
+# slab edge, and a two-step cornice moulding under every slab edge (the layered facade seen from outside)
+def pillar(mesh, cx, cz, y0, y1, half):
+    """Square post, sides only (the rails hide the ends)."""
+    x0, x1, z0, z1 = cx - half, cx + half, cz - half, cz + half
+    mesh.quad((x0, y0, z1), (x0, y1, z1), (x1, y1, z1), (x1, y0, z1))
+    mesh.quad((x1, y0, z0), (x1, y1, z0), (x0, y1, z0), (x0, y0, z0))
+    mesh.quad((x1, y0, z1), (x1, y1, z1), (x1, y1, z0), (x1, y0, z0))
+    mesh.quad((x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1))
+balustrade, cornice = Mesh(), Mesh()
+def balustrade_ring(y, r):
+    box_strip(balustrade, ring_frames(y + 0.06, r), 0.22, 0.12)         # base rail
+    box_strip(balustrade, ring_frames(y + RAIL_H, r), 0.26, 0.10)       # top rail
+    n = int(2 * math.pi * r / 0.36)
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        pillar(balustrade, r * math.cos(a), r * math.sin(a), y + 0.12, y + RAIL_H - 0.05, 0.05)
+for (y, r_in, r_out, th) in FLOORS:
+    balustrade_ring(y, r_out - 0.15)
+    balustrade_ring(y, r_in + 0.15)
+    box_strip(cornice, ring_frames(y - 0.08, r_out + 0.14), 0.28, 0.14)   # upper moulding, projects 0.28 m
+    box_strip(cornice, ring_frames(y - 0.22, r_out + 0.06), 0.12, 0.10)   # lower step
 
 coll = Mesh()   # slabs (walkable) + railing walls
 for (y, r_in, r_out, th) in FLOORS:
@@ -292,7 +318,8 @@ PALACE_TOWER_MATERIALS = [
     TOWER_MATERIALS[4],
     {"name": "ceiling", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 1}, "metallicFactor": 0.1, "roughnessFactor": 0.6}, "emissiveTexture": {"index": 1}, "emissiveFactor": [0.35, 0.35, 0.35]},
 ]
-write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png'])
+PALACE_TOWER_MATERIALS.append({"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]})
+write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("glow", glow_only, 2), ("balustrade", balustrade, 6), ("cornice", cornice, 6), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png'])
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])
@@ -792,3 +819,26 @@ for x in (-1.2, 0, 1.2):
     prism(pbar_top, x, -1.0, 0.05, 0, 0.7, 8)      # brass stool posts
     prism(pbar_body, x, -1.0, 0.24, 0.7, 0.78, 12)  # marble stool tops
 write_glb('models/bar-palace.glb', [("body", pbar_body, 0), ("top", pbar_top, 1), ("glow", pbar_glow, 2)], [MARBLE_MAT, BRASS_MAT, LAMP], images=['palace/marble.png'])
+
+# rooftop pavilion (palace): four fluted-look columns, a square entablature and a shallow brass pyramid roof;
+# 2.6 m square footprint, columns 2.7 m; placed four times on the terrace by lounge3d
+pv_cols, pv_beams, pv_roof = Mesh(), Mesh(), Mesh()
+for (x, z) in [(-1.15, -1.15), (1.15, -1.15), (-1.15, 1.15), (1.15, 1.15)]:
+    prism(pv_cols, x, z, 0.14, 0.0, 2.7, 12)
+    prism(pv_cols, x, z, 0.20, 0.0, 0.12, 12)     # base
+    prism(pv_cols, x, z, 0.20, 2.58, 2.7, 12)     # capital
+box_mesh(pv_beams, (0, 2.85, -1.15), (2.9, 0.3, 0.32))
+box_mesh(pv_beams, (0, 2.85, 1.15), (2.9, 0.3, 0.32))
+box_mesh(pv_beams, (-1.15, 2.85, 0), (0.32, 0.3, 2.9))
+box_mesh(pv_beams, (1.15, 2.85, 0), (0.32, 0.3, 2.9))
+box_mesh(pv_beams, (0, 3.05, 0), (3.1, 0.1, 3.1))     # cornice slab
+apex = (0, 3.75, 0)
+c00, c10, c11, c01 = (-1.5, 3.1, -1.5), (1.5, 3.1, -1.5), (1.5, 3.1, 1.5), (-1.5, 3.1, 1.5)
+for a, b in ((c00, c10), (c10, c11), (c11, c01), (c01, c00)):
+    n = normal(a, b, apex); base = len(pv_roof.pos)
+    for pnt in (a, b, apex):
+        pv_roof.pos.append(pnt); pv_roof.nor.append(n)
+    pv_roof.idx += [base, base + 1, base + 2]
+prism(pv_roof, 0, 0, 0.06, 3.7, 4.1, 8)   # finial
+MARBLE_CREAM = {"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]}
+write_glb('models/pavilion.glb', [("columns", pv_cols, 0), ("beams", pv_beams, 0), ("roof", pv_roof, 1)], [MARBLE_CREAM, BRASS_MAT])

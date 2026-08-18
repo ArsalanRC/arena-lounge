@@ -446,9 +446,17 @@ function buildTower(): void {
   // rooftop terrace (floor 3): benches looking down the oculus, planters, a sign under the crown
   const y3 = FLOORS[3].y
   const roofCentre = Vector3.create(PLAZA.x, y3, PLAZA.z)
-  for (const deg of [30, 100, 170, 260, 330]) {
+  // benches look down the oculus; in the palace finish four marble pavilions stand between them
+  for (const deg of PALACE ? [22, 90, 158, 202, 270, 338] : [30, 100, 170, 260, 330]) {
     const t = (deg * Math.PI) / 180
-    bench(Vector3.create(PLAZA.x + Math.sin(t) * 7.4, y3, PLAZA.z + Math.cos(t) * 7.4), roofCentre)
+    bench(Vector3.create(PLAZA.x + Math.sin(t) * 7.2, y3, PLAZA.z + Math.cos(t) * 7.2), roofCentre)
+  }
+  if (PALACE) {
+    for (const deg of [45, 135, 225, 315]) {
+      const t = (deg * Math.PI) / 180
+      const pos = Vector3.create(PLAZA.x + Math.sin(t) * 8.0, y3, PLAZA.z + Math.cos(t) * 8.0)
+      prop('models/pavilion.glb', pos, deg, 1, true)
+    }
   }
   planter(PLAZA.x - 8.9, PLAZA.z + 3, y3)
   planter(PLAZA.x + 8.9, PLAZA.z + 3, y3)
