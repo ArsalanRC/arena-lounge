@@ -58,7 +58,9 @@ export const TableBoard = engine.defineComponent('arena::tableBoard', {
   winsC: Schemas.Int,
   winsD: Schemas.Int,
   /** Date.now() of the last state change (turn timer + staleness). */
-  updatedAt: Schemas.Int64
+  updatedAt: Schemas.Int64,
+  /** Date.now() when the current round was dealt; with table id + round it names the round on the leaderboard server. */
+  dealtAt: Schemas.Int64
 })
 
 const seatSpec = {
@@ -95,7 +97,8 @@ export function emptyBoard(gameId: string): BoardData {
     winsB: 0,
     winsC: 0,
     winsD: 0,
-    updatedAt: 0
+    updatedAt: 0,
+    dealtAt: 0
   }
 }
 
