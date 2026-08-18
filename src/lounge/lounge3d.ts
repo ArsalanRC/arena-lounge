@@ -28,7 +28,7 @@ import {
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef } from './config'
+import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_SIZE, PALETTE, PLAZA, SCENE_SIZE, SPAWN, ZONES, yawToward, type FloorDef, type ZoneDef, INTERIOR } from './config'
 import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
@@ -62,6 +62,8 @@ function solid(pos: Vector3, scale: Vector3, color: Color4, opts: { collide?: bo
   return e
 }
 
+const PALACE = INTERIOR === 'palace'
+
 function cylinder(pos: Vector3, scale: Vector3, color: Color4, collide = false): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: pos, scale })
@@ -71,15 +73,30 @@ function cylinder(pos: Vector3, scale: Vector3, color: Color4, collide = false):
   return e
 }
 
-function texturedBox(pos: Vector3, scale: Vector3, src: string, tiling: [number, number], collide = false, rotY = 0): Entity {
+/** A structural column: fluted marble with gold capital and base in the palace finish, plain wood-brown otherwise. */
+function column(pos: Vector3, scale: Vector3, collide = true): Entity {
+  if (!PALACE) return cylinder(pos, scale, PALETTE.column, collide)
+  const e = engine.addEntity()
+  Transform.create(e, { position: pos, scale })
+  MeshRenderer.setCylinder(e, 0.5, 0.5)
+  if (collide) MeshCollider.setCylinder(e, 0.5, 0.5)
+  // the shaft texture runs bottom -> top once (capital at v = 1); the cylinder's u wraps around
+  const shaft = Material.Texture.Common({ src: 'models/palace/column.png', wrapMode: TextureWrapMode.TWM_CLAMP })
+  Material.setPbrMaterial(e, { texture: shaft, albedoColor: Color4.White(), roughness: 0.4, metallic: 0, emissiveTexture: shaft, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: 0.18 })
+  return e
+}
+
+function texturedBox(pos: Vector3, scale: Vector3, src: string, tiling: [number, number], collide = false, rotY = 0, selfLit = 0): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: pos, scale, rotation: Quaternion.fromEulerDegrees(0, rotY, 0) })
   MeshRenderer.setBox(e)
   if (collide) MeshCollider.setBox(e)
+  const tex = Material.Texture.Common({ src, wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: tiling[0], y: tiling[1] } })
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src, wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: tiling[0], y: tiling[1] } }),
+    texture: tex,
     roughness: 0.85,
-    metallic: 0
+    metallic: 0,
+    ...(selfLit > 0 ? { emissiveTexture: tex, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: selfLit } : {})
   })
   return e
 }
@@ -157,7 +174,11 @@ function lamp(x: number, z: number, y = 0): void {
 
 /** A bench facing `toward` (models/bench.glb). */
 function bench(pos: Vector3, toward: Vector3): void {
-  prop('models/bench.glb', pos, yawToward(pos, toward), 1, true)
+  prop(PALACE ? 'models/bench-palace.glb' : 'models/bench.glb', pos, yawToward(pos, toward), 1, true)
+}
+/** Model path of a lounge prop in the current finish (sofa / bar have palace variants). */
+function finish(name: 'sofa' | 'bar'): string {
+  return PALACE ? `models/${name}-palace.glb` : `models/${name}.glb`
 }
 
 /**
@@ -169,8 +190,11 @@ function pathRing(y: number, outer: number, tex: string): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(PLAZA.x, y + 0.006, PLAZA.z), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(outer * 2, outer * 2, 1) })
   MeshRenderer.setPlane(e)
-  // a touch of self-light keeps the runner cream under the purple night sky instead of turning it magenta
-  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: Color3.create(1, 0.96, 0.9), emissiveIntensity: 0.22 })
+  // a touch of self-light keeps the runner cream under the purple night sky instead of turning it magenta;
+  // in the palace finish the cream texture is tinted to a deep red carpet on the marble
+  const tint = PALACE ? PALETTE.runnerRed : Color4.White()
+  const glow = PALACE ? Color3.create(0.9, 0.35, 0.35) : Color3.create(1, 0.96, 0.9)
+  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), albedoColor: tint, roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: glow, emissiveIntensity: PALACE ? 0.16 : 0.22 })
   return e
 }
 
@@ -260,11 +284,15 @@ export function buildLounge(): void {
   const parquet = engine.addEntity()
   Transform.create(parquet, { position: Vector3.create(lc, 0.003, lc), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(LOUNGE_SIZE, LOUNGE_SIZE, 1) })
   MeshRenderer.setPlane(parquet)
+  // palace: marble tiles on a 4 m repeat (2 m tiles); lounge: dark parquet
+  const floorTex = Material.Texture.Common({ src: PALACE ? 'models/palace/floor.png' : 'images/floor.png', wrapMode: TextureWrapMode.TWM_REPEAT, tiling: PALACE ? { x: LOUNGE_SIZE / 4, y: LOUNGE_SIZE / 4 } : { x: 10, y: 10 } })
   Material.setPbrMaterial(parquet, {
-    texture: Material.Texture.Common({ src: 'images/floor.png', wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: 10, y: 10 } }),
-    roughness: 0.75,
+    texture: floorTex,
+    roughness: PALACE ? 0.35 : 0.75,
     metallic: 0,
-    castShadows: false
+    castShadows: false,
+    // palace marble keeps a little of its own light so the purple night ambient does not turn it lavender
+    ...(PALACE ? { emissiveTexture: floorTex, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: 0.18 } : {})
   })
 
   // low wooden boundary around the lounge so nobody walks off the parquet on a
@@ -276,16 +304,21 @@ export function buildLounge(): void {
   const east = SPAWN.x + gap / 2 + (LOUNGE_MAX - SPAWN.x - gap / 2) / 2
   const wLen = SPAWN.x - gap / 2 - LOUNGE_MIN
   const eLen = LOUNGE_MAX - SPAWN.x - gap / 2
-  texturedBox(Vector3.create(west, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, wallH, wallT), 'images/wood.png', [3.5, 1], true)
-  texturedBox(Vector3.create(east, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, wallH, wallT), 'images/wood.png', [3.5, 1], true)
-  texturedBox(Vector3.create(lc, wallH / 2, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true)
-  texturedBox(Vector3.create(LOUNGE_MIN + wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true, 90)
-  texturedBox(Vector3.create(LOUNGE_MAX - wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), 'images/wood.png', [8, 1], true, 90)
-  solid(Vector3.create(west, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, 0.06, wallT + 0.1), PALETTE.woodDark)
-  solid(Vector3.create(east, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, 0.06, wallT + 0.1), PALETTE.woodDark)
-  solid(Vector3.create(lc, wallH + 0.03, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, 0.06, wallT + 0.1), PALETTE.woodDark)
-  solid(Vector3.create(LOUNGE_MIN + wallT / 2, wallH + 0.03, lc), Vector3.create(wallT + 0.1, 0.06, LOUNGE_SIZE), PALETTE.woodDark)
-  solid(Vector3.create(LOUNGE_MAX - wallT / 2, wallH + 0.03, lc), Vector3.create(wallT + 0.1, 0.06, LOUNGE_SIZE), PALETTE.woodDark)
+  // palace: marble panels (2:1, engraved frieze along the top) with a brass cap rail; lounge: wood
+  const wallTex = PALACE ? 'models/palace/wall.png' : 'images/wood.png'
+  const panels = (len: number): [number, number] => (PALACE ? [Math.max(1, Math.round(len / (wallH * 2))), 1] : [len < 10 ? 3.5 : 8, 1])
+  const rail = PALACE ? PALETTE.brass : PALETTE.woodDark
+  const lit = PALACE ? 0.16 : 0
+  texturedBox(Vector3.create(west, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, wallH, wallT), wallTex, panels(wLen), true, 0, lit)
+  texturedBox(Vector3.create(east, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, wallH, wallT), wallTex, panels(eLen), true, 0, lit)
+  texturedBox(Vector3.create(lc, wallH / 2, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 0, lit)
+  texturedBox(Vector3.create(LOUNGE_MIN + wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90, lit)
+  texturedBox(Vector3.create(LOUNGE_MAX - wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90, lit)
+  solid(Vector3.create(west, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, 0.06, wallT + 0.1), rail)
+  solid(Vector3.create(east, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, 0.06, wallT + 0.1), rail)
+  solid(Vector3.create(lc, wallH + 0.03, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, 0.06, wallT + 0.1), rail)
+  solid(Vector3.create(LOUNGE_MIN + wallT / 2, wallH + 0.03, lc), Vector3.create(wallT + 0.1, 0.06, LOUNGE_SIZE), rail)
+  solid(Vector3.create(LOUNGE_MAX - wallT / 2, wallH + 0.03, lc), Vector3.create(wallT + 0.1, 0.06, LOUNGE_SIZE), rail)
 
   // garden ring outside the fence: a path from the scene edge to the entrance,
   // trees and lamps, and the scene edge kept walkable-safe by the fence itself
@@ -360,7 +393,7 @@ export function buildLounge(): void {
 function buildTower(): void {
   const tower = engine.addEntity()
   Transform.create(tower, { position: Vector3.create(PLAZA.x, 0, PLAZA.z) })
-  GltfContainer.create(tower, { src: 'models/tower.glb' })
+  GltfContainer.create(tower, { src: PALACE ? 'models/tower-palace.glb' : 'models/tower.glb' })
   // glass facade with the entrance portal, string lights (models/decor.glb, same origin)
   const decor = engine.addEntity()
   Transform.create(decor, { position: Vector3.create(PLAZA.x, 0, PLAZA.z) })
@@ -372,10 +405,10 @@ function buildTower(): void {
   for (const deg of [22, 158, 202, 338]) {
     const t = (deg * Math.PI) / 180
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 5.4, 0, PLAZA.z + Math.cos(t) * 5.4)
-    prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
+    prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
-  prop('models/bar.glb', Vector3.create(21.4, 0, 11.9), 90, 1, true)
-  prop('models/bar.glb', Vector3.create(26.6, 0, 11.9), -90, 1, true)
+  prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true)
+  prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
 
   // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture
   pathRing(FLOORS[0].y, 7.6, 'images/path-a.png')
@@ -384,13 +417,13 @@ function buildTower(): void {
   pathRing(FLOORS[3].y, 6.0, 'images/path-a.png')
 
   // columns carrying the slabs, between the corners so they never block a table
-  const column = (deg: number, r: number, y0: number, y1: number, thick: number) => {
+  const columnAt = (deg: number, r: number, y0: number, y1: number, thick: number) => {
     const t = (deg * Math.PI) / 180
-    cylinder(Vector3.create(PLAZA.x + Math.sin(t) * r, (y0 + y1) / 2, PLAZA.z + Math.cos(t) * r), Vector3.create(thick, y1 - y0, thick), PALETTE.column, true)
+    column(Vector3.create(PLAZA.x + Math.sin(t) * r, (y0 + y1) / 2, PLAZA.z + Math.cos(t) * r), Vector3.create(thick, y1 - y0, thick), true)
   }
   // ground: between the corners, two flanking the entrance path; game room: between its corners
-  for (const deg of [160, 200, 262, 304, 0, 56, 101]) column(deg, 11.4, 0, 8, 0.6)
-  for (const deg of [112, 158, 202, 338]) column(deg, 10.4, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
+  for (const deg of [160, 200, 262, 304, 0, 56, 101]) columnAt(deg, 11.4, 0, 8, 0.6)
+  for (const deg of [112, 158, 202, 338]) columnAt(deg, 10.4, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
 
   for (const pad of ELEVATORS) elevatorShaft(pad)
 
@@ -400,11 +433,11 @@ function buildTower(): void {
 
   // sky room (floor 2): two game corners (N, S), sofas at E and W looking over the oculus, planters, lamps
   const y2 = FLOORS[2].y
-  for (const deg of [45, 120, 225]) column(deg, 9.5, 16, 24, 0.5)
+  for (const deg of [45, 120, 225]) columnAt(deg, 9.5, 16, 24, 0.5)
   for (const deg of [90, 270]) {
     const t = (deg * Math.PI) / 180
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 6.2, y2, PLAZA.z + Math.cos(t) * 6.2)
-    prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
+    prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
 

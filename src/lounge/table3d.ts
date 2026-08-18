@@ -25,7 +25,7 @@ import {
   pointerEventsSystem
 } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { SEAT_PAD_OFFSET } from './config'
+import { INTERIOR, SEAT_PAD_OFFSET } from './config'
 import { localeInfo, seatLabel, t as L, uiLang } from './i18n'
 import type { View3DHandle } from './games/types'
 import { createTableSfx, play, playPersonal, type TableSfx } from './sfx'
@@ -109,7 +109,8 @@ export function buildTableVisual(t: Table): TableVisual {
 
   // table top + apron + legs + the seat pads: one GLB on the root (models/table.glb,
   // or the square four-pad table4.glb); the pads' pointer collider is an invisible mesh inside it
-  GltfContainer.create(root, { src: t.seats > 2 ? 'models/table4.glb' : 'models/table.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
+  const tableModel = t.seats > 2 ? 'table4' : 'table'
+  GltfContainer.create(root, { src: `models/${tableModel}${INTERIOR === 'palace' ? '-palace' : ''}.glb`, invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_NONE })
 
   // the game itself
   const view = t.game.createView3D(

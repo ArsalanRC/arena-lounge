@@ -48,8 +48,8 @@ export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 17), Vector3.create
 /** Standing within this distance of a pad opens the floor panel. */
 export const ELEVATOR_RADIUS = 1.3
 
-/** Fixed time of day for the skybox (seconds since midnight): 21:00, a lit lounge at night, DCL night stays readable. */
-export const DUSK_TIME = 16200
+/** Fixed time of day for the skybox (seconds since midnight): 22:00. The client build of 18 Aug 2026 renders 04:30 and 19:00 as a pink dawn/sunset; 22:00 is a clean purple night. scene.json carries the same value for the World. */
+export const DUSK_TIME = 79200
 
 /**
  * Real point lights (LightSource). Warm amber inside, teal at the entrance;
@@ -205,6 +205,17 @@ export const LEADERBOARD = {
 
 export const DEBUG_MOBILE_UI = false
 
+/**
+ * Interior finish of the tower and the lounge floor.
+ *   'lounge'  the original warm wood + parquet look
+ *   'palace'  royal marble: veined cream tiles with verde inlay and brass corners on every
+ *             slab and on the plaza floor, fluted white marble columns with gold capitals,
+ *             marble boundary panels with an engraved greek-key frieze, red runner rings,
+ *             brass railing posts (models/tower-palace.glb + models/palace/*.png from
+ *             tools/gen-marble.py). Same triangle count; three extra textures.
+ */
+export const INTERIOR: 'lounge' | 'palace' = 'palace'
+
 // ---------------------------------------------------------------- palette
 export const PALETTE = {
   floor: Color4.fromHexString('#2b2320ff'),
@@ -225,7 +236,10 @@ export const PALETTE = {
   pot: Color4.fromHexString('#8b5a3cff'),
   lawn: Color4.fromHexString('#4a7d3fff'),
   path: Color4.fromHexString('#b8a284ff'),
-  column: Color4.fromHexString('#6b4a33ff')
+  column: Color4.fromHexString('#6b4a33ff'),
+  /** Palace finish: brass rails, the red of the runner rings. */
+  brass: Color4.fromHexString('#d9a84cff'),
+  runnerRed: Color4.fromHexString('#8e1f2aff')
 }
 
 export const EMISSIVE_YELLOW = Color3.fromHexString('#f5c518')
