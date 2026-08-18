@@ -192,8 +192,10 @@ export const SEAT_PAD_OFFSET = 1.8
  * (supabase/001_leaderboard.sql). Empty url = feature hidden.
  */
 export const LEADERBOARD = {
-  url: '',
-  key: '',
+  // Arsalan's personal Supabase project "arena-lounge" (eu-central-1), NOT the Game Arena
+  // project of game-platform; to switch projects, change these two lines and redeploy.
+  url: 'https://vpizpihqwkmxtidqduos.supabase.co',
+  key: 'sb_publishable_SZcfbmGjm6qtqq9BkNcZcQ_0FQJJ6ot',
   /** How long a fetched board stays fresh before a panel or the rooftop asks again. */
   cacheMs: 45_000,
   /** Rows shown on the rooftop board and in the panel. */
