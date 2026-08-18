@@ -97,6 +97,8 @@ export interface LoungeStrings {
   leaderboardEmpty: string
   leaderboardOffline: string
   leaderboardTab: string
+  musicOn: string
+  musicOff: string
   howToPlayTab: string
   winsShort: string
   streakShort: string
@@ -258,6 +260,8 @@ const EN: LoungeStrings = {
   leaderboardEmpty: 'Nobody on the board yet. Beat a friend and be the first.',
   leaderboardOffline: 'The board is taking a moment. Try again in a bit.',
   leaderboardTab: 'Leaderboard',
+  musicOn: 'Music: on',
+  musicOff: 'Music: off',
   howToPlayTab: 'How to play',
   winsShort: 'wins',
   streakShort: 'streak',
@@ -417,6 +421,8 @@ const DE: LoungeStrings = {
   leaderboardEmpty: 'Noch niemand auf der Liste. Schlag einen Freund und sei der Erste.',
   leaderboardOffline: 'Die Liste braucht gerade einen Moment. Versuch es gleich noch mal.',
   leaderboardTab: 'Bestenliste',
+  musicOn: 'Musik: an',
+  musicOff: 'Musik: aus',
   howToPlayTab: 'So geht’s',
   winsShort: 'Siege',
   streakShort: 'Serie',
@@ -576,6 +582,8 @@ const ES: LoungeStrings = {
   leaderboardEmpty: 'Todavía no hay nadie. Gana a un amigo y sé el primero.',
   leaderboardOffline: 'La tabla tarda un momento. Prueba de nuevo enseguida.',
   leaderboardTab: 'Clasificación',
+  musicOn: 'Música: sí',
+  musicOff: 'Música: no',
   howToPlayTab: 'Cómo se juega',
   winsShort: 'victorias',
   streakShort: 'racha',
@@ -735,6 +743,8 @@ const PT: LoungeStrings = {
   leaderboardEmpty: 'Ainda ninguém na tabela. Ganha a um amigo e sê o primeiro.',
   leaderboardOffline: 'A tabela está a demorar um pouco. Tenta outra vez daqui a nada.',
   leaderboardTab: 'Ranking',
+  musicOn: 'Música: ligada',
+  musicOff: 'Música: desligada',
   howToPlayTab: 'Como jogar',
   winsShort: 'vitórias',
   streakShort: 'série',
@@ -894,6 +904,8 @@ const FR: LoungeStrings = {
   leaderboardEmpty: 'Personne au classement pour l’instant. Bats un ami et sois le premier.',
   leaderboardOffline: 'Le classement met un moment. Réessaie dans un instant.',
   leaderboardTab: 'Classement',
+  musicOn: 'Musique : oui',
+  musicOff: 'Musique : non',
   howToPlayTab: 'Comment jouer',
   winsShort: 'victoires',
   streakShort: 'série',

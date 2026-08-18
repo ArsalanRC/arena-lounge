@@ -9,6 +9,7 @@ import { SkyboxTime, engine } from '@dcl/sdk/ecs'
 import { DUSK_TIME } from './lounge/config'
 import { buildLounge, relabelSystem } from './lounge/lounge3d'
 import { buildTableVisual, tableVisualsSystem } from './lounge/table3d'
+import { setupMusic } from './lounge/music'
 import { setupPersonalSfx } from './lounge/sfx'
 import { createTables, startTableSystems, tables } from './lounge/tables'
 import { setupUi } from './lounge/ui'
@@ -18,6 +19,7 @@ export function main(): void {
   SkyboxTime.create(engine.RootEntity, { fixedTime: DUSK_TIME })
   buildLounge()
   setupPersonalSfx()
+  setupMusic()
   createTables()
   for (const t of tables) buildTableVisual(t)
   startTableSystems()

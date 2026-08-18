@@ -29,6 +29,7 @@ import { isMobile } from '@dcl/sdk/platform'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { board, leaderboardEnabled, refreshLeaderboard } from './leaderboard'
+import { music, toggleMusic } from './music'
 import { getGame } from './games/registry'
 import type { GameContext, GameId } from './games/types'
 import { LOCALES, localeInfo, t as L, uiLang } from './i18n'
@@ -623,8 +624,9 @@ function HelpPanel() {
           </UiEntity>
         )}
         <Row height={48} margin={{ bottom: 6 }}>
-          <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={260} />
-          <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={170} />
+          <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={230} />
+          <Btn label={music.on ? str.musicOn : str.musicOff} quiet onClick={toggleMusic} width={mobile ? 170 : 150} />
+          <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={150} />
         </Row>
         {local.langPickerOpen && (
           <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', margin: { top: 6 } }}>
