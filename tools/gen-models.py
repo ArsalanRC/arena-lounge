@@ -281,15 +281,18 @@ TOWER_MATERIALS = [
 write_glb('models/tower.glb', [("ribs", ribs, 0), ("floors", floors, 1), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], TOWER_MATERIALS)
 # palace variant (config INTERIOR = 'palace'): the same tower with polished marble slabs
 # (models/palace/floor.png from tools/gen-marble.py, planar 4 m tiles) and brass railing posts
+# the marble and the ceilings carry a little self-light (emissive = their own texture, dimmed):
+# the night sky's purple ambient would otherwise turn cream marble lavender
+BRASS_MAT = {"name": "brass", "pbrMetallicRoughness": {"baseColorFactor": [0.85, 0.66, 0.30, 1], "metallicFactor": 0.8, "roughnessFactor": 0.35}}
 PALACE_TOWER_MATERIALS = [
     TOWER_MATERIALS[0],
-    {"name": "marble", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.35}},
+    {"name": "marble", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.35}, "emissiveTexture": {"index": 0}, "emissiveFactor": [0.18, 0.17, 0.16]},
     TOWER_MATERIALS[2],
-    {"name": "brass", "pbrMetallicRoughness": {"baseColorFactor": [0.85, 0.66, 0.30, 1], "metallicFactor": 0.8, "roughnessFactor": 0.35}},
+    BRASS_MAT,
     TOWER_MATERIALS[4],
-    {"name": "plaster", "pbrMetallicRoughness": {"baseColorFactor": [0.90, 0.87, 0.81, 1], "metallicFactor": 0.0, "roughnessFactor": 0.9}},
+    {"name": "ceiling", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 1}, "metallicFactor": 0.1, "roughnessFactor": 0.6}, "emissiveTexture": {"index": 1}, "emissiveFactor": [0.35, 0.35, 0.35]},
 ]
-write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png'])
+write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("rings", rings, 2), ("posts", posts, 3), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png'])
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])
@@ -299,18 +302,25 @@ write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
 # instance; as one GLB per prop type the client shares the mesh + materials
 # across instances, which is what keeps the mobile material count in budget.
 
-def box_mesh(mesh, c, size):
-    """Axis-aligned box centred at c with full size (sx, sy, sz)."""
+def box_mesh(mesh, c, size, uv_period=None):
+    """Axis-aligned box centred at c with full size (sx, sy, sz). With uv_period T every face
+    gets planar UVs from its own two in-plane coordinates (metres / T), for tiling textures."""
     hx, hy, hz = size[0] / 2, size[1] / 2, size[2] / 2
     x0, x1 = c[0] - hx, c[0] + hx
     y0, y1 = c[1] - hy, c[1] + hy
     z0, z1 = c[2] - hz, c[2] + hz
-    mesh.quad((x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1))   # top
-    mesh.quad((x0, y0, z1), (x1, y0, z1), (x1, y0, z0), (x0, y0, z0))   # bottom
-    mesh.quad((x0, y0, z1), (x0, y1, z1), (x1, y1, z1), (x1, y0, z1))   # +z
-    mesh.quad((x1, y0, z0), (x1, y1, z0), (x0, y1, z0), (x0, y0, z0))   # -z
-    mesh.quad((x1, y0, z1), (x1, y1, z1), (x1, y1, z0), (x1, y0, z0))   # +x
-    mesh.quad((x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1))   # -x
+    T = uv_period
+    def q(a, b, cc, d, axes):
+        if not T:
+            mesh.quad(a, b, cc, d); return
+        i, j = axes
+        mesh.quad(a, b, cc, d, [(p[i] / T, p[j] / T) for p in (a, b, cc, d)])
+    q((x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1), (0, 2))   # top
+    q((x0, y0, z1), (x1, y0, z1), (x1, y0, z0), (x0, y0, z0), (0, 2))   # bottom
+    q((x0, y0, z1), (x0, y1, z1), (x1, y1, z1), (x1, y0, z1), (0, 1))   # +z
+    q((x1, y0, z0), (x1, y1, z0), (x0, y1, z0), (x0, y0, z0), (0, 1))   # -z
+    q((x1, y0, z1), (x1, y1, z1), (x1, y1, z0), (x1, y0, z0), (2, 1))   # +x
+    q((x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1), (2, 1))   # -x
 
 def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None):
     """Vertical n-gon prism (cylinder stand-in), optional taper to r_top."""
@@ -725,3 +735,60 @@ for x in (-1.2, 0, 1.2):
     prism(bar_wood, x, -1.0, 0.05, 0, 0.7, 8)
     prism(bar_top, x, -1.0, 0.24, 0.7, 0.78, 12)
 write_glb('models/bar.glb', [("wood", bar_wood, 0), ("top", bar_top, 1), ("glow", bar_glow, 2)], [WOOD_DARK, {"name": "barTop", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.44, 0.20, 1], "metallicFactor": 0.6, "roughnessFactor": 0.35}}, LAMP])
+
+# ------------------------------------------------------------------ palace furniture (config INTERIOR = 'palace')
+# Same geometry as the lounge props, marble + brass + velvet materials; the marble parts carry
+# planar UVs (models/palace/marble.png, 1.5 m repeat, with a touch of self-light for the night).
+MARBLE_MAT = {"name": "marble", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.3}, "emissiveTexture": {"index": 0}, "emissiveFactor": [0.16, 0.16, 0.15]}
+VELVET = {"name": "velvet", "pbrMetallicRoughness": {"baseColorFactor": [0.42, 0.06, 0.10, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}, "emissiveFactor": [0.06, 0.01, 0.01]}
+CREAM_SILK = {"name": "creamSilk", "pbrMetallicRoughness": {"baseColorFactor": [0.90, 0.85, 0.74, 1], "metallicFactor": 0.0, "roughnessFactor": 0.85}, "emissiveFactor": [0.10, 0.09, 0.08]}
+MARBLE_UV = 1.5
+
+pt_top, pt_frame, pt_pads, pt_coll = Mesh(), Mesh(), Mesh(), Mesh()
+box_mesh(pt_top, (0, TABLE_TOP - 0.03, 0), (1.8, 0.06, 0.9), MARBLE_UV)
+box_mesh(pt_frame, (0, TABLE_TOP - 0.1, 0), (1.6, 0.08, 0.7))
+for (x, z) in [(-0.78, -0.33), (0.78, -0.33), (-0.78, 0.33), (0.78, 0.33)]:
+    box_mesh(pt_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+for z in (-1.8, 1.8):
+    prism(pt_pads, 0, z, 0.5, 0, 0.03, 16)
+    prism(pt_coll, 0, z, 0.5, 0, 0.03, 12)
+write_glb('models/table-palace.glb', [("top", pt_top, 0), ("frame", pt_frame, 1), ("pads", pt_pads, 2), ("pads_collider", pt_coll, 3)], [MARBLE_MAT, BRASS_MAT, VELVET, COLLIDER], images=['palace/marble.png'])
+
+p4_top, p4_frame, p4_pads, p4_coll = Mesh(), Mesh(), Mesh(), Mesh()
+box_mesh(p4_top, (0, TABLE_TOP - 0.03, 0), (1.5, 0.06, 1.5), MARBLE_UV)
+box_mesh(p4_frame, (0, TABLE_TOP - 0.1, 0), (1.3, 0.08, 1.3))
+for (x, z) in [(-0.6, -0.6), (0.6, -0.6), (-0.6, 0.6), (0.6, 0.6)]:
+    box_mesh(p4_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+for (x, z) in [(0, -1.8), (0, 1.8), (-1.8, 0), (1.8, 0)]:
+    prism(p4_pads, x, z, 0.5, 0, 0.03, 16)
+    prism(p4_coll, x, z, 0.5, 0, 0.03, 12)
+write_glb('models/table4-palace.glb', [("top", p4_top, 0), ("frame", p4_frame, 1), ("pads", p4_pads, 2), ("pads_collider", p4_coll, 3)], [MARBLE_MAT, BRASS_MAT, VELVET, COLLIDER], images=['palace/marble.png'])
+
+pb_seat, pb_legs, pb_cushion = Mesh(), Mesh(), Mesh()
+box_mesh(pb_seat, (0, 0.43, 0), (1.8, 0.1, 0.52), MARBLE_UV)
+box_mesh(pb_cushion, (0, 0.50, 0), (1.6, 0.05, 0.42))
+box_mesh(pb_legs, (-0.68, 0.19, 0), (0.18, 0.4, 0.46))
+box_mesh(pb_legs, (0.68, 0.19, 0), (0.18, 0.4, 0.46))
+box_mesh(pb_legs, (0, 0.12, 0), (1.5, 0.08, 0.1))
+write_glb('models/bench-palace.glb', [("seat", pb_seat, 0), ("cushion", pb_cushion, 2), ("legs", pb_legs, 1)], [MARBLE_MAT, BRASS_MAT, VELVET], images=['palace/marble.png'])
+
+ps_base, ps_cushion, ps_trim = Mesh(), Mesh(), Mesh()
+box_mesh(ps_base, (0, 0.22, 0), (2.0, 0.44, 0.9))
+box_mesh(ps_base, (0, 0.55, 0.36), (2.0, 0.7, 0.2))
+box_mesh(ps_base, (-0.92, 0.42, 0), (0.16, 0.5, 0.9))
+box_mesh(ps_base, (0.92, 0.42, 0), (0.16, 0.5, 0.9))
+box_mesh(ps_cushion, (-0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
+box_mesh(ps_cushion, (0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
+box_mesh(ps_trim, (0, 0.03, 0), (2.04, 0.06, 0.94))          # brass plinth
+box_mesh(ps_trim, (0, 0.905, 0.36), (2.04, 0.04, 0.24))       # brass top rail on the backrest
+write_glb('models/sofa-palace.glb', [("base", ps_base, 0), ("cushions", ps_cushion, 1), ("trim", ps_trim, 2)], [VELVET, CREAM_SILK, BRASS_MAT])
+
+pbar_body, pbar_top, pbar_glow = Mesh(), Mesh(), Mesh()
+box_mesh(pbar_body, (0, 0.55, 0), (3.6, 1.1, 0.6), MARBLE_UV)
+box_mesh(pbar_top, (0, 1.13, 0), (3.8, 0.06, 0.8))
+box_mesh(pbar_glow, (0, 1.08, -0.36), (3.7, 0.04, 0.05))
+box_mesh(pbar_glow, (0, 0.06, -0.31), (3.6, 0.04, 0.03))
+for x in (-1.2, 0, 1.2):
+    prism(pbar_top, x, -1.0, 0.05, 0, 0.7, 8)      # brass stool posts
+    prism(pbar_body, x, -1.0, 0.24, 0.7, 0.78, 12)  # marble stool tops
+write_glb('models/bar-palace.glb', [("body", pbar_body, 0), ("top", pbar_top, 1), ("glow", pbar_glow, 2)], [MARBLE_MAT, BRASS_MAT, LAMP], images=['palace/marble.png'])

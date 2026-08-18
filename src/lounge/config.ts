@@ -48,8 +48,8 @@ export const ELEVATORS: Vector3[] = [Vector3.create(29.5, 0, 17), Vector3.create
 /** Standing within this distance of a pad opens the floor panel. */
 export const ELEVATOR_RADIUS = 1.3
 
-/** Fixed time of day for the skybox (seconds since midnight): 21:00, a lit lounge at night, DCL night stays readable. */
-export const DUSK_TIME = 16200
+/** Fixed time of day for the skybox (seconds since midnight): 22:00. The client build of 18 Aug 2026 renders 04:30 and 19:00 as a pink dawn/sunset; 22:00 is a clean purple night. scene.json carries the same value for the World. */
+export const DUSK_TIME = 79200
 
 /**
  * Real point lights (LightSource). Warm amber inside, teal at the entrance;

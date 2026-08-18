@@ -8,6 +8,8 @@ noise is built in the frequency domain (periodic by construction).
   models/palace/wall.png     1024x512  cream marble panel, gold rails, engraved frieze along the top
   models/palace/column.png   512x1024  white fluted marble shaft with gold capital and base bands
                                    (u wraps around the cylinder, v runs bottom -> top)
+  models/palace/marble.png   512   plain white veined marble (table tops, benches, bar tops)
+  models/palace/ceiling.png  1024  4 m period: 2x2 coffers, gold ribs, lapis field with a gold rosette
 
 Run: python3 tools/gen-marble.py
 """
@@ -171,7 +173,53 @@ def gen_column(path='models/palace/column.png', w=512, h=1024):
         img[groove] *= 0.5
     save(path, img)
 
+def gen_marble_plain(path='models/palace/marble.png', size=512):
+    img = marble(size, size, WHITE, WHITE_VEIN, WHITE_VEIN2, seed=17, vein_scale=1.1, strength=0.7)
+    save(path, img)
+
+LAPIS = (0.10, 0.16, 0.42)
+LAPIS_LIGHT = (0.20, 0.30, 0.62)
+
+def gen_ceiling(path='models/palace/ceiling.png', size=1024):
+    """Coffered ceiling, 2x2 coffers per texture (2 m coffers at a 4 m repeat): gold ribs with a
+    boss at every crossing, stepped cream moulding, deep lapis field with a gold eight-point rosette."""
+    s = size
+    half = s // 2
+    yy, xx = np.mgrid[0:s, 0:s]
+    tx = xx % half; ty = yy % half
+    d = np.minimum(np.minimum(tx, half - 1 - tx), np.minimum(ty, half - 1 - ty)).astype(np.float64) / half  # 0 at coffer edge .. 0.5 centre
+    img = np.zeros((s, s, 3))
+    # lapis field with a soft cloudy variation
+    cloud = fractal_noise(s, s, 3.2, 31)
+    field = np.array(LAPIS)[None, None, :] * (0.85 + 0.3 * cloud[..., None]) + np.array(LAPIS_LIGHT)[None, None, :] * 0.15 * cloud[..., None]
+    img[:] = field
+    # gold rib along the coffer edges (0..0.05), then a cream step (0.05..0.075), a thin gold line (0.075..0.085), then the field
+    rib = d < 0.05
+    step = (d >= 0.05) & (d < 0.075)
+    line = (d >= 0.075) & (d < 0.085)
+    ribshade = 0.85 + 0.35 * np.cos(d / 0.05 * np.pi)          # rounded rib
+    img[rib] = (np.array(BRASS)[None, :] * ribshade[rib][:, None]).clip(0, 1)
+    img[step] = np.array(CREAM) * 0.92
+    img[line] = np.array(BRASS) * 0.9
+    # boss at every rib crossing
+    cx = (xx + half // 2) % half - half // 2
+    cy = (yy + half // 2) % half - half // 2
+    r = np.hypot(cx, cy) / half
+    boss = r < 0.06
+    img[boss] = (np.array(BRASS)[None, :] * (1.15 - 4.0 * r[boss][:, None])).clip(0, 1)
+    # eight-point rosette in the coffer centre
+    ccx = (tx - half / 2) / half; ccy = (ty - half / 2) / half
+    rr = np.hypot(ccx, ccy); ang = np.arctan2(ccy, ccx)
+    star = rr < 0.10 * (0.55 + 0.45 * np.abs(np.cos(4 * ang)) ** 0.5)
+    ring = (rr > 0.115) & (rr < 0.128)
+    petals = (rr > 0.135) & (rr < 0.20) & (np.abs(np.sin(8 * ang)) < 0.35)
+    for m in (star, ring, petals):
+        img[m] = (np.array(BRASS)[None, :] * (0.95 + 0.25 * cloud[m][:, None])).clip(0, 1)
+    save(path, img)
+
 if __name__ == '__main__':
     gen_floor()
     gen_wall()
     gen_column()
+    gen_marble_plain()
+    gen_ceiling()

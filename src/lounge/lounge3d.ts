@@ -81,19 +81,22 @@ function column(pos: Vector3, scale: Vector3, collide = true): Entity {
   MeshRenderer.setCylinder(e, 0.5, 0.5)
   if (collide) MeshCollider.setCylinder(e, 0.5, 0.5)
   // the shaft texture runs bottom -> top once (capital at v = 1); the cylinder's u wraps around
-  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: 'models/palace/column.png', wrapMode: TextureWrapMode.TWM_CLAMP }), albedoColor: Color4.White(), roughness: 0.4, metallic: 0 })
+  const shaft = Material.Texture.Common({ src: 'models/palace/column.png', wrapMode: TextureWrapMode.TWM_CLAMP })
+  Material.setPbrMaterial(e, { texture: shaft, albedoColor: Color4.White(), roughness: 0.4, metallic: 0, emissiveTexture: shaft, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: 0.18 })
   return e
 }
 
-function texturedBox(pos: Vector3, scale: Vector3, src: string, tiling: [number, number], collide = false, rotY = 0): Entity {
+function texturedBox(pos: Vector3, scale: Vector3, src: string, tiling: [number, number], collide = false, rotY = 0, selfLit = 0): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: pos, scale, rotation: Quaternion.fromEulerDegrees(0, rotY, 0) })
   MeshRenderer.setBox(e)
   if (collide) MeshCollider.setBox(e)
+  const tex = Material.Texture.Common({ src, wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: tiling[0], y: tiling[1] } })
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src, wrapMode: TextureWrapMode.TWM_REPEAT, tiling: { x: tiling[0], y: tiling[1] } }),
+    texture: tex,
     roughness: 0.85,
-    metallic: 0
+    metallic: 0,
+    ...(selfLit > 0 ? { emissiveTexture: tex, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: selfLit } : {})
   })
   return e
 }
@@ -171,7 +174,11 @@ function lamp(x: number, z: number, y = 0): void {
 
 /** A bench facing `toward` (models/bench.glb). */
 function bench(pos: Vector3, toward: Vector3): void {
-  prop('models/bench.glb', pos, yawToward(pos, toward), 1, true)
+  prop(PALACE ? 'models/bench-palace.glb' : 'models/bench.glb', pos, yawToward(pos, toward), 1, true)
+}
+/** Model path of a lounge prop in the current finish (sofa / bar have palace variants). */
+function finish(name: 'sofa' | 'bar'): string {
+  return PALACE ? `models/${name}-palace.glb` : `models/${name}.glb`
 }
 
 /**
@@ -278,11 +285,14 @@ export function buildLounge(): void {
   Transform.create(parquet, { position: Vector3.create(lc, 0.003, lc), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(LOUNGE_SIZE, LOUNGE_SIZE, 1) })
   MeshRenderer.setPlane(parquet)
   // palace: marble tiles on a 4 m repeat (2 m tiles); lounge: dark parquet
+  const floorTex = Material.Texture.Common({ src: PALACE ? 'models/palace/floor.png' : 'images/floor.png', wrapMode: TextureWrapMode.TWM_REPEAT, tiling: PALACE ? { x: LOUNGE_SIZE / 4, y: LOUNGE_SIZE / 4 } : { x: 10, y: 10 } })
   Material.setPbrMaterial(parquet, {
-    texture: Material.Texture.Common({ src: PALACE ? 'models/palace/floor.png' : 'images/floor.png', wrapMode: TextureWrapMode.TWM_REPEAT, tiling: PALACE ? { x: LOUNGE_SIZE / 4, y: LOUNGE_SIZE / 4 } : { x: 10, y: 10 } }),
+    texture: floorTex,
     roughness: PALACE ? 0.35 : 0.75,
     metallic: 0,
-    castShadows: false
+    castShadows: false,
+    // palace marble keeps a little of its own light so the purple night ambient does not turn it lavender
+    ...(PALACE ? { emissiveTexture: floorTex, emissiveColor: Color3.create(1, 0.97, 0.92), emissiveIntensity: 0.18 } : {})
   })
 
   // low wooden boundary around the lounge so nobody walks off the parquet on a
@@ -298,11 +308,12 @@ export function buildLounge(): void {
   const wallTex = PALACE ? 'models/palace/wall.png' : 'images/wood.png'
   const panels = (len: number): [number, number] => (PALACE ? [Math.max(1, Math.round(len / (wallH * 2))), 1] : [len < 10 ? 3.5 : 8, 1])
   const rail = PALACE ? PALETTE.brass : PALETTE.woodDark
-  texturedBox(Vector3.create(west, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, wallH, wallT), wallTex, panels(wLen), true)
-  texturedBox(Vector3.create(east, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, wallH, wallT), wallTex, panels(eLen), true)
-  texturedBox(Vector3.create(lc, wallH / 2, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true)
-  texturedBox(Vector3.create(LOUNGE_MIN + wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90)
-  texturedBox(Vector3.create(LOUNGE_MAX - wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90)
+  const lit = PALACE ? 0.16 : 0
+  texturedBox(Vector3.create(west, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, wallH, wallT), wallTex, panels(wLen), true, 0, lit)
+  texturedBox(Vector3.create(east, wallH / 2, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, wallH, wallT), wallTex, panels(eLen), true, 0, lit)
+  texturedBox(Vector3.create(lc, wallH / 2, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 0, lit)
+  texturedBox(Vector3.create(LOUNGE_MIN + wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90, lit)
+  texturedBox(Vector3.create(LOUNGE_MAX - wallT / 2, wallH / 2, lc), Vector3.create(LOUNGE_SIZE, wallH, wallT), wallTex, panels(LOUNGE_SIZE), true, 90, lit)
   solid(Vector3.create(west, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(wLen, 0.06, wallT + 0.1), rail)
   solid(Vector3.create(east, wallH + 0.03, LOUNGE_MIN + wallT / 2), Vector3.create(eLen, 0.06, wallT + 0.1), rail)
   solid(Vector3.create(lc, wallH + 0.03, LOUNGE_MAX - wallT / 2), Vector3.create(LOUNGE_SIZE, 0.06, wallT + 0.1), rail)
@@ -394,10 +405,10 @@ function buildTower(): void {
   for (const deg of [22, 158, 202, 338]) {
     const t = (deg * Math.PI) / 180
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 5.4, 0, PLAZA.z + Math.cos(t) * 5.4)
-    prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
+    prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
-  prop('models/bar.glb', Vector3.create(21.4, 0, 11.9), 90, 1, true)
-  prop('models/bar.glb', Vector3.create(26.6, 0, 11.9), -90, 1, true)
+  prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true)
+  prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
 
   // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture
   pathRing(FLOORS[0].y, 7.6, 'images/path-a.png')
@@ -426,7 +437,7 @@ function buildTower(): void {
   for (const deg of [90, 270]) {
     const t = (deg * Math.PI) / 180
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 6.2, y2, PLAZA.z + Math.cos(t) * 6.2)
-    prop('models/sofa.glb', pos, yawToward(pos, PLAZA) + 180, 1, true)
+    prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
 
