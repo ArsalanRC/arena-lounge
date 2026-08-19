@@ -10,6 +10,7 @@ noise is built in the frequency domain (periodic by construction).
                                    (u wraps around the cylinder, v runs bottom -> top)
   models/palace/marble.png   512   plain white veined marble (table tops, benches, bar tops)
   models/palace/ceiling.png  1024  4 m period: 2x2 coffers, gold ribs, lapis field with a gold rosette
+  models/palace/seat.png     512   seat pad: red velvet disc, double gold ring, gold eight-point star (flat, on the floor)
 
 Run: python3 tools/gen-marble.py
 """
@@ -217,9 +218,41 @@ def gen_ceiling(path='models/palace/ceiling.png', size=1024):
         img[m] = (np.array(BRASS)[None, :] * (0.95 + 0.25 * cloud[m][:, None])).clip(0, 1)
     save(path, img)
 
+VELVET_RED = (0.46, 0.07, 0.11)
+VELVET_LIGHT = (0.62, 0.12, 0.16)
+
+def gen_seat(path='models/palace/seat.png', size=512):
+    """Seat pad disc (planar UV over the pad): velvet field with a soft sheen, gold rim + inner ring,
+    a gold eight-point star in the middle; transparent outside the circle."""
+    s = size
+    yy, xx = np.mgrid[0:s, 0:s].astype(np.float64) + 0.5
+    cx = cy = s / 2
+    r = np.hypot(xx - cx, yy - cy) / (s / 2)          # 0 centre .. 1 rim
+    ang = np.arctan2(yy - cy, xx - cx)
+    sheen = fractal_noise(s, s, 3.0, 41)
+    img = np.array(VELVET_RED)[None, None, :] * (0.85 + 0.3 * sheen[..., None]) + np.array(VELVET_LIGHT)[None, None, :] * 0.2 * (1 - r[..., None])
+    # gold rim (0.90..1.0), inner ring (0.74..0.78)
+    rim = (r > 0.90)
+    ring = (r > 0.74) & (r < 0.78)
+    shade_rim = 0.85 + 0.3 * np.cos((r - 0.95) / 0.05 * np.pi)
+    img[rim] = (np.array(BRASS)[None, :] * shade_rim[rim][:, None]).clip(0, 1)
+    img[ring] = np.array(BRASS) * 0.95
+    # eight-point star: two squares rotated 45 deg
+    def square(a, half):
+        x = (xx - cx) / (s / 2); y = (yy - cy) / (s / 2)
+        xr = x * np.cos(a) - y * np.sin(a); yr = x * np.sin(a) + y * np.cos(a)
+        return (np.abs(xr) < half) & (np.abs(yr) < half)
+    star = square(0, 0.16) | square(np.pi / 4, 0.16)
+    img[star] = np.array(BRASS) * (0.9 + 0.2 * sheen[star][:, None]).clip(0, 1)
+    core = r < 0.06
+    img[core] = np.array(BRASS_DARK)
+    alpha = np.clip((1.0 - r) * (s / 2) + 0.5, 0, 1)    # 1 px anti-aliased edge, transparent corners
+    save(path, img, alpha)
+
 if __name__ == '__main__':
     gen_floor()
     gen_wall()
     gen_column()
     gen_marble_plain()
     gen_ceiling()
+    gen_seat()

@@ -219,7 +219,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
         key="roll"
         uiTransform={{ width: 200, height: 56, margin: 4, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
         uiBackground={uiSprite(IMG.button, UI.accent)}
-        uiText={{ value: g.rollDie, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
+        uiText={{ value: g.rollDie, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
         onMouseDown={() => ctx.act({ roll: d6() } as LudoAction)}
       />
     )
@@ -232,7 +232,7 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
           key={`m${m.pieceIndex}`}
           uiTransform={{ width: props.phone ? 200 : 176, height: 52, margin: 4, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
           uiBackground={uiSprite(IMG.button, tint)}
-          uiText={{ value: moveLabel(m), fontSize: 18, color: UI.text, textAlign: 'middle-center' }}
+          uiText={{ value: moveLabel(m), fontSize: 18, color: UI.onAccent, textAlign: 'middle-center' }}
           onMouseDown={() => ctx.act({ piece: m.pieceIndex } as LudoAction)}
         />
       )

@@ -249,16 +249,30 @@ export const EMISSIVE_YELLOW = Color3.fromHexString('#f5c518')
 export const EMISSIVE_RED = Color3.fromHexString('#ff5a4d')
 
 // ---------------------------------------------------------------- UI colours
+/**
+ * UI palette (royal parchment, 19 Aug 2026): popups are aged parchment with a gold border
+ * (images/ui/panel-royal.png), so panel text is dark ink; buttons tint the gold-bordered
+ * button sprite (burgundy = primary, paper = quiet, red = danger) and carry cream text.
+ * `light` is for text drawn on the games' own dark boards (discs, bars, card faces).
+ */
 export const UI = {
-  panel: Color4.create(0.09, 0.08, 0.08, 0.86),
-  panelSoft: Color4.create(0.16, 0.14, 0.13, 0.9),
-  text: Color4.fromHexString('#f7f1e6ff'),
-  muted: Color4.fromHexString('#c9bfb2ff'),
-  accent: Color4.fromHexString('#2f8fa3ff'),
-  accentSoft: Color4.fromHexString('#256f80ff'),
-  /** Tint applied to the pill sprite when showing a toast. */
-  accentTint: Color4.fromHexString('#7fd0e0ff'),
-  danger: Color4.fromHexString('#a33a33ff'),
+  panel: Color4.create(0.91, 0.85, 0.70, 0.96),
+  /** Quiet button tint: darker parchment. */
+  panelSoft: Color4.fromHexString('#d6c49dff'),
+  /** Ink on parchment. */
+  text: Color4.fromHexString('#2b1d12ff'),
+  muted: Color4.fromHexString('#6b5440ff'),
+  /** Cream, for text on dark or strongly coloured surfaces (game boards, primary buttons). */
+  light: Color4.fromHexString('#f7f1e6ff'),
+  onAccent: Color4.fromHexString('#fbf4e4ff'),
+  /** Burgundy velvet: primary buttons, active segments. */
+  accent: Color4.fromHexString('#7a1f2bff'),
+  accentSoft: Color4.fromHexString('#5e1620ff'),
+  /** Tint applied to the pill sprite when showing a toast (light gold). */
+  accentTint: Color4.fromHexString('#e6c97fff'),
+  /** Dark gold for emphasised text on parchment ("your move"). */
+  gold: Color4.fromHexString('#8a5a12ff'),
+  danger: Color4.fromHexString('#9b2a2aff'),
   yellow: Color4.fromHexString('#f5c518ff'),
   red: Color4.fromHexString('#e2453dff'),
   boardBg: Color4.fromHexString('#1f4e5fff'),

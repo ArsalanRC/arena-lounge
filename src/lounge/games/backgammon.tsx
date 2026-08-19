@@ -140,7 +140,7 @@ function Stack(props: { pt: BackgammonPoint; size: number; top: boolean; highlig
       </UiEntity>
     )
   }
-  if (pt.count > 5) discs.push(<UiEntity key="n" uiTransform={{ width: size - 4, height: 18 }} uiText={{ value: `${pt.count}`, fontSize: 14, color: UI.text, textAlign: 'middle-center' }} />)
+  if (pt.count > 5) discs.push(<UiEntity key="n" uiTransform={{ width: size - 4, height: 18 }} uiText={{ value: `${pt.count}`, fontSize: 14, color: UI.light, textAlign: 'middle-center' }} />)
   return (
     <UiEntity uiTransform={{ width: size, height: '100%', flexDirection: props.top ? 'column' : 'column-reverse', alignItems: 'center' }}>{discs}</UiEntity>
   )
@@ -193,7 +193,7 @@ function Board(props: { state: BackgammonGameState; ctx: GameContext; phone: boo
       onMouseDown={() => tap('bar')}
     >
       {barCount > 0 && <UiEntity uiTransform={{ width: barW - 6, height: barW - 6 }} uiBackground={uiSprite(me === 'white' ? BG_SPRITES[0] : BG_SPRITES[1])} />}
-      {barCount > 1 && <UiEntity uiTransform={{ width: barW, height: 18 }} uiText={{ value: `${barCount}`, fontSize: 14, color: UI.text, textAlign: 'middle-center' }} />}
+      {barCount > 1 && <UiEntity uiTransform={{ width: barW, height: 18 }} uiText={{ value: `${barCount}`, fontSize: 14, color: UI.light, textAlign: 'middle-center' }} />}
     </UiEntity>
   )
   const off = (
@@ -202,7 +202,7 @@ function Board(props: { state: BackgammonGameState; ctx: GameContext; phone: boo
       uiBackground={{ color: targets.has('off') ? UI.accentTint : Color4.fromHexString('#3a2a1eff') }}
       onMouseDown={() => tap('off')}
     >
-      <UiEntity uiTransform={{ width: barW + 8, height: 40 }} uiText={{ value: `Off\n${state.off[me]}`, fontSize: 14, color: UI.text, textAlign: 'middle-center' }} />
+      <UiEntity uiTransform={{ width: barW + 8, height: 40 }} uiText={{ value: `Off\n${state.off[me]}`, fontSize: 14, color: UI.light, textAlign: 'middle-center' }} />
     </UiEntity>
   )
   const half = (pts: ReactEcs.JSX.Element[], top: boolean) => (
@@ -252,7 +252,7 @@ function Controls(props: { state: BackgammonGameState; ctx: GameContext; phone: 
         <UiEntity
           uiTransform={{ width: 220, height: 52, margin: { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
           uiBackground={uiSprite(IMG.button, UI.accent)}
-          uiText={{ value: g.rollDice, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
+          uiText={{ value: g.rollDice, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
           onMouseDown={() => props.ctx.act({ roll: [d6(), d6()] } as BgAction)}
         />
       )}

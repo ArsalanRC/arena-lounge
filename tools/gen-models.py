@@ -372,6 +372,20 @@ def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None):
         mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz))
         mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz))
 
+def disc_pad(mesh, cx, cz, r, y0, y1, n=16):
+    """Flat seat pad: n-gon prism whose top cap carries planar UVs over the pad square
+    (u = (x - cx) / 2r + 0.5), for a round sprite texture like models/palace/seat.png."""
+    for i in range(n):
+        a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
+        b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
+        t0 = (cx + r * math.cos(a0), y1, cz + r * math.sin(a0)); t1 = (cx + r * math.cos(a1), y1, cz + r * math.sin(a1))
+        uv = lambda p: ((p[0] - cx) / (2 * r) + 0.5, (p[2] - cz) / (2 * r) + 0.5)
+        mesh.quad(b0, t0, t1, b1, [uv(b0), uv(t0), uv(t1), uv(b1)])
+        # top cap wound counter-clockwise seen from above (prism()'s top cap faces down and is culled
+        # from above; its bottom cap is what shows on thin prisms, which is why pads used to look flat)
+        c = (cx, y1, cz)
+        mesh.quad(c, t1, t0, c, [uv(c), uv(t1), uv(t0), uv(c)])
+
 def sphere_at(mesh, c, radius, subdiv=1):
     tmp = Mesh()
     icosphere(tmp, subdiv, radius)
@@ -802,20 +816,26 @@ box_mesh(pt_top, (0, TABLE_TOP - 0.03, 0), (1.8, 0.06, 0.9), MARBLE_UV)
 box_mesh(pt_frame, (0, TABLE_TOP - 0.1, 0), (1.6, 0.08, 0.7))
 for (x, z) in [(-0.78, -0.33), (0.78, -0.33), (-0.78, 0.33), (0.78, 0.33)]:
     box_mesh(pt_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+pt_rims = Mesh()
 for z in (-1.8, 1.8):
-    prism(pt_pads, 0, z, 0.5, 0, 0.03, 16)
-    prism(pt_coll, 0, z, 0.5, 0, 0.03, 12)
-write_glb('models/table-palace.glb', [("top", pt_top, 0), ("frame", pt_frame, 1), ("pads", pt_pads, 2), ("pads_collider", pt_coll, 3)], [MARBLE_MAT, BRASS_MAT, VELVET, COLLIDER], images=['palace/marble.png'])
+    disc_pad(pt_pads, 0, z, 0.56, 0.004, 0.03, 20)      # velvet disc with gold star (models/palace/seat.png)
+    prism(pt_rims, 0, z, 0.60, 0, 0.016, 20)            # brass rim under the disc edge
+    prism(pt_coll, 0, z, 0.56, 0, 0.03, 12)
+# opaque on purpose: the disc polygon covers the texture's circle, the transparent corners are never mapped
+SEAT_MAT = {"name": "seat", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 1}, "metallicFactor": 0.0, "roughnessFactor": 0.9}, "emissiveTexture": {"index": 1}, "emissiveFactor": [0.30, 0.30, 0.30]}
+write_glb('models/table-palace.glb', [("top", pt_top, 0), ("frame", pt_frame, 1), ("pads", pt_pads, 2), ("rims", pt_rims, 1), ("pads_collider", pt_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
 
 p4_top, p4_frame, p4_pads, p4_coll = Mesh(), Mesh(), Mesh(), Mesh()
 box_mesh(p4_top, (0, TABLE_TOP - 0.03, 0), (1.5, 0.06, 1.5), MARBLE_UV)
 box_mesh(p4_frame, (0, TABLE_TOP - 0.1, 0), (1.3, 0.08, 1.3))
 for (x, z) in [(-0.6, -0.6), (0.6, -0.6), (-0.6, 0.6), (0.6, 0.6)]:
     box_mesh(p4_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+p4_rims = Mesh()
 for (x, z) in [(0, -1.8), (0, 1.8), (-1.8, 0), (1.8, 0)]:
-    prism(p4_pads, x, z, 0.5, 0, 0.03, 16)
-    prism(p4_coll, x, z, 0.5, 0, 0.03, 12)
-write_glb('models/table4-palace.glb', [("top", p4_top, 0), ("frame", p4_frame, 1), ("pads", p4_pads, 2), ("pads_collider", p4_coll, 3)], [MARBLE_MAT, BRASS_MAT, VELVET, COLLIDER], images=['palace/marble.png'])
+    disc_pad(p4_pads, x, z, 0.56, 0.004, 0.03, 20)
+    prism(p4_rims, x, z, 0.60, 0, 0.016, 20)
+    prism(p4_coll, x, z, 0.56, 0, 0.03, 12)
+write_glb('models/table4-palace.glb', [("top", p4_top, 0), ("frame", p4_frame, 1), ("pads", p4_pads, 2), ("rims", p4_rims, 1), ("pads_collider", p4_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
 
 pb_seat, pb_legs, pb_cushion = Mesh(), Mesh(), Mesh()
 box_mesh(pb_seat, (0, 0.43, 0), (1.8, 0.1, 0.52), MARBLE_UV)
@@ -903,7 +923,9 @@ prism(pk_post, 0, 0, 0.07, 0, 1.2, 8)
 prism(pk_post, 0, 0, 0.16, 0, 0.06, 10)
 box_mesh(pk_cube, (0, 1.45, 0), (0.42, 0.42, 0.42))
 box_mesh(pk_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
-write_glb('models/kiosk-palace.glb', [("post", pk_post, 0), ("cube", pk_cube, 1), ("kiosk_collider", pk_coll, 2)], [MARBLE_CREAM_M, WARM_GLOW, COLLIDER])
+# the cube glows burgundy so the white "?" label stays readable
+BURGUNDY_GLOW = {"name": "burgundyGlow", "pbrMetallicRoughness": {"baseColorFactor": [0.45, 0.08, 0.13, 1], "metallicFactor": 0.0, "roughnessFactor": 0.5}, "emissiveFactor": [0.55, 0.10, 0.14]}
+write_glb('models/kiosk-palace.glb', [("post", pk_post, 0), ("cube", pk_cube, 1), ("kiosk_collider", pk_coll, 2)], [MARBLE_CREAM_M, BURGUNDY_GLOW, COLLIDER])
 
 # elevator shaft: brass posts and roof, glass, warm pads and rings
 write_glb('models/shaft-palace.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [BRASS_MAT, GLASS, WARM_GLOW, WARM_GLOW, COLLIDER])

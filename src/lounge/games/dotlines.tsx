@@ -141,7 +141,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boole
         <UiEntity
           key={`h${r}-${c}`}
           uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2, top: r * cell + cell / 2 - lineT / 2 }, width: cell, height: lineT }}
-          uiBackground={{ color: on ? (isLast('h', r, c) ? UI.win : UI.text) : Color4.create(0, 0, 0, 0.08) }}
+          uiBackground={{ color: on ? (isLast('h', r, c) ? UI.win : UI.light) : Color4.create(0, 0, 0, 0.08) }}
         />
       )
     }
@@ -153,7 +153,7 @@ function Board(props: { state: DotLinesGameState; ctx: GameContext; phone: boole
         <UiEntity
           key={`v${r}-${c}`}
           uiTransform={{ positionType: 'absolute', position: { left: cc * cell + cell / 2 - lineT / 2, top: r * cell + cell / 2 }, width: lineT, height: cell }}
-          uiBackground={{ color: on ? (isLast('v', r, c) ? UI.win : UI.text) : Color4.create(0, 0, 0, 0.08) }}
+          uiBackground={{ color: on ? (isLast('v', r, c) ? UI.win : UI.light) : Color4.create(0, 0, 0, 0.08) }}
         />
       )
     }

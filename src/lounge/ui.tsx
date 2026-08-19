@@ -81,6 +81,8 @@ function phone(): boolean {
 // ---------------------------------------------------------------- tokens
 
 const WHITE = Color4.White()
+/** Royal chrome sprites (tools/gen-ui-theme.py): kept as single files outside the atlas. */
+const IMG_ROYAL = { panel: 'images/ui/panel-royal.png', pill: 'images/ui/pill-royal.png', button: 'images/ui/button-royal.png' }
 const BTN_H = 52
 const T = { title: 26, body: 20, small: 17, status: 22 }
 
@@ -94,7 +96,7 @@ function seatTint(t: Table, seat: Seat): Color4 {
 /** Black text on light tints, cream on dark ones. */
 function textOn(c: Color4): Color4 {
   const lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
-  return lum > 0.55 ? Color4.Black() : UI.text
+  return lum > 0.55 ? UI.text : UI.light
 }
 
 // ---------------------------------------------------------------- atoms
@@ -123,8 +125,8 @@ function Btn(props: {
         alignItems: 'center',
         pointerFilter: 'block'
       }}
-      uiBackground={uiSprite('button', props.color ?? (props.quiet ? UI.panelSoft : UI.accent))}
-      uiText={{ value: props.label, fontSize: props.fontSize ?? 20, color: props.textColor ?? (props.quiet ? UI.muted : UI.text), textAlign: 'middle-center' }}
+      uiBackground={{ texture: { src: IMG_ROYAL.button }, textureMode: 'stretch', color: props.color ?? (props.quiet ? UI.panelSoft : UI.accent) }}
+      uiText={{ value: props.label, fontSize: props.fontSize ?? 20, color: props.textColor ?? (props.quiet ? UI.text : UI.onAccent), textAlign: 'middle-center' }}
       onMouseDown={props.onClick}
     />
   )
@@ -176,8 +178,8 @@ function Row(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; 
 function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; width: Width; place: UiTransformProps; padding?: number }) {
   return (
     <UiEntity
-      uiTransform={{ ...props.place, width: props.width, height: 'auto', padding: props.padding ?? 16, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
-      uiBackground={uiSprite('panel')}
+      uiTransform={{ ...props.place, width: props.width, height: 'auto', padding: props.padding ?? 22, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
+      uiBackground={{ texture: { src: IMG_ROYAL.panel }, textureMode: 'stretch' }}
     >
       {props.children}
     </UiEntity>
@@ -192,8 +194,8 @@ function Segmented(props: { options: Array<{ key: string; label: string }>; acti
         <UiEntity
           key={o.key}
           uiTransform={{ width: props.width ?? 92, height: 40, margin: 2, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={uiSprite('button', props.active === o.key ? UI.accent : UI.panelSoft)}
-          uiText={{ value: o.label, fontSize: props.fontSize ?? 16, color: props.active === o.key ? UI.text : UI.muted, textAlign: 'middle-center' }}
+          uiBackground={{ texture: { src: IMG_ROYAL.button }, textureMode: 'stretch', color: props.active === o.key ? UI.accent : UI.panelSoft }}
+          uiText={{ value: o.label, fontSize: props.fontSize ?? 16, color: props.active === o.key ? UI.onAccent : UI.text, textAlign: 'middle-center' }}
           onMouseDown={() => props.onPick(o.key)}
         />
       ))}
@@ -253,7 +255,7 @@ function Hint() {
   return (
     <UiEntity
       uiTransform={{ positionType: 'absolute', position: { top: 16, left: '50%' }, margin: { left: -260 }, width: 520, height: 52, justifyContent: 'center', alignItems: 'center' }}
-      uiBackground={uiSprite('pill', WHITE)}
+      uiBackground={{ texture: { src: IMG_ROYAL.pill }, textureMode: 'stretch', color: WHITE }}
       uiText={{ value, fontSize: T.body, color: UI.muted, textAlign: 'middle-center' }}
     />
   )
@@ -265,7 +267,7 @@ function Toast() {
   return (
     <UiEntity
       uiTransform={{ positionType: 'absolute', position: { top, left: '50%' }, margin: { left: -260 }, width: 520, height: 56, justifyContent: 'center', alignItems: 'center' }}
-      uiBackground={uiSprite('pill', UI.accentTint)}
+      uiBackground={{ texture: { src: IMG_ROYAL.pill }, textureMode: 'stretch', color: UI.accentTint }}
       uiText={{ value: local.toast.text, fontSize: T.body, color: Color4.Black(), textAlign: 'middle-center' }}
     />
   )
@@ -320,12 +322,12 @@ function TableCard() {
   const canSit = !full && !(t.seats > 2 && b.status === Status.Playing)
   // wide enough for "Take a seat" + "Play the house bot" side by side inside the padding; "?" and
   // "Not now" get their own row so nothing ever touches the panel edge (phone canvas included)
-  const W = phone() ? 600 : 540
-  const mainW = phone() ? 250 : 220
+  const W = phone() ? 660 : 600
+  const mainW = phone() ? 262 : 236
   return (
-    <Panel width={W} place={bottomCentre(W, 36)} padding={18}>
-      <Text value={`${tableTitle(t)}`} size={T.title} />
-      <Text value={line} size={T.body} color={UI.muted} margin={{ top: 2, bottom: 8 }} />
+    <Panel width={W} place={bottomCentre(W, 36)} padding={26}>
+      <Text value={`${tableTitle(t)}`} size={T.title} margin={{ top: 4 }} />
+      <Text value={line} size={T.body} color={UI.muted} margin={{ top: 4, bottom: 10 }} />
       {bothTaken && state !== null && !phone() && <t.game.Controls state={state} ctx={contextFor(t)} phone={false} fullBoard={false} />}
       {/* bot strength is chosen before the first round, not only after one is lost */}
       {emptyTable && (
@@ -335,14 +337,14 @@ function TableCard() {
         </Row>
       )}
       {(canSit || emptyTable) && (
-        <Row height={58}>
-          {canSit && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={mainW} />}
-          {emptyTable && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} width={mainW} />}
+        <Row height={64}>
+          {canSit && <Btn label={str.takeSeat} color={UI.accent} onClick={() => sitAnywhere(t)} width={mainW} margin={6} />}
+          {emptyTable && <Btn label={str.playBot} quiet onClick={() => sitWithBot(t)} fontSize={18} width={mainW} margin={6} />}
         </Row>
       )}
-      <Row height={54}>
-        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={56} />
-        <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} width={160} />
+      <Row height={64}>
+        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={56} margin={6} />
+        <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} width={170} margin={6} />
       </Row>
     </Panel>
   )
@@ -386,10 +388,7 @@ function Controller() {
   } else if (b.status === Status.Playing) {
     const secs = secondsLeft(b.updatedAt)
     status = myTurn ? str.yourMove(secs) : str.thinking(displayName(opp), secs)
-    if (myTurn) {
-      const tint = seatTint(t, mySide)
-      statusColor = textOn(tint) === UI.text ? UI.text : tint
-    } else statusColor = UI.muted
+    statusColor = myTurn ? UI.gold : UI.muted
   } else if (b.winner === Winner.Draw) status = str.draw
   else if (b.winner === seat) status = str.youWin
   else status = str.takesRound(displayName(seatOf(t, (b.winner || otherSeat(seat)) as Seat)))
@@ -688,8 +687,8 @@ function HelpPanel() {
               <UiEntity
                 key={l.code}
                 uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 38, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-                uiBackground={uiSprite('button', uiLang.code === l.code ? UI.accent : UI.panelSoft)}
-                uiText={{ value: l.name, fontSize: 16, color: UI.text, textAlign: 'middle-center' }}
+                uiBackground={{ texture: { src: IMG_ROYAL.button }, textureMode: 'stretch', color: uiLang.code === l.code ? UI.accent : UI.panelSoft }}
+                uiText={{ value: l.name, fontSize: 16, color: uiLang.code === l.code ? UI.onAccent : UI.text, textAlign: 'middle-center' }}
                 onMouseDown={() => ((uiLang.code = l.code), (local.langPickerOpen = false))}
               />
             ))}

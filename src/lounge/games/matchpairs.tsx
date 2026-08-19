@@ -118,7 +118,7 @@ function Board(props: { state: MatchPairsGameState; ctx: GameContext; phone: boo
       const card = state.cards[i]
       const up = card.flipped || card.matched
       const sym = symbolIndex(card.symbol)
-      const body = card.matched ? (card.matchedBy === 'B' ? OWNER_TINTS[1] : OWNER_TINTS[0]) : up ? UI.text : Color4.fromHexString('#2f4858ff')
+      const body = card.matched ? (card.matchedBy === 'B' ? OWNER_TINTS[1] : OWNER_TINTS[0]) : up ? UI.light : Color4.fromHexString('#2f4858ff')
       cells.push(
         <UiEntity
           key={`c${i}`}

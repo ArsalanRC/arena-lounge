@@ -213,13 +213,13 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
       <UiEntity
         key={c}
         uiTransform={{ width: w, height: 34, margin: 2, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', padding: { left: 8, right: 8 }, pointerFilter: 'block' }}
-        uiBackground={uiSprite(IMG.button, filled !== null ? UI.panelSoft : open ? UI.accent : Color4.create(0.2, 0.18, 0.17, 0.9))}
+        uiBackground={uiSprite(IMG.button, filled !== null ? UI.panelSoft : open ? UI.accent : Color4.create(0.86, 0.79, 0.64, 0.9))}
         onMouseDown={() => {
           if (open) ctx.act({ score: c } as RoyaleAction)
         }}
       >
-        <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: CATEGORY_LABELS[c], fontSize: 14, color: filled !== null ? UI.muted : UI.text }} />
-        <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: filled !== null ? `${filled}` : preview !== null ? `${preview}` : '', fontSize: 15, color: filled !== null ? UI.muted : UI.text }} />
+        <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: CATEGORY_LABELS[c], fontSize: 14, color: filled !== null ? UI.muted : open ? UI.onAccent : UI.text }} />
+        <UiEntity uiTransform={{ width: 'auto', height: 'auto' }} uiText={{ value: filled !== null ? `${filled}` : preview !== null ? `${preview}` : '', fontSize: 15, color: filled !== null ? UI.muted : open ? UI.onAccent : UI.text }} />
       </UiEntity>
     )
   }
@@ -235,7 +235,7 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
           <UiEntity
             uiTransform={{ width: 130, height: 52, margin: { left: 8 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
             uiBackground={uiSprite(IMG.button, UI.accent)}
-            uiText={{ value: `${g.rollDice} (${cur.rollsLeft})`, fontSize: 17, color: UI.text, textAlign: 'middle-center' }}
+            uiText={{ value: `${g.rollDice} (${cur.rollsLeft})`, fontSize: 17, color: UI.onAccent, textAlign: 'middle-center' }}
             onMouseDown={() => ctx.act({ roll: cur.dice.map((f, i) => (cur.held[i] ? f : d6())) } as RoyaleAction)}
           />
         )}
