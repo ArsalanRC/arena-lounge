@@ -7,6 +7,7 @@ plainest possible textures).
   images/ui/panel-royal.png   512x512  aged parchment, double gold border, corner rosettes, r 28
   images/ui/pill-royal.png    512x128  same language, fully rounded ends (hint / toast)
   images/ui/button-royal.png  256x64   white fill to tint at runtime, gold border, soft gloss
+  images/ui/button-sq-royal.png 64x64  the same for square icon buttons ("?"), so the border survives
 
 Run: python3 tools/gen-ui-theme.py
 """
@@ -67,7 +68,9 @@ def rosette(img, cx, cy, r):
 
 def save(path, rgb, alpha):
     im = np.dstack([np.clip(rgb, 0, 1), np.clip(alpha, 0, 1)])
-    Image.fromarray((im * 255 + 0.5).astype(np.uint8), 'RGBA').save(path, optimize=True)
+    import os
+    Image.fromarray((im * 255 + 0.5).astype(np.uint8), 'RGBA').save(path + '.tmp.png', optimize=True)
+    os.replace(path + '.tmp.png', path)   # atomic for the preview server
     print('wrote', path)
 
 def gen_panel(path='images/ui/panel-royal.png', w=512, h=512, r=28, rosettes=True):
@@ -107,3 +110,4 @@ if __name__ == '__main__':
     gen_panel()
     gen_pill()
     gen_button()
+    gen_button('images/ui/button-sq-royal.png', 64, 64, 14)

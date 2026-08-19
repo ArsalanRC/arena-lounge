@@ -304,7 +304,12 @@ def write_glb(out, parts, materials, images=None):
     glb = struct.pack('<III', 0x46546C67, 2, 12 + 8 + len(js) + 8 + len(bin_data))
     glb += struct.pack('<II', len(js), 0x4E4F534A) + js
     glb += struct.pack('<II', len(bin_data), 0x004E4942) + bytes(bin_data)
-    open(out, 'wb').write(glb)
+    # atomic: the preview server may be serving the old file while we write (a half-written GLB
+    # gets cached as broken by the Explorer until it restarts)
+    import os
+    tmp = out + '.tmp'
+    open(tmp, 'wb').write(glb)
+    os.replace(tmp, out)
     print(f"wrote {out}: {len(glb)/1024:.0f} KB, {tris} rendered triangles, {coll_tris} collider triangles")
 
 TOWER_MATERIALS = [
@@ -360,26 +365,37 @@ def box_mesh(mesh, c, size, uv_period=None):
     q((x1, y0, z1), (x1, y1, z1), (x1, y1, z0), (x1, y0, z0), (2, 1))   # +x
     q((x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1), (2, 1))   # -x
 
-def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None):
-    """Vertical n-gon prism (cylinder stand-in), optional taper to r_top."""
+def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None, uv_period=None):
+    """Vertical n-gon prism (cylinder stand-in), optional taper to r_top. With uv_period T the
+    sides get cylindrical UVs (arc / T, y / T) and the caps planar ones, for a tiling texture."""
     rt = r if r_top is None else r_top
+    T = uv_period
     for i in range(n):
         a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
         b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
         t0 = (cx + rt * math.cos(a0), y1, cz + rt * math.sin(a0)); t1 = (cx + rt * math.cos(a1), y1, cz + rt * math.sin(a1))
-        mesh.quad(b0, t0, t1, b1)
-        # caps as fans (quad with a repeated vertex is fine for flat shading)
-        mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz))
-        mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz))
+        if T:
+            su0, su1 = a0 * r / T, a1 * r / T
+            mesh.quad(b0, t0, t1, b1, [(su0, y0 / T), (su0, y1 / T), (su1, y1 / T), (su1, y0 / T)])
+            pl = lambda p: (p[0] / T, p[2] / T)
+            mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz), [pl((cx, y1, cz)), pl(t0), pl(t1), pl((cx, y1, cz))])
+            mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz), [pl((cx, y0, cz)), pl(b1), pl(b0), pl((cx, y0, cz))])
+        else:
+            mesh.quad(b0, t0, t1, b1)
+            # caps as fans (quad with a repeated vertex is fine for flat shading)
+            mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz))
+            mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz))
 
-def disc_pad(mesh, cx, cz, r, y0, y1, n=16):
-    """Flat seat pad: n-gon prism whose top cap carries planar UVs over the pad square
-    (u = (x - cx) / 2r + 0.5), for a round sprite texture like models/palace/seat.png."""
+def disc_pad(mesh, cx, cz, r, y0, y1, n=16, quad=0):
+    """Flat seat pad: n-gon prism whose top cap carries planar UVs over the pad square, mapped onto
+    quadrant `quad` (0 top-left, 1 top-right, 2 bottom-left, 3 bottom-right) of the 2x2 sheet
+    models/palace/seat.png (v = 1 is the top of the image)."""
+    qu, qv = (quad % 2) * 0.5, 0.5 - (quad // 2) * 0.5
     for i in range(n):
         a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
         b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
         t0 = (cx + r * math.cos(a0), y1, cz + r * math.sin(a0)); t1 = (cx + r * math.cos(a1), y1, cz + r * math.sin(a1))
-        uv = lambda p: ((p[0] - cx) / (2 * r) + 0.5, (p[2] - cz) / (2 * r) + 0.5)
+        uv = lambda p: (qu + ((p[0] - cx) / (2 * r) + 0.5) * 0.5, qv + ((p[2] - cz) / (2 * r) + 0.5) * 0.5)
         mesh.quad(b0, t0, t1, b1, [uv(b0), uv(t0), uv(t1), uv(b1)])
         # top cap wound counter-clockwise seen from above (prism()'s top cap faces down and is culled
         # from above; its bottom cap is what shows on thin prisms, which is why pads used to look flat)
@@ -487,20 +503,39 @@ box_mesh(ks_cube, (0, 1.45, 0), (0.42, 0.42, 0.42))
 box_mesh(ks_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
 write_glb('models/kiosk.glb', [("post", ks_post, 0), ("cube", ks_cube, 1), ("kiosk_collider", ks_coll, 2)], [WOOD_DARK, GLOW_CYAN, COLLIDER])
 
-# suggestion box (ideas + bugs) at the entrance: marble pedestal, brass letter box with a dark slot and a
-# small ball finial; pointer collider around the box (lounge3d opens the feedback panel on click)
-pb_ped, pb_box, pb_slot, pb_coll = Mesh(), Mesh(), Mesh(), Mesh()
-prism(pb_ped, 0, 0, 0.30, 0, 0.08, 12)
-prism(pb_ped, 0, 0, 0.22, 0.08, 0.95, 12)
-prism(pb_ped, 0, 0, 0.30, 0.95, 1.02, 12)
-box_mesh(pb_box, (0, 1.24, 0), (0.56, 0.44, 0.40))
-box_mesh(pb_box, (0, 1.48, 0), (0.60, 0.05, 0.44))            # lid
-prism(pb_box, 0, 0, 0.06, 1.50, 1.62, 8)                       # finial
-box_mesh(pb_slot, (0, 1.36, -0.205), (0.34, 0.035, 0.02))     # slot on the front (-z)
-box_mesh(pb_coll, (0, 1.25, 0), (0.7, 0.6, 0.55))
+# suggestion box (ideas + bugs) at the entrance: a royal letter box. Veined-marble pedestal, a bright gold
+# body with a domed lid (half cylinder along x), raised bands, a framed dark slot on the front (-z), a
+# crown-like finial; pointer collider around the box (lounge3d opens the feedback panel on click)
 MARBLE_CREAM_M = {"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]}
+MARBLE_MAT_POST = {"name": "marble", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.3}, "emissiveTexture": {"index": 0}, "emissiveFactor": [0.16, 0.16, 0.15]}
+
+def half_cylinder_x(mesh, cx, cy, cz, radius, length, n=12):
+    """Domed lid: half cylinder with its axis along x (top half), with flat end caps."""
+    x0, x1 = cx - length / 2, cx + length / 2
+    for i in range(n):
+        a0, a1 = math.pi * i / n, math.pi * (i + 1) / n
+        p0 = (cy + radius * math.sin(a0), cz + radius * math.cos(a0)); p1 = (cy + radius * math.sin(a1), cz + radius * math.cos(a1))
+        mesh.quad((x0, p0[0], p0[1]), (x0, p1[0], p1[1]), (x1, p1[0], p1[1]), (x1, p0[0], p0[1]))
+        mesh.quad((x0, cy, cz), (x0, p1[0], p1[1]), (x0, p0[0], p0[1]), (x0, cy, cz))        # -x cap
+        mesh.quad((x1, cy, cz), (x1, p0[0], p0[1]), (x1, p1[0], p1[1]), (x1, cy, cz))        # +x cap
+
+pb_ped, pb_gold, pb_gold2, pb_slot, pb_coll = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
+prism(pb_ped, 0, 0, 0.32, 0, 0.08, 12, uv_period=0.8)
+prism(pb_ped, 0, 0, 0.22, 0.08, 0.95, 12, uv_period=0.8)
+prism(pb_ped, 0, 0, 0.32, 0.95, 1.03, 12, uv_period=0.8)
+box_mesh(pb_gold, (0, 1.30, 0), (0.62, 0.54, 0.46))                 # body 1.03 .. 1.57
+half_cylinder_x(pb_gold, 0, 1.57, 0, 0.23, 0.62, 12)                # domed lid
+box_mesh(pb_gold2, (0, 1.07, 0), (0.68, 0.05, 0.52))                # foot band
+box_mesh(pb_gold2, (0, 1.555, 0), (0.68, 0.04, 0.52))               # band under the lid
+box_mesh(pb_gold2, (0, 1.36, -0.235), (0.42, 0.12, 0.02))           # slot frame on the front
+box_mesh(pb_slot, (0, 1.36, -0.246), (0.34, 0.04, 0.01))            # the slot
+prism(pb_gold2, 0, 0, 0.05, 1.80, 1.90, 8)                          # finial stem
+sphere_at(pb_gold2, (0, 1.95, 0), 0.06, 1)                          # finial ball
+box_mesh(pb_coll, (0, 1.45, 0), (0.75, 0.95, 0.6))
+GOLD_BRIGHT = {"name": "goldBright", "pbrMetallicRoughness": {"baseColorFactor": [0.96, 0.78, 0.38, 1], "metallicFactor": 0.55, "roughnessFactor": 0.35}, "emissiveFactor": [0.30, 0.22, 0.08]}
+GOLD_DEEP = {"name": "goldDeep", "pbrMetallicRoughness": {"baseColorFactor": [0.80, 0.58, 0.22, 1], "metallicFactor": 0.7, "roughnessFactor": 0.3}, "emissiveFactor": [0.18, 0.12, 0.04]}
 SLOT_DARK = {"name": "slot", "pbrMetallicRoughness": {"baseColorFactor": [0.05, 0.04, 0.04, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}}
-write_glb('models/postbox.glb', [("pedestal", pb_ped, 0), ("box", pb_box, 1), ("slot", pb_slot, 2), ("postbox_collider", pb_coll, 3)], [MARBLE_CREAM_M, BRASS_MAT, SLOT_DARK, COLLIDER])
+write_glb('models/postbox.glb', [("pedestal", pb_ped, 0), ("gold", pb_gold, 1), ("trim", pb_gold2, 2), ("slot", pb_slot, 3), ("postbox_collider", pb_coll, 4)], [MARBLE_MAT_POST, GOLD_BRIGHT, GOLD_DEEP, SLOT_DARK, COLLIDER], images=['palace/marble.png'])
 
 # gateway: two posts + beam + two lanterns (spans x -3.2..3.2 at z 0)
 gw_wood, gw_light = Mesh(), Mesh()
@@ -811,31 +846,35 @@ VELVET = {"name": "velvet", "pbrMetallicRoughness": {"baseColorFactor": [0.42, 0
 CREAM_SILK = {"name": "creamSilk", "pbrMetallicRoughness": {"baseColorFactor": [0.90, 0.85, 0.74, 1], "metallicFactor": 0.0, "roughnessFactor": 0.85}, "emissiveFactor": [0.10, 0.09, 0.08]}
 MARBLE_UV = 1.5
 
-pt_top, pt_frame, pt_pads, pt_coll = Mesh(), Mesh(), Mesh(), Mesh()
+pt_top, pt_frame, pt_legs, pt_pads, pt_coll = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
 box_mesh(pt_top, (0, TABLE_TOP - 0.03, 0), (1.8, 0.06, 0.9), MARBLE_UV)
-box_mesh(pt_frame, (0, TABLE_TOP - 0.1, 0), (1.6, 0.08, 0.7))
+box_mesh(pt_frame, (0, TABLE_TOP - 0.1, 0), (1.6, 0.08, 0.7))          # brass apron
 for (x, z) in [(-0.78, -0.33), (0.78, -0.33), (-0.78, 0.33), (0.78, 0.33)]:
-    box_mesh(pt_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+    prism(pt_legs, x, z, 0.055, 0.04, TABLE_TOP - 0.14, 12, uv_period=0.7)   # round veined-marble legs (flat box legs read as two faces at night)
+    prism(pt_frame, x, z, 0.075, 0.0, 0.04, 12)                         # brass foot
+    prism(pt_frame, x, z, 0.075, TABLE_TOP - 0.14, TABLE_TOP - 0.1, 12)  # brass collar under the apron
 pt_rims = Mesh()
-for z in (-1.8, 1.8):
-    disc_pad(pt_pads, 0, z, 0.56, 0.004, 0.03, 20)      # velvet disc with gold star (models/palace/seat.png)
-    prism(pt_rims, 0, z, 0.60, 0, 0.016, 20)            # brass rim under the disc edge
+for k, z in enumerate((-1.8, 1.8)):
+    disc_pad(pt_pads, 0, z, 0.56, 0.004, 0.03, 20, quad=k)   # red front pad, green back pad (models/palace/seat.png)
+    prism(pt_rims, 0, z, 0.60, 0, 0.016, 20)                 # brass rim under the disc edge
     prism(pt_coll, 0, z, 0.56, 0, 0.03, 12)
 # opaque on purpose: the disc polygon covers the texture's circle, the transparent corners are never mapped
 SEAT_MAT = {"name": "seat", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 1}, "metallicFactor": 0.0, "roughnessFactor": 0.9}, "emissiveTexture": {"index": 1}, "emissiveFactor": [0.30, 0.30, 0.30]}
-write_glb('models/table-palace.glb', [("top", pt_top, 0), ("frame", pt_frame, 1), ("pads", pt_pads, 2), ("rims", pt_rims, 1), ("pads_collider", pt_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
+write_glb('models/table-palace.glb', [("top", pt_top, 0), ("frame", pt_frame, 1), ("legs", pt_legs, 0), ("pads", pt_pads, 2), ("rims", pt_rims, 1), ("pads_collider", pt_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
 
-p4_top, p4_frame, p4_pads, p4_coll = Mesh(), Mesh(), Mesh(), Mesh()
+p4_top, p4_frame, p4_legs, p4_pads, p4_coll = Mesh(), Mesh(), Mesh(), Mesh(), Mesh()
 box_mesh(p4_top, (0, TABLE_TOP - 0.03, 0), (1.5, 0.06, 1.5), MARBLE_UV)
 box_mesh(p4_frame, (0, TABLE_TOP - 0.1, 0), (1.3, 0.08, 1.3))
 for (x, z) in [(-0.6, -0.6), (0.6, -0.6), (-0.6, 0.6), (0.6, 0.6)]:
-    box_mesh(p4_frame, (x, (TABLE_TOP - 0.06) / 2, z), (0.09, TABLE_TOP - 0.06, 0.09))
+    prism(p4_legs, x, z, 0.055, 0.04, TABLE_TOP - 0.14, 12, uv_period=0.7)
+    prism(p4_frame, x, z, 0.075, 0.0, 0.04, 12)
+    prism(p4_frame, x, z, 0.075, TABLE_TOP - 0.14, TABLE_TOP - 0.1, 12)
 p4_rims = Mesh()
-for (x, z) in [(0, -1.8), (0, 1.8), (-1.8, 0), (1.8, 0)]:
-    disc_pad(p4_pads, x, z, 0.56, 0.004, 0.03, 20)
+for k, (x, z) in enumerate([(0, -1.8), (0, 1.8), (-1.8, 0), (1.8, 0)]):
+    disc_pad(p4_pads, x, z, 0.56, 0.004, 0.03, 20, quad=k)   # red, green, blue, yellow (Ludo)
     prism(p4_rims, x, z, 0.60, 0, 0.016, 20)
     prism(p4_coll, x, z, 0.56, 0, 0.03, 12)
-write_glb('models/table4-palace.glb', [("top", p4_top, 0), ("frame", p4_frame, 1), ("pads", p4_pads, 2), ("rims", p4_rims, 1), ("pads_collider", p4_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
+write_glb('models/table4-palace.glb', [("top", p4_top, 0), ("frame", p4_frame, 1), ("legs", p4_legs, 0), ("pads", p4_pads, 2), ("rims", p4_rims, 1), ("pads_collider", p4_coll, 3)], [MARBLE_MAT, BRASS_MAT, SEAT_MAT, COLLIDER], images=['palace/marble.png', 'palace/seat.png'])
 
 pb_seat, pb_legs, pb_cushion = Mesh(), Mesh(), Mesh()
 box_mesh(pb_seat, (0, 0.43, 0), (1.8, 0.1, 0.52), MARBLE_UV)
@@ -927,8 +966,20 @@ box_mesh(pk_coll, (0, 1.45, 0), (0.5, 0.5, 0.5))
 BURGUNDY_GLOW = {"name": "burgundyGlow", "pbrMetallicRoughness": {"baseColorFactor": [0.45, 0.08, 0.13, 1], "metallicFactor": 0.0, "roughnessFactor": 0.5}, "emissiveFactor": [0.55, 0.10, 0.14]}
 write_glb('models/kiosk-palace.glb', [("post", pk_post, 0), ("cube", pk_cube, 1), ("kiosk_collider", pk_coll, 2)], [MARBLE_CREAM_M, BURGUNDY_GLOW, COLLIDER])
 
-# elevator shaft: brass posts and roof, glass, warm pads and rings
-write_glb('models/shaft-palace.glb', [("posts", sh_posts, 0), ("glass", sh_glass, 1), ("pads", sh_pads, 2), ("rings", sh_rings, 3), ("shaft_collider", sh_coll, 4)], [BRASS_MAT, GLASS, WARM_GLOW, WARM_GLOW, COLLIDER])
+# elevator shaft: round marble columns with brass bases and capitals, brass roof rim, glass on three sides,
+# gold-glowing floor pads and light rings on every floor (the palace version of shaft.glb)
+psh_cols, psh_brass, psh_gold = Mesh(), Mesh(), Mesh()
+for (x, z) in [(-half, -half), (half, -half), (-half, half), (half, half)]:
+    prism(psh_cols, x, z, 0.11, 0, SHAFT_TOP, 12, uv_period=1.0)
+    for y in (0, 8, 16, 24):
+        prism(psh_brass, x, z, 0.15, y, y + 0.12, 12)             # base ring on every floor
+    prism(psh_brass, x, z, 0.15, SHAFT_TOP - 0.2, SHAFT_TOP, 12)   # capital
+box_mesh(psh_brass, (0, SHAFT_TOP + 0.1, 0), (half * 2 + 0.3, 0.2, half * 2 + 0.3))   # roof slab
+for y in (0, 8, 16, 24):
+    prism(psh_gold, 0, 0, 1.1, y + 0.005, y + 0.04, 24)           # gold floor pad
+    box_mesh(psh_gold, (0, y + 2.6, -half), (half * 2 + 0.2, 0.08, 0.08))   # light ring at the opening
+GOLD_GLOW = {"name": "goldGlow", "pbrMetallicRoughness": {"baseColorFactor": [0.95, 0.76, 0.35, 1], "metallicFactor": 0.6, "roughnessFactor": 0.35}, "emissiveFactor": [0.75, 0.55, 0.18]}
+write_glb('models/shaft-palace.glb', [("columns", psh_cols, 0), ("brass", psh_brass, 1), ("glass", sh_glass, 2), ("gold", psh_gold, 3), ("shaft_collider", sh_coll, 4)], [MARBLE_MAT, BRASS_MAT, GLASS, GOLD_GLOW, COLLIDER], images=['palace/marble.png'])
 
 # gateway: marble posts with brass caps, brass beam, warm lanterns
 pg_marble, pg_brass, pg_light = Mesh(), Mesh(), Mesh()
@@ -940,9 +991,28 @@ for x in (-3.2, 3.2):
 box_mesh(pg_brass, (0, 3.5, 0), (6.9, 0.22, 0.3))
 write_glb('models/gateway-palace.glb', [("marble", pg_marble, 0), ("brass", pg_brass, 1), ("lights", pg_light, 2)], [MARBLE_CREAM_M, BRASS_MAT, LAMP])
 
-# lamp: brass post, same lantern
-write_glb('models/lamp-palace.glb', [("post", lp_post, 0), ("light", lp_light, 1)], [BRASS_MAT, LAMP])
+# lamp: round marble post with a brass collar under the lantern, same warm lantern
+plp_post, plp_brass = Mesh(), Mesh()
+prism(plp_post, 0, 0, 0.07, 0, 2.7, 12, uv_period=0.9)
+prism(plp_brass, 0, 0, 0.12, 0, 0.06, 12)
+prism(plp_brass, 0, 0, 0.10, 2.7, 2.78, 12)
+write_glb('models/lamp-palace.glb', [("post", plp_post, 0), ("brass", plp_brass, 1), ("light", lp_light, 2)], [MARBLE_MAT, BRASS_MAT, LAMP], images=['palace/marble.png'])
 
 # planters and the plaza tree: marble pots
 write_glb('models/planter-palace.glb', [("pot", pl_pot, 0), ("leaves", pl_leaves, 1)], [MARBLE_CREAM_M, PLANT])
 write_glb('models/plazatree-palace.glb', [("pot", pt_pot, 0), ("trunk", pt_trunk, 1), ("leaves", pt_leaves, 2)], [MARBLE_CREAM_M, WOOD_DARK, PLANT])
+
+# ------------------------------------------------------------------ directory monument (palace): one piece
+# A single marble stele: stepped plinth, solid block with the dark directory plate recessed into its
+# front (-z) behind a thin gold inlay line, stepped cap with a brass ball. Origin on the floor.
+dm_marble, dm_plate, dm_brass = Mesh(), Mesh(), Mesh()
+box_mesh(dm_marble, (0, 0.21, 0), (2.1, 0.42, 1.0), MARBLE_UV)        # plinth 0 .. 0.42 (all marble: brass bands clashed)
+box_mesh(dm_marble, (0, 0.515, 0), (1.8, 0.19, 0.7), MARBLE_UV)       # step 0.42 .. 0.61
+box_mesh(dm_marble, (0, 1.76, 0), (1.6, 2.34, 0.3), MARBLE_UV)        # stele 0.59 .. 2.93 (meets the cap)
+box_mesh(dm_plate, (0, 1.86, -0.145), (1.15, 1.6, 0.02))              # recessed dark plate (front face at -0.155, inside the stele face at -0.15)
+for (c, size) in [((0, 2.69, -0.151), (1.25, 0.025, 0.004)), ((0, 1.03, -0.151), (1.25, 0.025, 0.004)), ((-0.6125, 1.86, -0.151), (0.025, 1.685, 0.004)), ((0.6125, 1.86, -0.151), (0.025, 1.685, 0.004))]:
+    box_mesh(dm_brass, c, size)                                        # gold inlay line around the plate, flush with the face
+box_mesh(dm_marble, (0, 3.02, 0), (1.8, 0.12, 0.46), MARBLE_UV)       # cap
+box_mesh(dm_marble, (0, 3.12, 0), (1.5, 0.08, 0.36), MARBLE_UV)       # upper step of the cap
+sphere_at(dm_brass, (0, 3.26, 0), 0.09, 1)                            # brass ball finial
+write_glb('models/directory-palace.glb', [("marble", dm_marble, 0), ("plate", dm_plate, 1), ("brass", dm_brass, 2)], [MARBLE_MAT, DECOR_MATERIALS[4], BRASS_MAT], images=['palace/marble.png'])
