@@ -209,7 +209,11 @@ function zoneBanner(z: ZoneDef): void {
   const y = z.position.y
   const centre = Vector3.create(PLAZA.x, y, PLAZA.z)
   const away = Vector3.normalize(Vector3.subtract(z.position, centre))
-  const pos = Vector3.add(z.position, Vector3.scale(away, z.floor === 1 ? 1.8 : 2.6)) // floor 1: 2.6 put the pole in the railing
+  // a lone four-seat table has seat pads on BOTH local axes at 1.8 m, so an on-axis pole lands
+  // exactly on the outer seat (players stood up into it); step diagonally between two pads instead
+  const lone4 = z.tables === 1 && (getGame(z.gameId).seats ?? 2) > 2
+  const dir = lone4 ? Vector3.rotate(away, Quaternion.fromEulerDegrees(0, -45, 0)) : away
+  const pos = Vector3.add(z.position, Vector3.scale(dir, lone4 ? 2.3 : z.floor === 1 ? 1.8 : 2.6)) // floor 1: 2.6 put the pole in the railing
   cylinder(Vector3.create(pos.x, y + 1.7, pos.z), Vector3.create(0.12, 3.4, 0.12), PALACE ? PALETTE.brass : PALETTE.woodDark, true)
   const cloth = engine.addEntity()
   Transform.create(cloth, {
@@ -256,11 +260,26 @@ function elevatorShaft(pad: Vector3): void {
 /** The directory text: every floor with its games, in the UI language. */
 function directoryText(): string {
   const names = (floor: number) =>
-    ZONES.filter((zn) => zn.floor === floor && BUILT_GAMES.includes(zn.gameId))
-      .map((zn) => localeInfo(uiLang.code).games[zn.gameId]?.name ?? GAME_NAMES[zn.gameId])
+    Array.from(new Set(ZONES.filter((zn) => zn.floor === floor && BUILT_GAMES.includes(zn.gameId)).map((zn) => zn.gameId)))
+      .map((id) => localeInfo(uiLang.code).games[id]?.name ?? GAME_NAMES[id])
       .join(' · ')
   const f = L().floors
   return `${f[0].toUpperCase()}\n${names(0)}\n\n${f[1].toUpperCase()} ▲\n${names(1)}\n\n${f[2].toUpperCase()} ▲▲\n${names(2)}\n\n${f[3].toUpperCase()} ▲▲▲`
+}
+
+/**
+ * Museum label for a floor's ceiling artwork (Arsalan 20 Aug): the directory stele model
+ * with a static plate text naming the fresco, Pozzo and the photographer. Spots are
+ * clash-checked against each floor's rugs, columns, shafts, runners, sofas and railings.
+ */
+function artworkBoard(pos: Vector3, yaw: number, text: string): void {
+  const e = engine.addEntity()
+  Transform.create(e, { position: pos, rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
+  GltfContainer.create(e, { src: 'models/directory-palace.glb' })
+  const lbl = engine.addEntity()
+  // plate front sits at local z -0.155 (brass inlay -0.151): the label floats just proud
+  Transform.create(lbl, { parent: e, position: Vector3.create(0, 1.83, -0.16) })
+  TextShape.create(lbl, { text, fontSize: 0.34, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 1.02, height: 1.45, textWrapping: true })
 }
 
 function directoryBoard(x: number, z: number): void {
@@ -308,6 +327,23 @@ function welcomeBoard(x: number, z: number): void {
   })
   pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'ArsalanRC', maxDistance: 12 } }, () => {
     void openExternalUrl({ url: 'https://arsalanrc.github.io' })
+  })
+  // museum label on the stele base: the ceiling artworks' visible credit (details in
+  // models/palace/CREDITS.md; Arsalan asked 20 Aug where the artist is credited in-world)
+  // y 0.71 / z -0.165: the only clear band on the front. The octagonal base courses reach
+  // 0.72 m forward below y 0.58 (a label there sits INSIDE the marble, invisible), the brass
+  // inlay line crosses at y 0.84, and the body face itself is at z -0.15.
+  const credit = engine.addEntity()
+  Transform.create(credit, { parent: e, position: Vector3.create(0, 0.71, -0.165) })
+  TextShape.create(credit, {
+    text: 'Ceilings: Andrea Pozzo · Sant\'Ignazio, Rome & Jesuit Church, Vienna\nPhotos: Wilfredor CC0 · J.-C. BENOIST CC BY 2.5 · Everbruin CC BY-SA 4.0',
+    fontSize: 0.2,
+    font: Font.F_SANS_SERIF,
+    textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
+    textColor: PALETTE.cream,
+    width: 2.5,
+    height: 0.3,
+    textWrapping: true
   })
 }
 
@@ -450,6 +486,18 @@ export function buildLounge(): void {
   feedbackBox(27.0, 15.4) // clear of the east elevator shaft
   directoryBoard(21.4, 11.9) // left of the entrance (mirrors the welcome stele); lounge: on the left bar
 
+  // one ceiling-credit board per artwork floor (rooftop is open sky). Ground: entrance court
+  // west of the path, faces east like the directory (2.4 m off the kiosk, 6 m off the nearest
+  // rug). Game room: free arc between Croc Snap and Snakes & Ladders (3.7 m off the rug, 1.4 m
+  // off the 202.5-deg column). Sky room: between the west sofa and Dice Royale (4.3 m / 2.5 m).
+  if (PALACE) {
+    artworkBoard(Vector3.create(18.4, 0, 14.6), 270, "THE CEILING\n\nTriumph of St Ignatius\nAndrea Pozzo, 1685-94\nSant'Ignazio, Rome\n\nPhoto: Wilfredor (CC0)")
+    const g = Vector3.create(20.27, FLOORS[1].y, 13.76)
+    artworkBoard(g, yawToward(g, PLAZA), 'THE CEILING\n\nVault fresco\nAndrea Pozzo, 1703\nJesuit Church, Vienna\n\nPhoto: Everbruin\n(CC BY-SA 4.0)')
+    const sk = Vector3.create(16.55, FLOORS[2].y, 19.7)
+    artworkBoard(sk, yawToward(sk, PLAZA), "THE CEILING\n\nThe painted dome\nAndrea Pozzo, 1685\nSant'Ignazio, Rome\n\nPhoto: J.-C. BENOIST\n(CC BY 2.5)")
+  }
+
   buildTower()
 
   // real lights on top of the emissive fixtures (see config LIGHTS)
@@ -479,7 +527,8 @@ function buildTower(): void {
   // flanking the entrance path just inside the portal
   for (const deg of [22, 158, 202, 338]) {
     const t = (deg * Math.PI) / 180
-    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 4.6, 0, PLAZA.z + Math.cos(t) * 4.6)
+    // 0.015 lift: the sofa base is coplanar with the floor and z-fights on bare marble (sky room pair)
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 4.6, 0.015, PLAZA.z + Math.cos(t) * 4.6)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   if (!PALACE) {
@@ -501,7 +550,7 @@ function buildTower(): void {
   if (PALACE) {
     // straight entrance carpet: from the fence gap up into the ring band, same velvet + gold edges
     const carpet = engine.addEntity()
-    const z0 = 7.6 // the fence line is at z 8.15: run through the gap onto the garden path
+    const z0 = 6.4 // the fence line is at z 8.15: reach well onto the garden path so arrivals step onto it earlier (was 7.6; Arsalan 20 Aug)
     const z1 = PLAZA.z - 6.4 // reaches into the ring band (16.4 .. 18.6), the ring draws above it
     Transform.create(carpet, { position: Vector3.create(SPAWN.x, 0.005, (z0 + z1) / 2), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(2.6, z1 - z0, 1) })
     MeshRenderer.setPlane(carpet)
@@ -532,7 +581,7 @@ function buildTower(): void {
   for (const deg of [45, 120, 225]) columnAt(deg, 9.5, 16, 24, 0.5)
   for (const deg of [90, 270]) {
     const t = (deg * Math.PI) / 180
-    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.0, y2, PLAZA.z + Math.cos(t) * 7.0)
+    const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.0, y2 + 0.015, PLAZA.z + Math.cos(t) * 7.0)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
   liveLabel(Vector3.create(PLAZA.x, y2 + 3.2, PLAZA.z + 4.4), () => L().skyRoom, 2.6, Color4.White(), 8)
@@ -546,7 +595,10 @@ function buildTower(): void {
     bench(Vector3.create(PLAZA.x + Math.sin(t) * 7.2, y3, PLAZA.z + Math.cos(t) * 7.2), roofCentre)
   }
   if (PALACE) {
-    for (const deg of [45, 135, 225, 315]) {
+    // 45 and 225 only: the elevator shafts rise through this ring at ~142 and ~304 deg, and a
+    // pavilion (half-diagonal ~2.1) needs 22+ deg of arc from each shaft AND each bench; the
+    // two that stood at 135/315 interpenetrated the shafts (Arsalan, rooftop pass 20 Aug)
+    for (const deg of [45, 225]) {
       const t = (deg * Math.PI) / 180
       // r 7.3: at 8.0 the pavilion corners (half-diagonal ~2.1) pierced the edge balustrade at r 9.95
       const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.3, y3, PLAZA.z + Math.cos(t) * 7.3)
@@ -571,10 +623,12 @@ function leaderboardBoard(pos: Vector3): void {
   prop(finish('board'), Vector3.create(pos.x, pos.y + 2.6, pos.z), 0, 1.5, true)
   const title = engine.addEntity()
   Transform.create(title, { position: Vector3.create(pos.x, pos.y + 3.72, pos.z - 0.14) })
-  TextShape.create(title, { text: '', fontSize: 2.2, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 5, height: 0.7 })
+  TextShape.create(title, { text: '', fontSize: 2.2, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 3.6, height: 0.7, textWrapping: true })
   const body = engine.addEntity()
   Transform.create(body, { position: Vector3.create(pos.x, pos.y + 2.35, pos.z - 0.14) })
-  TextShape.create(body, { text: '', fontSize: 1.35, font: Font.F_MONOSPACE, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), width: 4.2, height: 2.4 })
+  // width 3.4 + wrapping: the plate is 3.9 wide, and the empty-state sentence used to run
+  // straight past the frame (fontSize 1.35 monospace needs ~2x the plate for one line)
+  TextShape.create(body, { text: '', fontSize: 1.15, font: Font.F_MONOSPACE, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.White(), width: 3.4, height: 2.4, textWrapping: true })
   let shownVersion = -1
   let shownLang = ''
   engine.addSystem((dt) => {
@@ -587,6 +641,6 @@ function leaderboardBoard(pos: Vector3): void {
     const rows = board.rows.slice(0, 10)
     TextShape.getMutable(body).text = rows.length === 0
       ? (board.failed ? str.leaderboardOffline : str.leaderboardEmpty)
-      : rows.map((r) => `${String(r.rank).padStart(2, ' ')}. ${r.name.slice(0, 14).padEnd(14, ' ')} ${String(r.wins).padStart(3, ' ')} ${str.winsShort}  ${str.streakShort} ${r.streak}`).join('\n')
+      : rows.map((r) => `${String(r.rank).padStart(2, ' ')}. ${r.name.slice(0, 14).padEnd(14, ' ')} ${String(r.points).padStart(4, ' ')} ${str.pointsShort}`).join('\n')
   })
 }

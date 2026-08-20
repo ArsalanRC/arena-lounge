@@ -118,7 +118,8 @@ function ring(deg: number, r: number, f: number): Vector3 {
  * Ground floor: six corners around the plaza (r ~11.3), entrance (spawn) to the
  * south. Game room (floor 1): six corners at r 10.2, sky room (floor 2): two at
  * r 8.5. Every game has two tables side by side (3.4 m apart) except Ludo,
- * whose one four-seat table needs the room. Empty corners are reserved for
+ * whose four-seat tables need the room: two corners with one table each
+ * (west, and past the north-west elevator). Empty corners are reserved for
  * games that are not built yet: they show a "coming soon" banner and get their
  * rug + tables only once the plugin exists. Radii leave a 2 m+ walking ring
  * inside the seats on every floor (lounge3d pathRing).
@@ -137,7 +138,13 @@ export const ZONES: ZoneDef[] = [
   { id: 10, gameId: 'supertictactoe', position: ring(45, 10.2, 1), rug: Color4.fromHexString('#e0917aff'), banner: Color4.fromHexString('#b8523aff'), tables: 2, floor: 1 },
   { id: 11, gameId: 'snakesladders', position: ring(225, 10.2, 1), rug: Color4.fromHexString('#7fb069ff'), banner: Color4.fromHexString('#3f7a3aff'), tables: 2, floor: 1 },
   { id: 12, gameId: 'seastrike', position: ring(0, 8.5, 2), rug: Color4.fromHexString('#4f7fb0ff'), banner: Color4.fromHexString('#1f4e7fff'), tables: 2, floor: 2 },
-  { id: 13, gameId: 'diceroyale', position: ring(180, 8.5, 2), rug: Color4.fromHexString('#9b6fd0ff'), banner: Color4.fromHexString('#5a3a8aff'), tables: 2, floor: 2 }
+  { id: 13, gameId: 'diceroyale', position: ring(180, 8.5, 2), rug: Color4.fromHexString('#9b6fd0ff'), banner: Color4.fromHexString('#5a3a8aff'), tables: 2, floor: 2 },
+  // second Ludo corner (Arsalan, 20 Aug): past the north-west elevator shaft (~304 deg), between
+  // it and the Chess corner. Appended LAST so existing table ids / sync ids stay stable.
+  // 328 deg, not closer: the shaft's corner columns reach 1.77 m from the pad centre, and at
+  // 322 deg the shaft-side seat pad sat 0.19 m from one (10.2 + seat 1.8 leaves ~1 m walking
+  // gap at 328; the rug also stays 0.1 m clear of the Chess rug, so the two never z-fight)
+  { id: 14, gameId: 'ludo', position: ring(328, 10.2, 1), rug: Color4.fromHexString('#d9a441ff'), banner: Color4.fromHexString('#8a6420ff'), tables: 1, floor: 1 }
 ]
 
 /** Games that have a plugin today; zones for other games stay empty until then. */

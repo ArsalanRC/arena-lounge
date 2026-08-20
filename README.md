@@ -43,7 +43,7 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
 - **Nothing heavy to download.** Sixteen small GLBs written by a Python
   script (tower, glass facade, neon marquee, elevator shafts, furniture; 1.8 MB
   together), procedural textures (about 1 MB) and tiny synthesised sounds.
-  Fifteen tables on four floors, ~510 entities idle (piece pools exist only
+  Twenty-eight tables on four floors, ~510 entities idle (piece pools exist only
   while a round runs), ~59k triangles on a 3x3 World; the production script is
   0.9 MB (0.25 MB gzipped), so it loads in seconds on 4G.
 - **Safe-area aware, no hover states, no tiny targets, no rounded-corner CSS

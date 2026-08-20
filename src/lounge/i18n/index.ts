@@ -109,6 +109,7 @@ export interface LoungeStrings {
   feedbackSign: string
   howToPlayTab: string
   winsShort: string
+  pointsShort: string
   streakShort: string
   yourStats: (wins: number, streak: number, best: number) => string
   notRanked: string
@@ -264,7 +265,7 @@ const EN: LoungeStrings = {
   rooftop: 'ROOFTOP',
   rooftopNote: 'Leaderboard and tournaments: coming after the buildathon',
   leaderboardTitle: 'Leaderboard',
-  leaderboardSub: 'Wins against real players, on every floor, kept forever. Rounds against the house bot do not count.',
+  leaderboardSub: 'Wins against real players score points: quick games 1, deeper boards 2, the long games 3. Only your first 5 wins a day against the same rival score. Bot rounds never count.',
   leaderboardEmpty: 'Nobody on the board yet. Beat a friend and be the first.',
   leaderboardOffline: 'The board is taking a moment. Try again in a bit.',
   leaderboardTab: 'Leaderboard',
@@ -280,6 +281,7 @@ const EN: LoungeStrings = {
   feedbackSign: 'IDEAS\nBUGS',
   howToPlayTab: 'How to play',
   winsShort: 'wins',
+  pointsShort: 'pts',
   streakShort: 'streak',
   yourStats: (wins, streak, best) => `You: ${wins} wins · streak ${streak} · best ${best}`,
   notRanked: 'You are not on the board yet. Win a round against a person.',
@@ -433,7 +435,7 @@ const DE: LoungeStrings = {
   rooftop: 'DACHTERRASSE',
   rooftopNote: 'Bestenliste und Turniere: kommen nach dem Buildathon',
   leaderboardTitle: 'Bestenliste',
-  leaderboardSub: 'Siege gegen echte Spieler, auf allen Etagen, dauerhaft gezählt. Runden gegen den Bot zählen nicht.',
+  leaderboardSub: 'Siege gegen echte Spieler bringen Punkte: schnelle Spiele 1, tiefere Bretter 2, die langen Partien 3. Pro Tag zählen nur die ersten 5 Siege gegen denselben Rivalen. Bot-Runden zählen nie.',
   leaderboardEmpty: 'Noch niemand auf der Liste. Schlag einen Freund und sei der Erste.',
   leaderboardOffline: 'Die Liste braucht gerade einen Moment. Versuch es gleich noch mal.',
   leaderboardTab: 'Bestenliste',
@@ -449,6 +451,7 @@ const DE: LoungeStrings = {
   feedbackSign: 'IDEEN\nFEHLER',
   howToPlayTab: 'So geht’s',
   winsShort: 'Siege',
+  pointsShort: 'Pkt.',
   streakShort: 'Serie',
   yourStats: (wins, streak, best) => `Du: ${wins} Siege · Serie ${streak} · beste ${best}`,
   notRanked: 'Du stehst noch nicht auf der Liste. Gewinn eine Runde gegen einen Menschen.',
@@ -602,7 +605,7 @@ const ES: LoungeStrings = {
   rooftop: 'AZOTEA',
   rooftopNote: 'Clasificación y torneos: después del buildathon',
   leaderboardTitle: 'Clasificación',
-  leaderboardSub: 'Victorias contra jugadores reales, en todas las plantas, para siempre. Las rondas contra el bot no cuentan.',
+  leaderboardSub: 'Las victorias contra jugadores reales dan puntos: juegos rápidos 1, tableros profundos 2, las partidas largas 3. Solo puntúan tus primeras 5 victorias al día contra el mismo rival. Las rondas contra el bot no cuentan.',
   leaderboardEmpty: 'Todavía no hay nadie. Gana a un amigo y sé el primero.',
   leaderboardOffline: 'La tabla tarda un momento. Prueba de nuevo enseguida.',
   leaderboardTab: 'Clasificación',
@@ -618,6 +621,7 @@ const ES: LoungeStrings = {
   feedbackSign: 'IDEAS\nFALLOS',
   howToPlayTab: 'Cómo se juega',
   winsShort: 'victorias',
+  pointsShort: 'pts',
   streakShort: 'racha',
   yourStats: (wins, streak, best) => `Tú: ${wins} victorias · racha ${streak} · mejor ${best}`,
   notRanked: 'Aún no estás en la tabla. Gana una ronda contra una persona.',
@@ -771,7 +775,7 @@ const PT: LoungeStrings = {
   rooftop: 'TERRAÇO',
   rooftopNote: 'Ranking e torneios: depois do buildathon',
   leaderboardTitle: 'Ranking',
-  leaderboardSub: 'Vitórias contra jogadores reais, em todos os pisos, guardadas para sempre. Rondas contra o bot não contam.',
+  leaderboardSub: 'Vitórias contra jogadores reais valem pontos: jogos rápidos 1, tabuleiros profundos 2, as partidas longas 3. Só pontuam as tuas primeiras 5 vitórias por dia contra o mesmo rival. Rondas contra o bot não contam.',
   leaderboardEmpty: 'Ainda ninguém na tabela. Ganha a um amigo e sê o primeiro.',
   leaderboardOffline: 'A tabela está a demorar um pouco. Tenta outra vez daqui a nada.',
   leaderboardTab: 'Ranking',
@@ -787,6 +791,7 @@ const PT: LoungeStrings = {
   feedbackSign: 'IDEIAS\nBUGS',
   howToPlayTab: 'Como jogar',
   winsShort: 'vitórias',
+  pointsShort: 'pts',
   streakShort: 'série',
   yourStats: (wins, streak, best) => `Tu: ${wins} vitórias · série ${streak} · melhor ${best}`,
   notRanked: 'Ainda não estás na tabela. Ganha uma ronda contra uma pessoa.',
@@ -940,7 +945,7 @@ const FR: LoungeStrings = {
   rooftop: 'TOIT-TERRASSE',
   rooftopNote: 'Classement et tournois : après le buildathon',
   leaderboardTitle: 'Classement',
-  leaderboardSub: 'Victoires contre de vrais joueurs, à tous les étages, gardées pour toujours. Les manches contre le bot ne comptent pas.',
+  leaderboardSub: 'Les victoires contre de vrais joueurs rapportent des points : jeux rapides 1, plateaux profonds 2, les longues parties 3. Seules tes 5 premières victoires du jour contre le même rival comptent. Les manches contre le bot ne comptent jamais.',
   leaderboardEmpty: 'Personne au classement pour l’instant. Bats un ami et sois le premier.',
   leaderboardOffline: 'Le classement met un moment. Réessaie dans un instant.',
   leaderboardTab: 'Classement',
@@ -956,6 +961,7 @@ const FR: LoungeStrings = {
   feedbackSign: 'IDÉES\nBUGS',
   howToPlayTab: 'Comment jouer',
   winsShort: 'victoires',
+  pointsShort: 'pts',
   streakShort: 'série',
   yourStats: (wins, streak, best) => `Toi : ${wins} victoires · série ${streak} · record ${best}`,
   notRanked: 'Tu n’es pas encore au classement. Gagne une manche contre quelqu’un.',

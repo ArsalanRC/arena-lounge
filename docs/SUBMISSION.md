@@ -22,7 +22,7 @@ around a plaza host Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match
 Pairs and Checkers; two glass elevators take you up the tower to the game
 room (Chess, Croc Snap, Backgammon, Ludo, Super Tic Tac Toe, Snakes &
 Ladders), the sky room (Sea Strike, a Dice Royale duel) and the rooftop
-terrace. Fourteen games at fifteen tables. Anyone can walk up, take a seat
+terrace. Fourteen games at twenty-eight tables. Anyone can walk up, take a seat
 and play; sides are dealt at random every round, a house bot fills the empty
 seat so a solo visitor is never stuck waiting, and it steps aside the moment
 a human wants the chair. Every move is visible to everyone in the World, so
@@ -60,7 +60,7 @@ tables become natural gathering points: play, watch, take the next seat.
   how many play, friends fill the chairs, house bots fill what is left.
 - The floating sign over each table says who is waiting for a rival; full
   tables invite you to watch from behind either player.
-- Fourteen games at fifteen tables across four floors give a group reasons to
+- Fourteen games at twenty-eight tables across four floors give a group reasons to
   split up, wander, and regroup on the rooftop; the bot only keeps a table
   warm, the games are built around two humans, and the series score ("2 : 1")
   gives a reason to stay for one more round.

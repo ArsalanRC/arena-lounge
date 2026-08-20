@@ -162,10 +162,10 @@ function Text(props: { value: string; size?: number; color?: Color4; margin?: Ma
 }
 
 /** Left-aligned wrapped paragraph. */
-function Para(props: { value: string; size?: number; color?: Color4; margin?: Margin; rtl?: boolean }) {
+function Para(props: { value: string; size?: number; color?: Color4; margin?: Margin; rtl?: boolean; width?: Width }) {
   return (
     <UiEntity
-      uiTransform={{ width: '96%', height: 'auto', margin: props.margin ?? 0 }}
+      uiTransform={{ width: props.width ?? '96%', height: 'auto', margin: props.margin ?? 0 }}
       uiText={{ value: props.value, fontSize: props.size ?? 18, color: props.color ?? UI.text, textAlign: props.rtl ? 'top-right' : 'top-left' }}
     />
   )
@@ -210,14 +210,36 @@ function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]
   )
 }
 
-/** Segmented control: equal-width options, one active. */
-function Segmented(props: { options: Array<{ key: string; label: string }>; active: string; onPick: (key: string) => void; width?: number; fontSize?: number }) {
+/** Rows a greedy left-to-right wrap needs for items of these outer widths in a box (mirrors Yoga). */
+function wrapRows(widths: number[], box: number): number {
+  let rows = 1
+  let x = 0
+  for (const w of widths) {
+    // 2-unit epsilon: the renderer refuses a row that fills the box EXACTLY (seen 20 Aug:
+    // 4 x 154 in a 616 box wrapped to 3 per row), so the sim must be a hair stricter too
+    if (x > 0 && x + w > box - 2) {
+      rows += 1
+      x = 0
+    }
+    x += w
+  }
+  return rows
+}
+
+/** Segmented control: equal-width options, one active. `wrap` flows them over several
+ * centred rows (the how-to-play game strip outgrew one row at fourteen games); pills
+ * keep their width either way, so a tight row can no longer squeeze the labels. A
+ * wrapping box needs its width AND height explicit (auto-height flexWrap containers
+ * mis-measure here and spill past the panel border), hence `boxWidth` + wrapRows. */
+function Segmented(props: { options: Array<{ key: string; label: string }>; active: string; onPick: (key: string) => void; width?: number; fontSize?: number; wrap?: boolean; boxWidth?: number; margin?: Margin }) {
+  const box = props.boxWidth ?? 600
+  const boxH = props.wrap ? wrapRows(props.options.map(() => (props.width ?? 92) + 4), box) * 44 : 40
   return (
-    <UiEntity uiTransform={{ width: 'auto', height: 40, flexDirection: 'row', alignItems: 'center' }}>
+    <UiEntity uiTransform={props.wrap ? { width: box, height: boxH, flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', margin: props.margin ?? 0 } : { width: 'auto', height: 40, flexDirection: 'row', alignItems: 'center', margin: props.margin ?? 0 }}>
       {props.options.map((o) => (
         <UiEntity
           key={o.key}
-          uiTransform={{ width: props.width ?? 92, height: 40, margin: 2, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+          uiTransform={{ width: props.width ?? 92, height: 40, margin: 2, flexShrink: 0, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
           uiBackground={{ texture: { src: IMG_ROYAL.button }, textureMode: 'stretch', color: props.active === o.key ? UI.accent : UI.panelSoft }}
           uiText={{ value: o.label, fontSize: props.fontSize ?? 16, color: props.active === o.key ? UI.onAccent : UI.text, textAlign: 'middle-center' }}
           onMouseDown={() => props.onPick(o.key)}
@@ -367,7 +389,7 @@ function TableCard() {
         </Row>
       )}
       <Row height={64}>
-        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={68} margin={6} />
+        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={68} margin={6} />
         <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} width={170} margin={6} />
       </Row>
     </Panel>
@@ -501,7 +523,7 @@ function Controller() {
               {botRow}
               {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} />}
               <Row height={60}>
-                <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={52} />
+                <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={52} />
                 <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={126} fontSize={18} />
               </Row>
             </UiEntity>
@@ -528,7 +550,7 @@ function Controller() {
         {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={200} margin={6} />}
       </Row>
       <Row height={64} margin={{ top: 2, bottom: 6 }}>
-        <Btn label="?" quiet onClick={() => (local.helpOpen = true)} width={68} margin={6} />
+        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={68} margin={6} />
         <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={190} margin={6} />
       </Row>
     </Panel>
@@ -582,22 +604,23 @@ function hostedGames(): GameId[] {
 }
 
 /** Ranked rows + the local player's totals, inside the help panel. */
-function LeaderboardBody() {
+function LeaderboardBody(props: { width: number }) {
   const str = L()
   const rows = board.rows.slice(0, 10)
   const mobile = phone()
-  const line = (r: { rank: number; name: string; wins: number; streak: number }, i: number) => (
-    <UiEntity key={`lb${i}`} uiTransform={{ width: '100%', height: mobile ? 30 : 34, flexDirection: 'row', alignItems: 'center', margin: { top: 2 } }}>
+  const bodyW = props.width
+  const line = (r: { rank: number; name: string; points: number; wins: number; streak: number }, i: number) => (
+    <UiEntity key={`lb${i}`} uiTransform={{ width: bodyW, height: mobile ? 30 : 34, flexDirection: 'row', alignItems: 'center', margin: { top: 2 } }}>
       <UiEntity uiTransform={{ width: 44, height: 'auto' }} uiText={{ value: `${r.rank}.`, fontSize: 18, color: r.rank <= 3 ? UI.accent : UI.muted, textAlign: 'middle-right' }} />
       <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { left: 12 } }} uiText={{ value: r.name.slice(0, 22), fontSize: 18, color: UI.text }} />
-      <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { left: 14 } }} uiText={{ value: `${r.wins} ${str.winsShort} · ${str.streakShort} ${r.streak}`, fontSize: 16, color: UI.muted }} />
+      <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { left: 14 } }} uiText={{ value: `${r.points} ${str.pointsShort} · ${r.wins} ${str.winsShort} · ${str.streakShort} ${r.streak}`, fontSize: 16, color: UI.muted }} />
     </UiEntity>
   )
   return (
-    <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'column' }}>
-      <Para value={str.leaderboardSub} color={UI.muted} margin={{ bottom: 8 }} />
-      {rows.length === 0 ? <Para value={board.failed ? str.leaderboardOffline : str.leaderboardEmpty} color={UI.text} margin={{ top: 6, bottom: 6 }} /> : rows.map(line)}
-      <Para value={board.me ? str.yourStats(board.me.wins, board.me.streak, board.me.best_streak) : str.notRanked} color={UI.text} margin={{ top: 10, bottom: 4 }} />
+    <UiEntity uiTransform={{ width: bodyW, height: 'auto', flexDirection: 'column', alignItems: 'center' }}>
+      <Para value={str.leaderboardSub} color={UI.muted} margin={{ bottom: 8 }} width={bodyW} />
+      {rows.length === 0 ? <Para value={board.failed ? str.leaderboardOffline : str.leaderboardEmpty} color={UI.text} margin={{ top: 6, bottom: 6 }} width={bodyW} /> : rows.map(line)}
+      <Para value={board.me ? str.yourStats(board.me.wins, board.me.streak, board.me.best_streak) : str.notRanked} color={UI.text} margin={{ top: 10, bottom: 4 }} width={bodyW} />
     </UiEntity>
   )
 }
@@ -619,9 +642,10 @@ function FeedbackPanel() {
   const status = local.feedbackState === 'sent' ? str.feedbackThanks : local.feedbackState === 'failed' ? str.feedbackFailed : local.feedbackState === 'sending' ? '...' : ''
   return (
     <UiEntity
+      // no close-on-backdrop-tap: pointer events land on every entity under the cursor in this
+      // renderer, so a fullscreen handler also fires when a button INSIDE the panel is tapped
       uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
       uiBackground={{ color: Color4.create(0, 0, 0, 0.5) }}
-      onMouseDown={close}
     >
       <Panel width={width} place={{}} padding={20}>
         <Text value={str.feedbackTitle} size={T.title} />
@@ -661,15 +685,20 @@ function HelpPanel() {
   const rules = info.games[gameId] ?? info.games.connectfour ?? { name: game.label, overview: '' }
   const mobile = phone()
   const width = mobile ? 1000 : 720
+  // This panel nests wrappers, and that makes Panel EAT its own padding (19 Aug gotcha: content
+  // then starts at the panel's outer origin and the last rows fall past the border). So nothing
+  // in here relies on padding or % widths: every level gets this explicit content width, the
+  // panel centres it, and the first/last children carry the border clearance as margins.
+  const content = width - 104
   return (
     <UiEntity
+      // no close-on-backdrop-tap (see FeedbackPanel): child taps would close the panel too
       uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
       uiBackground={{ color: Color4.create(0, 0, 0, 0.5) }}
-      onMouseDown={() => (local.helpOpen = false)}
     >
       <Panel width={width} place={{}} padding={20}>
         {leaderboardEnabled() ? (
-          <Row height={46} margin={{ bottom: 6 }}>
+          <Row height={46} margin={{ top: 14, bottom: 6 }}>
             <Segmented
               options={[{ key: 'rules', label: str.howToPlayTab }, { key: 'board', label: str.leaderboardTab }]}
               active={local.helpTab}
@@ -685,34 +714,35 @@ function HelpPanel() {
           <Text value={str.howToPlay} size={T.title} />
         )}
         {local.helpTab === 'board' && leaderboardEnabled() ? (
-          <LeaderboardBody />
+          <LeaderboardBody width={content} />
         ) : (
-          <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'column' }}>
-            <Row height={48} margin={{ top: 4, bottom: 8 }} wrap>
-              <Segmented
-                options={hostedGames().map((id) => ({ key: id, label: info.games[id]?.name ?? getGame(id).label }))}
-                active={gameId}
-                onPick={(k) => (local.helpGame = k)}
-                width={mobile ? 150 : 132}
-              />
-            </Row>
-            <Para value={rules.overview} size={19} margin={{ bottom: 6 }} rtl={info.rtl} />
-            <Para value={`• ${str.howToSit}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
-            <Para value={`• ${str.move[gameId] ?? str.move.connectfour}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} />
-            <Para value={`• ${str.timer}`} color={UI.muted} margin={{ top: 4, bottom: 6 }} rtl={info.rtl} />
+          <UiEntity uiTransform={{ width: content, height: 'auto', flexDirection: 'column', alignItems: 'center' }}>
+            <Segmented
+              wrap
+              boxWidth={content}
+              margin={{ top: 6, bottom: 8 }}
+              options={hostedGames().map((id) => ({ key: id, label: info.games[id]?.name ?? getGame(id).label }))}
+              active={gameId}
+              onPick={(k) => (local.helpGame = k)}
+              width={148}
+            />
+            <Para value={rules.overview} size={19} margin={{ bottom: 6 }} rtl={info.rtl} width={content} />
+            <Para value={`• ${str.howToSit}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} width={content} />
+            <Para value={`• ${str.move[gameId] ?? str.move.connectfour}`} color={UI.muted} margin={{ top: 4 }} rtl={info.rtl} width={content} />
+            <Para value={`• ${str.timer}`} color={UI.muted} margin={{ top: 4, bottom: 6 }} rtl={info.rtl} width={content} />
           </UiEntity>
         )}
-        <Row height={48} margin={{ bottom: 6 }}>
+        <Row height={48} margin={{ top: 6, bottom: 34 }}>
           <Btn label={`${str.language}: ${info.name}`} quiet onClick={() => (local.langPickerOpen = !local.langPickerOpen)} width={230} />
           <Btn label={music.on ? str.musicOn : str.musicOff} quiet onClick={toggleMusic} width={mobile ? 170 : 150} />
           <Btn label={str.gotIt} onClick={() => ((local.helpOpen = false), (local.langPickerOpen = false))} width={150} />
         </Row>
         {local.langPickerOpen && (
-          <UiEntity uiTransform={{ width: '100%', height: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', margin: { top: 6 } }}>
+          <UiEntity uiTransform={{ width: content, height: wrapRows(LOCALES.map((l) => Math.max(92, l.name.length * 11 + 26) + 6), content) * 44 + 6, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', margin: { top: 6, bottom: 44 } }}>
             {LOCALES.map((l) => (
               <UiEntity
                 key={l.code}
-                uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 38, margin: 3, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+                uiTransform={{ width: Math.max(92, l.name.length * 11 + 26), height: 38, margin: 3, flexShrink: 0, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
                 uiBackground={{ texture: { src: IMG_ROYAL.button }, textureMode: 'stretch', color: uiLang.code === l.code ? UI.accent : UI.panelSoft }}
                 uiText={{ value: l.name, fontSize: 16, color: uiLang.code === l.code ? UI.onAccent : UI.text, textAlign: 'middle-center' }}
                 onMouseDown={() => ((uiLang.code = l.code), (local.langPickerOpen = false))}
