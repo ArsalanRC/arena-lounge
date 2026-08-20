@@ -110,6 +110,7 @@ export interface LoungeStrings {
   howToPlayTab: string
   winsShort: string
   pointsShort: string
+  directoryTitle: string
   streakShort: string
   yourStats: (wins: number, streak: number, best: number) => string
   notRanked: string
@@ -281,6 +282,7 @@ const EN: LoungeStrings = {
   feedbackSign: 'IDEAS\nBUGS',
   howToPlayTab: 'How to play',
   winsShort: 'wins',
+  directoryTitle: 'Directory',
   pointsShort: 'pts',
   streakShort: 'streak',
   yourStats: (wins, streak, best) => `You: ${wins} wins · streak ${streak} · best ${best}`,
@@ -451,6 +453,7 @@ const DE: LoungeStrings = {
   feedbackSign: 'IDEEN\nFEHLER',
   howToPlayTab: 'So geht’s',
   winsShort: 'Siege',
+  directoryTitle: 'Wegweiser',
   pointsShort: 'Pkt.',
   streakShort: 'Serie',
   yourStats: (wins, streak, best) => `Du: ${wins} Siege · Serie ${streak} · beste ${best}`,
@@ -621,6 +624,7 @@ const ES: LoungeStrings = {
   feedbackSign: 'IDEAS\nFALLOS',
   howToPlayTab: 'Cómo se juega',
   winsShort: 'victorias',
+  directoryTitle: 'Directorio',
   pointsShort: 'pts',
   streakShort: 'racha',
   yourStats: (wins, streak, best) => `Tú: ${wins} victorias · racha ${streak} · mejor ${best}`,
@@ -791,6 +795,7 @@ const PT: LoungeStrings = {
   feedbackSign: 'IDEIAS\nBUGS',
   howToPlayTab: 'Como jogar',
   winsShort: 'vitórias',
+  directoryTitle: 'Diretório',
   pointsShort: 'pts',
   streakShort: 'série',
   yourStats: (wins, streak, best) => `Tu: ${wins} vitórias · série ${streak} · melhor ${best}`,
@@ -961,6 +966,7 @@ const FR: LoungeStrings = {
   feedbackSign: 'IDÉES\nBUGS',
   howToPlayTab: 'Comment jouer',
   winsShort: 'victoires',
+  directoryTitle: 'Répertoire',
   pointsShort: 'pts',
   streakShort: 'série',
   yourStats: (wins, streak, best) => `Toi : ${wins} victoires · série ${streak} · record ${best}`,
