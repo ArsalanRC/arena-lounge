@@ -66,7 +66,8 @@
   },
   "requiredPermissions": [
     "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE",
-    "USE_FETCH"
+    "USE_FETCH",
+    "OPEN_EXTERNAL_LINK"
   ],
   "worldConfiguration": {
     "name": "arenalounge.dcl.eth",

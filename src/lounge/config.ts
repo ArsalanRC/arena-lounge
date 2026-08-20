@@ -78,6 +78,10 @@ export const PLAZA = Vector3.create(24, 0, 24)
 /** Point lights as offsets from the plaza centre (dx, dz) so the whole tower can move as one. */
 const LIGHT_SPEC: Array<{ dx: number; y: number; dz: number; color: Color3; intensity: number; range: number }> = [
   { dx: 0, y: 5.6, dz: 0, color: Color3.create(1, 0.78, 0.5), intensity: 3200, range: 16 },
+  // fountain uplights (desktop only: the mobile client renders no scene lights; the model glows on its own)
+  { dx: -2.3, y: 1.0, dz: 0, color: Color3.create(1, 0.8, 0.5), intensity: 900, range: 7 },
+  { dx: 2.3, y: 1.0, dz: 0, color: Color3.create(1, 0.8, 0.5), intensity: 900, range: 7 },
+  { dx: 0, y: 4.6, dz: 0, color: Color3.create(0.6, 0.9, 1), intensity: 700, range: 6 },
   { dx: 0, y: 6.5, dz: -14.3, color: Color3.create(0.55, 0.9, 1), intensity: 2400, range: 12 },
   { dx: -5.5, y: 4.2, dz: -9.5, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },
   { dx: 5.5, y: 4.2, dz: -9.5, color: Color3.create(1, 0.72, 0.42), intensity: 1200, range: 9 },

@@ -374,23 +374,25 @@ def prism(mesh, cx, cz, r, y0, y1, n=12, r_top=None, uv_period=None):
         a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
         b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
         t0 = (cx + rt * math.cos(a0), y1, cz + rt * math.sin(a0)); t1 = (cx + rt * math.cos(a1), y1, cz + rt * math.sin(a1))
+        # caps: top wound CCW seen from above (+y normal), bottom CCW seen from below; the old
+        # winding pointed both caps down, so prism tops vanished when viewed from above
         if T:
             su0, su1 = a0 * r / T, a1 * r / T
             mesh.quad(b0, t0, t1, b1, [(su0, y0 / T), (su0, y1 / T), (su1, y1 / T), (su1, y0 / T)])
             pl = lambda p: (p[0] / T, p[2] / T)
-            mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz), [pl((cx, y1, cz)), pl(t0), pl(t1), pl((cx, y1, cz))])
-            mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz), [pl((cx, y0, cz)), pl(b1), pl(b0), pl((cx, y0, cz))])
+            mesh.quad((cx, y1, cz), t1, t0, (cx, y1, cz), [pl((cx, y1, cz)), pl(t1), pl(t0), pl((cx, y1, cz))])
+            mesh.quad((cx, y0, cz), b0, b1, (cx, y0, cz), [pl((cx, y0, cz)), pl(b0), pl(b1), pl((cx, y0, cz))])
         else:
             mesh.quad(b0, t0, t1, b1)
             # caps as fans (quad with a repeated vertex is fine for flat shading)
-            mesh.quad((cx, y1, cz), t0, t1, (cx, y1, cz))
-            mesh.quad((cx, y0, cz), b1, b0, (cx, y0, cz))
+            mesh.quad((cx, y1, cz), t1, t0, (cx, y1, cz))
+            mesh.quad((cx, y0, cz), b0, b1, (cx, y0, cz))
 
 def disc_pad(mesh, cx, cz, r, y0, y1, n=16, quad=0):
     """Flat seat pad: n-gon prism whose top cap carries planar UVs over the pad square, mapped onto
     quadrant `quad` (0 top-left, 1 top-right, 2 bottom-left, 3 bottom-right) of the 2x2 sheet
     models/palace/seat.png (v = 1 is the top of the image)."""
-    qu, qv = (quad % 2) * 0.5, 0.5 - (quad // 2) * 0.5
+    qu, qv = (quad % 2) * 0.5, (quad // 2) * 0.5   # glTF UV origin is top-left: v = 0 is the image top
     for i in range(n):
         a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
         b0 = (cx + r * math.cos(a0), y0, cz + r * math.sin(a0)); b1 = (cx + r * math.cos(a1), y0, cz + r * math.sin(a1))
@@ -721,13 +723,13 @@ def neon_text(mesh, text, y_base, dr):
         sd += ADVANCE
 neon_text(neon, 'ARENA LOUNGE', (SIGN_Y0 + SIGN_Y1) / 2 - LETTER_H / 2, 0.13 + TUBE_D / 2 + 0.02)
 
-# string lights: catenaries between the seven ground columns around the plaza (r 11.4)
+# string lights: catenaries between the seven ground columns around the plaza (r 12.6, mirrors lounge3d)
 lights = Mesh()
 col_angles = [160, 200, 262, 304, 0, 56, 101]
 def col_pos(deg):
     t = math.radians(deg)
     # scene: x = sin, z = cos (config.ts ring()); glTF keeps x and z
-    return (11.4 * math.sin(t), 11.4 * math.cos(t))
+    return (12.6 * math.sin(t), 12.6 * math.cos(t))
 pairs = [(200, 262), (262, 304), (304, 0), (0, 56), (56, 101), (101, 160)]
 for (a, b) in pairs:
     (x0, z0), (x1, z1) = col_pos(a), col_pos(b)
@@ -769,17 +771,18 @@ def collar(deg, r, y):
     cx, cz = r * math.sin(t), r * math.cos(t)     # scene ring(): x = sin, z = cos
     box_strip(lights, [((cx + 0.42 * math.cos(a), y, cz + 0.42 * math.sin(a)), (-math.sin(a), 0, math.cos(a)), (math.cos(a), 0, math.sin(a))) for a in [2 * math.pi * k / 16 for k in range(17)]], 0.07, 0.07)
 for deg in [160, 200, 262, 304, 0, 56, 101]:
-    collar(deg, 11.4, 0.55)
-    collar(deg, 11.4, 7.3)
-for deg in [112, 158, 202, 338]:
-    collar(deg, 10.4, 8.55)
-    collar(deg, 10.4, 15.3)
+    collar(deg, 12.6, 0.55)
+    collar(deg, 12.6, 7.3)
+for deg in [22.5 + k * 45 for k in range(8)]:
+    collar(deg, 12.2, 8.55)
+    collar(deg, 12.2, 15.3)
 def string(p0, p1, y, n=10, sag=0.7):
     for i in range(1, n):
         t = i / n
         box_mesh(lights, (p0[0] + (p1[0] - p0[0]) * t, y - sag * math.sin(math.pi * t), p0[1] + (p1[1] - p0[1]) * t), (0.12, 0.12, 0.12))
-gr = [(10.4 * math.sin(math.radians(d)), 10.4 * math.cos(math.radians(d))) for d in [112, 158, 202, 338]]
-string(gr[0], gr[1], 14.6); string(gr[1], gr[2], 14.6); string(gr[3], gr[0], 14.6, 14, 1.0); string(gr[2], gr[3], 14.6, 14, 1.0)
+gr = [(12.2 * math.sin(math.radians(22.5 + k * 45)), 12.2 * math.cos(math.radians(22.5 + k * 45))) for k in range(8)]
+for k in range(8):
+    string(gr[k], gr[(k + 1) % 8], 14.6)
 for i in range(32):
     a = 2 * math.pi * i / 32
     box_mesh(lights, (8.6 * math.cos(a), 19.2 + 0.25 * math.sin(a * 8), 8.6 * math.sin(a)), (0.12, 0.12, 0.12))
@@ -1002,17 +1005,62 @@ write_glb('models/lamp-palace.glb', [("post", plp_post, 0), ("brass", plp_brass,
 write_glb('models/planter-palace.glb', [("pot", pl_pot, 0), ("leaves", pl_leaves, 1)], [MARBLE_CREAM_M, PLANT])
 write_glb('models/plazatree-palace.glb', [("pot", pt_pot, 0), ("trunk", pt_trunk, 1), ("leaves", pt_leaves, 2)], [MARBLE_CREAM_M, WOOD_DARK, PLANT])
 
-# ------------------------------------------------------------------ directory monument (palace): one piece
-# A single marble stele: stepped plinth, solid block with the dark directory plate recessed into its
-# front (-z) behind a thin gold inlay line, stepped cap with a brass ball. Origin on the floor.
-dm_marble, dm_plate, dm_brass = Mesh(), Mesh(), Mesh()
-box_mesh(dm_marble, (0, 0.21, 0), (2.1, 0.42, 1.0), MARBLE_UV)        # plinth 0 .. 0.42 (all marble: brass bands clashed)
-box_mesh(dm_marble, (0, 0.515, 0), (1.8, 0.19, 0.7), MARBLE_UV)       # step 0.42 .. 0.61
-box_mesh(dm_marble, (0, 1.76, 0), (1.6, 2.34, 0.3), MARBLE_UV)        # stele 0.59 .. 2.93 (meets the cap)
-box_mesh(dm_plate, (0, 1.86, -0.145), (1.15, 1.6, 0.02))              # recessed dark plate (front face at -0.155, inside the stele face at -0.15)
-for (c, size) in [((0, 2.69, -0.151), (1.25, 0.025, 0.004)), ((0, 1.03, -0.151), (1.25, 0.025, 0.004)), ((-0.6125, 1.86, -0.151), (0.025, 1.685, 0.004)), ((0.6125, 1.86, -0.151), (0.025, 1.685, 0.004))]:
-    box_mesh(dm_brass, c, size)                                        # gold inlay line around the plate, flush with the face
-box_mesh(dm_marble, (0, 3.02, 0), (1.8, 0.12, 0.46), MARBLE_UV)       # cap
-box_mesh(dm_marble, (0, 3.12, 0), (1.5, 0.08, 0.36), MARBLE_UV)       # upper step of the cap
-sphere_at(dm_brass, (0, 3.26, 0), 0.09, 1)                            # brass ball finial
-write_glb('models/directory-palace.glb', [("marble", dm_marble, 0), ("plate", dm_plate, 1), ("brass", dm_brass, 2)], [MARBLE_MAT, DECOR_MATERIALS[4], BRASS_MAT], images=['palace/marble.png'])
+# ------------------------------------------------------------------ marble steles (palace): directory + welcome
+# One-piece marble stele on an octagonal stepped base: dark plate recessed into the front (-z) behind a
+# thin gold inlay line, stepped cap, brass ball on a stem. Parametrised so the welcome board is the same
+# design in landscape. All courses overlap (coplanar faces z-fight).
+def stele(out, width, plate_w, plate_h, depth=0.3, base_r=None, courses=3):
+    m_marble, m_plate, m_brass = Mesh(), Mesh(), Mesh()
+    br = base_r if base_r is not None else width * 0.7
+    heights = [(0, 0.34), (0.30, 0.58), (0.54, 0.72)][:courses]
+    radii = [br, br * 0.82, br * 0.64][:courses]
+    for (yy0, yy1), rr in zip(heights, radii):
+        prism(m_marble, 0, 0, rr, yy0, yy1, 8, uv_period=1.5)
+    body_h = plate_h + 0.7
+    y0, y1 = heights[-1][1] - 0.09, heights[-1][1] - 0.09 + body_h
+    yc = (y0 + y1) / 2
+    box_mesh(m_marble, (0, yc, 0), (width, body_h + 0.06, depth), MARBLE_UV)   # into base and cap
+    pc = yc + 0.05
+    box_mesh(m_plate, (0, pc, -depth / 2 + 0.005), (plate_w, plate_h, 0.02))
+    ix, iy = plate_w / 2 + 0.05, plate_h / 2 + 0.05
+    for (c, size) in [((0, pc + iy, -depth / 2 - 0.001), (plate_w + 0.13, 0.025, 0.004)), ((0, pc - iy, -depth / 2 - 0.001), (plate_w + 0.13, 0.025, 0.004)), ((-ix, pc, -depth / 2 - 0.001), (0.025, plate_h + 0.13, 0.004)), ((ix, pc, -depth / 2 - 0.001), (0.025, plate_h + 0.13, 0.004))]:
+        box_mesh(m_brass, c, size)
+    box_mesh(m_marble, (0, y1 + 0.05, 0), (width + 0.2, 0.14, depth + 0.16), MARBLE_UV)   # cap
+    box_mesh(m_marble, (0, y1 + 0.14, 0), (width - 0.1, 0.1, depth + 0.06), MARBLE_UV)    # upper step
+    prism(m_brass, 0, 0, 0.035, y1 + 0.12, y1 + 0.30, 10)
+    sphere_at(m_brass, (0, y1 + 0.36, 0), 0.09, 1)
+    write_glb(out, [("marble", m_marble, 0), ("plate", m_plate, 1), ("brass", m_brass, 2)], [MARBLE_MAT, DECOR_MATERIALS[4], BRASS_MAT], images=['palace/marble.png'])
+    return pc
+
+DIRECTORY_PLATE_Y = stele('models/directory-palace.glb', 1.6, 1.15, 1.6)
+# slim base: the landscape board flanks the entrance path and may not crowd it
+WELCOME_PLATE_Y = stele('models/welcome-palace.glb', 2.7, 2.25, 1.35, base_r=0.95, courses=2)
+print('plate centres: directory', DIRECTORY_PLATE_Y, 'welcome', WELCOME_PLATE_Y)
+
+# ------------------------------------------------------------------ plaza fountain (palace)
+# A Roman piazza fountain instead of the tree: octagonal marble pedestal, three tiers of marble
+# bowls on a lathe-turned column, still water discs glowing softly, a brass pinecone finial
+# (the classic Roman fontana crown). ~4 m tall, n = 16.
+ft_marble, ft_brass, ft_water = Mesh(), Mesh(), Mesh()
+prism(ft_marble, 0, 0, 1.5, 0, 0.32, 8, uv_period=1.5)                # pedestal
+prism(ft_marble, 0, 0, 1.2, 0.28, 0.58, 8, uv_period=1.5)
+prism(ft_brass, 0, 0, 0.62, 0.56, 0.66, 16)                           # brass ring at the column foot
+def bowl(y_rim, r_rim, r_stem, stem_top):
+    prism(ft_marble, 0, 0, r_stem + 0.10, y_rim - 0.34, y_rim - 0.05, 16, r_top=r_rim, uv_period=1.2)   # flaring bowl
+    prism(ft_marble, 0, 0, r_rim, y_rim - 0.06, y_rim + 0.03, 16, uv_period=1.2)                        # rim band
+    prism(ft_water, 0, 0, r_rim - 0.09, y_rim - 0.02, y_rim + 0.055, 16)                                # water
+    prism(ft_marble, 0, 0, r_stem, y_rim, stem_top + 0.04, 16, uv_period=1.2)                           # stem above
+bowl(1.55, 1.28, 0.30, 2.45)
+bowl(2.45, 0.85, 0.22, 3.25)
+bowl(3.25, 0.52, 0.14, 3.55)
+# brass pinecone finial: stacked tapering rings + tip
+for k, (yy, rr) in enumerate([(3.55, 0.17), (3.68, 0.14), (3.79, 0.10), (3.88, 0.06)]):
+    prism(ft_brass, 0, 0, rr, yy, yy + 0.12, 10, r_top=rr * 0.72)
+sphere_at(ft_brass, (0, 4.02, 0), 0.05, 1)
+# luminous: the mobile client renders no scene lights, so the fountain carries its own glow
+# (bright water, a gold light ring on the pedestal); desktop adds the real point lights on top
+ft_glow = Mesh()
+prism(ft_glow, 0, 0, 1.24, 0.55, 0.63, 16)                            # light ring at the pedestal top
+WATER_MAT = {"name": "water", "pbrMetallicRoughness": {"baseColorFactor": [0.45, 0.78, 0.88, 0.88], "metallicFactor": 0.1, "roughnessFactor": 0.15}, "emissiveFactor": [0.30, 0.55, 0.65], "alphaMode": "BLEND"}
+FOUNTAIN_GLOW = {"name": "fountainGlow", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.9, 0.7, 1], "metallicFactor": 0.1, "roughnessFactor": 0.4}, "emissiveFactor": [1.0, 0.78, 0.45]}
+write_glb('models/statue-palace.glb', [("marble", ft_marble, 0), ("brass", ft_brass, 1), ("water", ft_water, 2), ("glow", ft_glow, 3)], [MARBLE_MAT, BRASS_MAT, WATER_MAT, FOUNTAIN_GLOW], images=['palace/marble.png'])

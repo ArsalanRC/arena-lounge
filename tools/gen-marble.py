@@ -11,6 +11,9 @@ noise is built in the frequency domain (periodic by construction).
   models/palace/marble.png   512   plain white veined marble (table tops, benches, bar tops)
   models/palace/ceiling.png  1024  4 m period: 2x2 coffers, gold ribs, lapis field with a gold rosette
   models/palace/seat.png     1024  2x2 seat pads (red, green, blue, yellow velvet): double gold ring, gold eight-point star
+  models/palace/runner-a.png 1024  ring carpet (outer/inner 0.705): red velvet, gold border bands on both edges
+  models/palace/runner-b.png 1024  ring carpet, 0.60 ratio (sky room)
+  models/palace/runner-s.png 256x1024  straight entrance carpet, gold bands on the long edges (tiles along v)
 
 Run: python3 tools/gen-marble.py
 """
@@ -265,6 +268,53 @@ def gen_seat(path='models/palace/seat.png', size=512):
         sheet[r0:r0 + size, c0:c0 + size] = rgb; alpha[r0:r0 + size, c0:c0 + size] = a
     save(path, sheet, alpha)
 
+def velvet_field(w, h, seed):
+    sheen = fractal_noise(w, h, 3.0, seed)
+    f = np.array(VELVETS['red'][0]); l = np.array(VELVETS['red'][1])
+    return f[None, None, :] * (0.82 + 0.32 * sheen[..., None]) + l[None, None, :] * 0.12
+
+def gen_runner_ring(path, inner, seed):
+    """Ring carpet on a transparent square: red velvet band from `inner` (fraction of half-size) to the
+    edge, a gold border band just inside each edge."""
+    s = 1024
+    yy, xx = np.mgrid[0:s, 0:s].astype(np.float64) + 0.5
+    d = np.hypot(xx - s / 2, yy - s / 2) / (s / 2)      # 0 centre .. 1 edge
+    img = velvet_field(s, s, seed)
+    t = np.clip((d - inner) / (1 - inner), 0, 1)        # 0 inner edge .. 1 outer edge
+    for lo, hi in ((0.015, 0.06), (0.94, 0.985)):       # gold bands
+        band = (t > lo) & (t < hi)
+        shade = 0.85 + 0.3 * np.cos((t - (lo + hi) / 2) / ((hi - lo) / 2) * np.pi / 2)
+        img[band] = (np.array(BRASS)[None, :] * shade[band][:, None]).clip(0, 1)
+    alpha = np.clip((d - inner) * (s / 2), 0, 1) * np.clip((1.0 - d) * (s / 2), 0, 1)
+    save(path, img, alpha)
+
+def gen_runner_straight(path='models/palace/runner-s.png'):
+    """Straight carpet strip: red velvet, gold band along each long edge; tiles along v."""
+    w, h = 256, 1024
+    img = velvet_field(w, h, 47)
+    xx = np.mgrid[0:h, 0:w][1].astype(np.float64) / w   # 0..1 across
+    for lo, hi in ((0.02, 0.075), (0.925, 0.98)):
+        band = (xx > lo) & (xx < hi)
+        shade = 0.85 + 0.3 * np.cos((xx - (lo + hi) / 2) / ((hi - lo) / 2) * np.pi / 2)
+        img[band] = (np.array(BRASS)[None, :] * shade[band][:, None]).clip(0, 1)
+    alpha = np.ones((h, w))
+    alpha[:, :2] = 0; alpha[:, -2:] = 0
+    save(path, img, alpha)
+
+def gen_rug_royal(path='models/palace/rug.png', size=1024):
+    """Round zone carpet: red velvet, one wide gold band just inside the rim, alpha outside."""
+    s = size
+    yy, xx = np.mgrid[0:s, 0:s].astype(np.float64) + 0.5
+    d = np.hypot(xx - s / 2, yy - s / 2) / (s / 2)
+    img = velvet_field(s, s, 51)
+    band = (d > 0.86) & (d < 0.955)
+    shade = 0.85 + 0.3 * np.cos((d - 0.9075) / 0.0475 * np.pi / 2)
+    img[band] = (np.array(BRASS)[None, :] * shade[band][:, None]).clip(0, 1)
+    ring2 = (d > 0.78) & (d < 0.80)
+    img[ring2] = np.array(BRASS) * 0.9
+    alpha = np.clip((1.0 - d) * (s / 2), 0, 1)
+    save(path, img, alpha)
+
 if __name__ == '__main__':
     gen_floor()
     gen_wall()
@@ -272,3 +322,7 @@ if __name__ == '__main__':
     gen_marble_plain()
     gen_ceiling()
     gen_seat()
+    gen_runner_ring('models/palace/runner-a.png', 0.705, 43)
+    gen_runner_ring('models/palace/runner-b.png', 0.60, 44)
+    gen_runner_straight()
+    gen_rug_royal()

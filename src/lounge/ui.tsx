@@ -27,7 +27,7 @@ import { Color4 } from '@dcl/sdk/math'
 import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
-import { uiSprite, type SpriteName } from './atlas'
+import { ATLAS, uiSprite, type SpriteName } from './atlas'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
 import { board, leaderboardEnabled, refreshLeaderboard } from './leaderboard'
@@ -97,6 +97,22 @@ function seatTint(t: Table, seat: Seat): Color4 {
 function textOn(c: Color4): Color4 {
   const lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
   return lum > 0.55 ? UI.text : UI.light
+}
+
+/**
+ * Invisible 1px mounts for every UI texture: the client only loads a UI texture
+ * the first time it is shown (AssetLoad does not cover UI), so without this the
+ * first open of any panel flashes white while the parchment loads (workshop 3).
+ */
+function TexturePreload() {
+  const srcs = [IMG_ROYAL.panel, IMG_ROYAL.pill, IMG_ROYAL.button, IMG_ROYAL.buttonSq, ATLAS, 'images/croc-face.png', 'images/ludo-board.png', 'images/snakes-board.png']
+  return (
+    <UiEntity uiTransform={{ positionType: 'absolute', position: { top: -10, left: -10 }, width: 1, height: 1 }}>
+      {srcs.map((src) => (
+        <UiEntity key={src} uiTransform={{ width: 1, height: 1 }} uiBackground={{ texture: { src }, textureMode: 'stretch', color: Color4.create(1, 1, 1, 0.01) }} />
+      ))}
+    </UiEntity>
+  )
 }
 
 // ---------------------------------------------------------------- atoms
@@ -719,6 +735,7 @@ const LoungeUi = () => (
     uiTransform={DEBUG_MOBILE_UI ? { width: '100%', height: 720, positionType: 'absolute', position: { bottom: 0, left: 0 } } : { width: '100%', height: '100%', positionType: 'absolute' }}
     uiBackground={DEBUG_MOBILE_UI ? { color: Color4.create(1, 0, 1, 0.08) } : undefined}
   >
+    <TexturePreload />
     <Hint />
     <Toast />
     <TableCard />
