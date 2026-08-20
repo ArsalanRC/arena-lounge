@@ -157,12 +157,13 @@ for (y, r_in, r_out, th) in FLOORS:
 # ceilings: the ground-floor and sky-room ceilings carry the Pozzo fresco (models/palace/fresco.jpg, CC0,
 # one painting spread over the whole ring, the oculus cuts out its centre), the game-room ceiling the
 # coffered lapis-and-gold texture (4 m repeat)
-floors_marble, floors_under, floors_fresco = Mesh(), Mesh(), Mesh()
+# every ceiling is a Pozzo now (Arsalan 20 Aug): k=0 bottom = ground-floor ceiling (Rome nave
+# fresco), k=1 bottom = game-room ceiling (Vienna Jesuit Church vault panel, replacing the
+# blue coffer tiles), k=2 bottom = sky-room ceiling (the Rome painted fake dome)
+floors_marble, floors_fresco, floors_dome, floors_vienna = Mesh(), Mesh(), Mesh(), Mesh()
+CEILING_ART = [floors_fresco, floors_vienna, floors_dome]
 for k, (y, r_in, r_out, th) in enumerate(FLOORS):
-    if k == 1:
-        annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_under)
-    else:
-        annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=floors_fresco, under_span=2 * r_out + 0.4)
+    annulus(floors_marble, y, r_in, r_out, th, uv_period=4.0, under=CEILING_ART[k], under_span=2 * r_out + 0.4)
 
 rings = Mesh()      # lounge look: wire railing rails + glowing rims + crown ring (one glow material)
 posts = Mesh()
@@ -335,7 +336,11 @@ PALACE_TOWER_MATERIALS = [
     {"name": "fresco", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 2}, "metallicFactor": 0.0, "roughnessFactor": 0.8}, "emissiveTexture": {"index": 2}, "emissiveFactor": [0.55, 0.55, 0.55]},
 ]
 PALACE_TOWER_MATERIALS.append({"name": "marbleCream", "pbrMetallicRoughness": {"baseColorFactor": [0.93, 0.91, 0.86, 1], "metallicFactor": 0.0, "roughnessFactor": 0.4}, "emissiveFactor": [0.16, 0.155, 0.145]})
-write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("ceilings", floors_under, 5), ("frescoes", floors_fresco, 6), ("glow", glow_only, 2), ("balustrade", balustrade, 7), ("cornice", cornice, 7), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png', 'palace/fresco.jpg'])
+# 8: the fake-dome fresco (texture 3), 9: the Vienna vault panel (texture 4); material 5
+# (coffer ceiling) is now unused but keeps the material indices stable
+PALACE_TOWER_MATERIALS.append({"name": "frescoDome", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 3}, "metallicFactor": 0.0, "roughnessFactor": 0.8}, "emissiveTexture": {"index": 3}, "emissiveFactor": [0.55, 0.55, 0.55]})
+PALACE_TOWER_MATERIALS.append({"name": "frescoVienna", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "baseColorTexture": {"index": 4}, "metallicFactor": 0.0, "roughnessFactor": 0.8}, "emissiveTexture": {"index": 4}, "emissiveFactor": [0.55, 0.55, 0.55]})
+write_glb('models/tower-palace.glb', [("ribs", ribs, 0), ("floors", floors_marble, 1), ("frescoes", floors_fresco, 6), ("fresco_dome", floors_dome, 8), ("fresco_vienna", floors_vienna, 9), ("glow", glow_only, 2), ("balustrade", balustrade, 7), ("cornice", cornice, 7), ("tower_collider", coll, 4)], PALACE_TOWER_MATERIALS, images=['palace/floor.png', 'palace/ceiling.png', 'palace/fresco.jpg', 'palace/fresco-dome.jpg', 'palace/fresco-vienna.jpg'])
 write_glb('models/canopy.glb', [("canopy", canopy, 0)], [
     {"name": "plant", "pbrMetallicRoughness": {"baseColorFactor": [0.25, 0.49, 0.31, 1], "metallicFactor": 0.0, "roughnessFactor": 1.0}},
 ])
@@ -887,16 +892,21 @@ box_mesh(pb_legs, (0.68, 0.19, 0), (0.18, 0.4, 0.46))
 box_mesh(pb_legs, (0, 0.12, 0), (1.5, 0.08, 0.1))
 write_glb('models/bench-palace.glb', [("seat", pb_seat, 0), ("cushion", pb_cushion, 2), ("legs", pb_legs, 1)], [MARBLE_MAT, BRASS_MAT, VELVET], images=['palace/marble.png'])
 
-ps_base, ps_cushion, ps_trim = Mesh(), Mesh(), Mesh()
-box_mesh(ps_base, (0, 0.22, 0), (2.0, 0.44, 0.9))
-box_mesh(ps_base, (0, 0.55, 0.36), (2.0, 0.7, 0.2))
-box_mesh(ps_base, (-0.92, 0.42, 0), (0.16, 0.5, 0.9))
-box_mesh(ps_base, (0.92, 0.42, 0), (0.16, 0.5, 0.9))
-box_mesh(ps_cushion, (-0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
-box_mesh(ps_cushion, (0.46, 0.5, -0.05), (0.86, 0.14, 0.7))
-box_mesh(ps_trim, (0, 0.03, 0), (2.04, 0.06, 0.94))          # brass plinth
-box_mesh(ps_trim, (0, 0.905, 0.36), (2.04, 0.04, 0.24))       # brass top rail on the backrest
-write_glb('models/sofa-palace.glb', [("base", ps_base, 0), ("cushions", ps_cushion, 1), ("trim", ps_trim, 2)], [VELVET, CREAM_SILK, BRASS_MAT])
+# marble settee in the stele vocabulary (Arsalan 20 Aug: the velvet sofa z-fought everywhere,
+# base/backrest/armrests shared the x = +-1.0 side plane and base/plinth the y = 0 bottom).
+# Every joint here is staggered by 10-20 mm: pieces either sink into each other or protrude,
+# no two faces ever share a plane.
+ps_marble, ps_cushion, ps_trim = Mesh(), Mesh(), Mesh()
+box_mesh(ps_marble, (0, 0.29, 0), (2.0, 0.46, 0.9), MARBLE_UV)             # seat block, y 0.06..0.52
+box_mesh(ps_marble, (0, 0.625, 0.375), (1.9, 0.85, 0.17), MARBLE_UV)       # backrest, x +-0.95, back z 0.46
+box_mesh(ps_marble, (-0.935, 0.60, -0.02), (0.15, 0.42, 0.82), MARBLE_UV)  # armrests, outer x +-1.01
+box_mesh(ps_marble, (0.935, 0.60, -0.02), (0.15, 0.42, 0.82), MARBLE_UV)
+box_mesh(ps_marble, (0, 1.09, 0.375), (2.04, 0.08, 0.23), MARBLE_UV)       # stele-style cap over the backrest
+box_mesh(ps_cushion, (0, 0.555, -0.035), (1.68, 0.11, 0.75))               # velvet seat, sinks 20 mm into the block
+box_mesh(ps_cushion, (0, 0.815, 0.315), (1.68, 0.38, 0.09))                # velvet back pad, leans into the backrest
+box_mesh(ps_trim, (0, 0.045, 0), (2.06, 0.09, 0.96))                       # brass plinth, seat block sits into it
+box_mesh(ps_trim, (0, 0.30, -0.4575), (1.7, 0.03, 0.012))                  # gold inlay line on the seat front
+write_glb('models/sofa-palace.glb', [("marble", ps_marble, 0), ("cushions", ps_cushion, 1), ("trim", ps_trim, 2)], [MARBLE_MAT, VELVET, BRASS_MAT], images=['palace/marble.png'])
 
 pbar_body, pbar_top, pbar_glow = Mesh(), Mesh(), Mesh()
 box_mesh(pbar_body, (0, 0.55, 0), (3.6, 1.1, 0.6), MARBLE_UV)

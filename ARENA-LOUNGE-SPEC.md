@@ -333,7 +333,9 @@ version works as well", 16 Aug 11:30):
    kiosk + directory still wood, ceiling medallion artwork (public-domain fresco
    needs his OK to download).
 3d. (done 18 Aug 21:20) two tables per game, wider rings, palace rooftop, music,
-   suggestion box. Next: the mobile pass on the live World (controller bar with the
+   suggestion box. (20 Aug 21:55: + second Ludo table = 28 tables, weighted
+   leaderboard points live; the two-identity round on the live World now also
+   verifies scoring.) Next: the mobile pass on the live World (controller bar with the
    new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
    on the phone keyboard, music toggle); everything through PR #62 deployed 20 Aug
    20:22. NEXT: his phone pass (two verifications from spec 2c: emissive-only look
@@ -482,6 +484,15 @@ Deploy: docs/DEPLOY.md. Submission text: docs/SUBMISSION.md.
   from twelve viewpoints on all floors and still reads as night (pre-dawn
   blue); that is the fixed time since 17 Aug 23:20. If the hour ever changes,
   screenshot entrance-north, inside-south, plaza east/west and the rooftop.
+- React-ECS UI, learned 20 Aug: pointer events fire on EVERY entity stacked under the
+  cursor (a fullscreen backdrop onMouseDown also fires when a button inside the panel is
+  tapped: no tap-outside-to-close); a Panel with nested wrappers EATS its own padding
+  (content starts at the panel's outer origin, last rows fall past the border: explicit
+  widths everywhere + margins for border clearance, see HelpPanel); a flexWrap container
+  needs explicit width AND height (wrapRows sim, 2-unit epsilon: the renderer refuses a
+  row that fills the box exactly).
+- Stele octagon bases reach 0.72 m forward below y 0.58: text parented at plate depth
+  (z -0.16) is INSIDE the marble there. Put labels on the body band (y 0.6..0.84).
 - Baked text: the client mirrors glTF x, so geometry letters must be laid
   out with negative arc length (see `sign_pt` in tools/gen-models.py);
   TextShapes read from their -Z side.
@@ -501,6 +512,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-20 21:55 evening fix pass (session 3: Arsalan explored the preview, fixes went live per report; branch evening-fixes-20aug). Ludo banner pole stood exactly on the green seat pad (clash pass had moved poles to away*1.8 = the seat offset; lone four-seat tables now step the pole diagonally, away rotated -45 deg * 2.3). Second Ludo corner as zone 14 / Table 28 at ring 328 deg past the NW shaft (322 clashed: shaft corner columns reach 1.77 m; appended LAST so table ids stay stable; directory dedupes game names). Help panel rebuilt on explicit widths: 14-game strip wraps via Segmented wrap/boxWidth + wrapRows (renderer refuses a row that fills the box exactly: 2-unit epsilon, pills 148), rules/leaderboard/picker get one explicit content width (Panel EATS its padding when wrappers nest: margins carry the border clearance now), backdrop tap-to-close removed everywhere (pointer events fire on EVERY stacked entity, so child taps closed the panel: "?" toggles, Got it / Cancel close). Marble settee replaces the velvet sofa (old one z-fought: three faces shared x=+-1.0 and two y=0; new one staggers every joint 10-20 mm; all sofas +0.015 lift). All three ceilings are Pozzo now: game room = Vienna Jesuit Church vault panel (fresco-vienna.jpg, Everbruin CC BY-SA 4.0), sky room = Sant'Ignazio fake dome (fresco-dome.jpg, J.-C. BENOIST CC BY 2.5), ground keeps the nave fresco; per-ceiling materials in tower-palace.glb; visible credit label on the welcome stele body (first attempt sat INSIDE the base octagon: courses reach 0.72 m forward below y 0.58). Rooftop pavilions cut to 45/225 (135/315 interpenetrated the shafts: only those two angles clear shafts + benches on that ring). Leaderboard body text clamped to the plate (was 4.2 wide on a 3.9 plate, no wrap) and WEIGHTED POINTS live on Supabase (migration 005): win = 1/2/3 pts by game depth, only first 5 scoring wins per rival set per rolling 24 h, rank by points then wins/streak/games; rooftop rows show points, "?" rows points+wins+streak, subtitle explains in 5 languages; leaderboard() dropped+recreated WITH re-grant to anon (verified live). Entrance carpet reaches z 6.4 (was 7.6). Tests 561 green, build clean. NOT yet verified on the live World: the two-identity confirm+points round. Late add on his ask: a ceiling-credit museum board per artwork floor (directory-stele model reused, no regen): ground (18.4,14.6) yaw 270, game room (20.27,13.76), sky room (16.55,19.7), spots clash-checked analytically (rugs/columns/shafts/runners/sofas/railings)
 
 - 2026-08-20 20:22 design session 2 deployed (PR #62, entity 18:21 UTC, 77 files; his signature; earlier same morning PR #61 deployed the royal UI at 08:46). Session log: welcome stele right of the entrance (host portrait images/host.jpg cropped from his avatar screenshot, credits ArsalanRC + ArsalanRC.dcl.eth which he bought, GL & HF, tap opens arsalanrc.github.io, OPEN_EXTERNAL_LINK added), directory stele left (parametrised stele(), octagonal all-marble base after several iterations he reviewed), gateway frame removed, red-and-gold entrance carpet z 7.6..17.6 connecting to gold-bordered velvet ring runners (models/palace/runner-a/b/s.png), Roman three-tier fountain with glowing water replaces the plaza tree (chess king with cross rejected), royal round zone rugs (models/palace/rug.png, self-lit; per-zone tints only in the lounge finish), full clash pass all floors (analytic checker + camera sweep with his OK to drive: pavilions/planters inside the rooftop balustrade, columns out of the two-table zones, game room = 8 uniform columns at 22.5°+k*45 r 12.2, decor collars + string lights follow, banner poles off the railing, postbox off the shaft), TWO ROOT BUGS: prism() end caps were wound face-down since ever (tops invisible from above: octagon bases exposed it; fixed globally, disc_pad's local flip removed... kept), and glTF UV v=0 is the TOP so the seat quadrants were flipped (pads showed blue/yellow: fixed, red front / green back again). Workshops 2+3 digested (spec 2c, transcripts docs/workshops/): applied UI-texture preload, no-jump, 2x parchment chrome; iOS Discover whitelist requested in the curation Discord (his post). Mobile client renders NO scene lights: everything is self-lit now, VERIFY on the phone pass along with the left chat column vs the seated bottom bar
 

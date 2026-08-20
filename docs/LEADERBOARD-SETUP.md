@@ -91,3 +91,15 @@ Local check of the signature path without a scene:
 `deno run --node-modules-dir=none --allow-net --allow-env supabase/functions/report/index.ts`
 (env `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set to dummies) and
 `deno run --node-modules-dir=none --allow-net --allow-env tools/dev/report-fn/signed-call.ts http://127.0.0.1:8000/functions/v1/report`.
+
+## 7. Scoring (migration 005, 20 Aug 2026)
+
+Ranking is by **points**, then wins, best streak, fewer games. A confirmed win scores
+by game depth: 1 point for the quick or luck games (Tic Tac Toe, Croc Snap, Dot Lines,
+Four in a Row, Snakes & Ladders, Dice Royale, Match Pairs), 2 for the deeper boards
+(Reversi, Checkers, Super Tic Tac Toe, Sea Strike), 3 for the long games (Chess, Ludo,
+Backgammon) — see `game_points()` in `supabase/005_weighted_points.sql`. Anti-farm rule:
+only the first 5 scoring wins per rolling 24 h against the same rival set earn points
+(`apply_report` checks the applied reports); later rounds still count as games, wins and
+streak. Draws and losses score 0. The rooftop board shows points; the "?" panel rows show
+points, wins and streak; the subtitle explains the rule in the five lounge languages.

@@ -18,6 +18,7 @@ export interface LeaderRow {
   rank: number
   name: string
   address: string
+  points: number
   wins: number
   streak: number
   best_streak: number
