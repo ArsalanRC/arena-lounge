@@ -33,7 +33,6 @@ import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
 import { board, leaderboardEnabled, leaderboardTicker } from './leaderboard'
-import { openExternalUrl } from '~system/RestrictedActions'
 import { feedbackEnabled } from './feedback'
 
 /**
@@ -272,14 +271,18 @@ function directoryText(): string {
  * with a static plate text naming the fresco, Pozzo and the photographer. Spots are
  * clash-checked against each floor's rugs, columns, shafts, runners, sofas and railings.
  */
-function artworkBoard(pos: Vector3, yaw: number, text: string): void {
+function artworkBoard(pos: Vector3, yaw: number, title: string, body: string): void {
   const e = engine.addEntity()
   Transform.create(e, { position: pos, rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  GltfContainer.create(e, { src: 'models/directory-palace.glb' })
+  GltfContainer.create(e, { src: 'models/directory-palace.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_POINTER })
   const lbl = engine.addEntity()
   // plate front sits at local z -0.155 (brass inlay -0.151): the label floats just proud
   Transform.create(lbl, { parent: e, position: Vector3.create(0, 1.83, -0.16) })
-  TextShape.create(lbl, { text, fontSize: 0.34, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 1.02, height: 1.45, textWrapping: true })
+  TextShape.create(lbl, { text: `${title.toUpperCase()}\n\n${body}`, fontSize: 0.34, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 1.02, height: 1.45, textWrapping: true })
+  // plate text is tiny from afar (and on phones): tapping the stele opens the reader panel
+  pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: title, maxDistance: 14 } }, () => {
+    local.infoPanel = { title, body }
+  })
 }
 
 function directoryBoard(x: number, z: number): void {
@@ -288,7 +291,11 @@ function directoryBoard(x: number, z: number): void {
   const yaw = PALACE ? 270 : 90
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(x, PALACE ? 0 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  GltfContainer.create(e, { src: PALACE ? 'models/directory-palace.glb' : 'models/board.glb' })
+  GltfContainer.create(e, { src: PALACE ? 'models/directory-palace.glb' : 'models/board.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_POINTER })
+  // the level-by-level game map reads small: tap to open it big (localized at tap time)
+  pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'Directory', maxDistance: 14 } }, () => {
+    local.infoPanel = { title: L().directoryTitle, body: directoryText() }
+  })
   const text = directoryText
   const lbl = engine.addEntity()
   // text shapes read from their -Z side: yaw 270 faces east (the lounge board plate sits at yaw 90, so its label is turned round)
@@ -305,7 +312,9 @@ function welcomeBoard(x: number, z: number): void {
   const e = engine.addEntity()
   // right of the entrance: front (-Z local) turns west towards the path with yaw 90
   Transform.create(e, { position: Vector3.create(x, 0, z), rotation: Quaternion.fromEulerDegrees(0, 90, 0) })
-  GltfContainer.create(e, { src: 'models/welcome-palace.glb' })
+  // CL_POINTER: the GLB has no collider meshes, so without this, taps pass straight through
+  // the marble and the profile handler below can never fire (found by Arsalan, 20 Aug)
+  GltfContainer.create(e, { src: 'models/welcome-palace.glb', invisibleMeshesCollisionMask: ColliderLayer.CL_POINTER, visibleMeshesCollisionMask: ColliderLayer.CL_POINTER })
   // portrait on the viewer's left (local +X with yaw 90); plate centre y 1.565, 2.25 x 1.35;
   // the plane's unmirrored face is +Z, so it turns 180 to show correctly on the front
   const pic = engine.addEntity()
@@ -325,8 +334,14 @@ function welcomeBoard(x: number, z: number): void {
     height: 1.3,
     textWrapping: true
   })
+  // tap -> reader panel with BOTH profile links (Arsalan 20 Aug: Decentraland profile AND
+  // the portfolio underneath; address = the World owner wallet, verified via /permissions)
   pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'ArsalanRC', maxDistance: 12 } }, () => {
-    void openExternalUrl({ url: 'https://arsalanrc.github.io' })
+    local.infoPanel = {
+      title: 'ArsalanRC',
+      body: 'Hi, welcome to Arena Lounge!\nBuilt with love by ArsalanRC (ArsalanRC.dcl.eth)\n\nGL & HF!',
+      links: [{ label: 'Decentraland profile', url: 'https://decentraland.org/profile/accounts/0x3451a1e45b5f6b54c3c6a65d29db2584a53e5e9f' }]
+    }
   })
   // museum label on the stele base: the ceiling artworks' visible credit (details in
   // models/palace/CREDITS.md; Arsalan asked 20 Aug where the artist is credited in-world)
@@ -491,11 +506,11 @@ export function buildLounge(): void {
   // rug). Game room: free arc between Croc Snap and Snakes & Ladders (3.7 m off the rug, 1.4 m
   // off the 202.5-deg column). Sky room: between the west sofa and Dice Royale (4.3 m / 2.5 m).
   if (PALACE) {
-    artworkBoard(Vector3.create(18.4, 0, 14.6), 270, "THE CEILING\n\nTriumph of St Ignatius\nAndrea Pozzo, 1685-94\nSant'Ignazio, Rome\n\nPhoto: Wilfredor (CC0)")
+    artworkBoard(Vector3.create(18.4, 0, 14.6), 270, 'The ceiling', "Triumph of St Ignatius\nAndrea Pozzo, 1685-94\nSant'Ignazio, Rome\n\nPhoto: Wilfredor (CC0)")
     const g = Vector3.create(20.27, FLOORS[1].y, 13.76)
-    artworkBoard(g, yawToward(g, PLAZA), 'THE CEILING\n\nVault fresco\nAndrea Pozzo, 1703\nJesuit Church, Vienna\n\nPhoto: Everbruin\n(CC BY-SA 4.0)')
+    artworkBoard(g, yawToward(g, PLAZA), 'The ceiling', 'Vault fresco\nAndrea Pozzo, 1703\nJesuit Church, Vienna\n\nPhoto: Everbruin (CC BY-SA 4.0)')
     const sk = Vector3.create(16.55, FLOORS[2].y, 19.7)
-    artworkBoard(sk, yawToward(sk, PLAZA), "THE CEILING\n\nThe painted dome\nAndrea Pozzo, 1685\nSant'Ignazio, Rome\n\nPhoto: J.-C. BENOIST\n(CC BY 2.5)")
+    artworkBoard(sk, yawToward(sk, PLAZA), 'The ceiling', "The painted dome\nAndrea Pozzo, 1685\nSant'Ignazio, Rome\n\nPhoto: J.-C. BENOIST (CC BY 2.5)")
   }
 
   buildTower()

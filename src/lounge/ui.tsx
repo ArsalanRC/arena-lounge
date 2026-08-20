@@ -24,6 +24,7 @@
  * and reads module state + synced components.
  */
 import { Color4 } from '@dcl/sdk/math'
+import { openExternalUrl } from '~system/RestrictedActions'
 import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { isMobile } from '@dcl/sdk/platform'
@@ -665,10 +666,45 @@ function FeedbackPanel() {
             onSubmit={() => void sendFeedback()}
           />
         </UiEntity>
-        {status !== '' && <Text value={status} size={T.body} color={local.feedbackState === 'failed' ? UI.red : UI.accentTint} margin={{ bottom: 8 }} />}
+        {/* accentTint (pale gold) vanished on the parchment: dark gold / parchment red instead */}
+        {status !== '' && <Text value={status} size={T.body} color={local.feedbackState === 'failed' ? UI.danger : UI.gold} margin={{ bottom: 8 }} />}
         <Row height={64}>
           <Btn label={str.send} color={UI.accent} onClick={() => void sendFeedback()} width={180} margin={6} />
           <Btn label={local.feedbackState === 'sent' ? str.gotIt : str.cancel} quiet onClick={close} width={180} margin={6} />
+        </Row>
+      </Panel>
+    </UiEntity>
+  )
+}
+
+/** Reader panel: a tapped stele/board's text at readable size. Shallow structure on purpose
+ * (title + paragraph + one row directly in the Panel), like FeedbackPanel, so the panel's
+ * padding behaves; closes only via its button (backdrop taps also hit children here). */
+function InfoPanel() {
+  const info = local.infoPanel
+  if (!info) return null
+  const str = L()
+  const mobile = phone()
+  return (
+    <UiEntity
+      uiTransform={{ positionType: 'absolute', position: { top: 0, left: 0 }, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+      uiBackground={{ color: Color4.create(0, 0, 0, 0.5) }}
+    >
+      <Panel width={mobile ? 860 : 560} place={{}} padding={20}>
+        <Text value={info.title} size={T.title} margin={{ top: 10, bottom: 4 }} />
+        <UiEntity
+          uiTransform={{ width: mobile ? 756 : 456, height: 'auto', margin: { top: 6, bottom: 10 } }}
+          uiText={{ value: info.body, fontSize: mobile ? 26 : 22, color: UI.text, textAlign: 'middle-center' }}
+        />
+        {info.links && (
+          <Row height={56} margin={{ top: 2 }}>
+            {info.links.map((l) => (
+              <Btn key={l.url} label={l.label} color={UI.accent} onClick={() => void openExternalUrl({ url: l.url })} width={mobile ? 300 : 240} margin={6} />
+            ))}
+          </Row>
+        )}
+        <Row height={52} margin={{ top: 4, bottom: 24 }}>
+          <Btn label={str.gotIt} onClick={() => (local.infoPanel = null)} width={170} />
         </Row>
       </Panel>
     </UiEntity>
@@ -773,5 +809,6 @@ const LoungeUi = () => (
     <Controller />
     <HelpPanel />
     <FeedbackPanel />
+    <InfoPanel />
   </UiEntity>
 )
