@@ -312,8 +312,10 @@ version works as well", 16 Aug 11:30):
 3d. (done 18 Aug 21:20) two tables per game, wider rings, palace rooftop, music,
    suggestion box. Next: the mobile pass on the live World (controller bar with the
    new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
-   on the phone keyboard, music toggle); palace finish deployed 19 Aug 08:46.
-   Then README refresh with phone screenshots, submission ~1 to
+   on the phone keyboard, music toggle); palace finish deployed 19 Aug 08:46;
+   royal UI + props polish on branch royal-ui (19 Aug evening) waits for his look at
+   the all-marble stele base, then merge + deploy. Then README refresh with phone
+   screenshots, submission ~1 to
    3 Sept once everything is polished (secrecy no longer matters to him).
 4. Claude: mobile layout tuning from the phone screenshots (open: where the
    phone HUD sits, whether the bar overlaps joystick / jump buttons; if it
@@ -476,6 +478,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-19 22:20 design session on the laptop preview (Arsalan explored, I fixed live; branch royal-ui, committed, NOT merged/deployed yet): royal parchment UI (tools/gen-ui-theme.py: images/ui/panel-royal.png gold-bordered parchment with corner rosettes, pill-royal, button-royal + button-sq-royal for icon buttons; palette = ink text, burgundy primary, parchment quiet, red danger, dark-gold emphasis; games keep UI.light on their own dark boards); Panel lays children out in an inner box of explicit width because '100%' rows and the note input resolve against the FULL panel width in this renderer (they reached under the padding and past the gold border in the table card, the seated controller and the feedback panel); table card 600/660 wide with two action rows; seated desktop panel 520; rows 64 tall for margin-6 buttons; seat pads = textured velvet discs (models/palace/seat.png 2x2 sheet: red front, green back, Ludo red/green/blue/yellow) with brass rims (disc_pad: top cap wound CCW from above, because prism()'s top cap faces down and only its bottom cap showed); round veined-marble table legs with brass feet/collars and marble lamp poles (prism uv_period); palace elevator shaft = marble columns + brass rings + gold pads/light bars + parchment directory sign inside the cabin on every floor; directory = one marble stele (all marble base, recessed plate, gold inlay line, stepped cap + brass ball) at (21.4, 11.9) replacing the left bar; royal gold letter box on the marble pedestal; burgundy kiosk cube. Gotchas learned: in local preview the Explorer keys assets by path ("b64-...") and keeps a loaded GLB until it RESTARTS (a reload does not refetch; a half-written GLB stays broken), so after any model change restart the Explorer (generators now write atomically); my MCP moves/camera hijack his avatar while he explores (he could not walk twice): keep hands off while he is in the window. Tomorrow: he wants the stele base fully marble (done in the last regen, unseen), then merge + deploy (signature), then the phone pass
 
 - 2026-08-19 08:46 palace finish deployed (his signature at 08:45): entity 06:45 UTC, 64 files, fresco ceilings + ornate props + card padding live. Phone pass pending
 

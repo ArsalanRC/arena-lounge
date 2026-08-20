@@ -126,7 +126,7 @@ function Controls(props: { state: SnakesLaddersGameState; ctx: GameContext; phon
           <UiEntity
             uiTransform={{ width: 200, height: 56, margin: props.phone ? { left: 10 } : { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
             uiBackground={uiSprite(IMG.button, UI.accent)}
-            uiText={{ value: g.rollDie, fontSize: 20, color: UI.text, textAlign: 'middle-center' }}
+            uiText={{ value: g.rollDie, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
             onMouseDown={() => ctx.act({ roll: d6() } as SnakesAction)}
           />
         )}

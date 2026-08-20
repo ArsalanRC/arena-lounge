@@ -10,6 +10,7 @@ noise is built in the frequency domain (periodic by construction).
                                    (u wraps around the cylinder, v runs bottom -> top)
   models/palace/marble.png   512   plain white veined marble (table tops, benches, bar tops)
   models/palace/ceiling.png  1024  4 m period: 2x2 coffers, gold ribs, lapis field with a gold rosette
+  models/palace/seat.png     1024  2x2 seat pads (red, green, blue, yellow velvet): double gold ring, gold eight-point star
 
 Run: python3 tools/gen-marble.py
 """
@@ -70,7 +71,9 @@ def marble(w, h, base, vein, vein2, seed, vein_scale=1.0, strength=1.0):
 def save(path, rgb, alpha=None):
     a = np.ones(rgb.shape[:2]) if alpha is None else alpha
     img = np.dstack([np.clip(rgb, 0, 1), np.clip(a, 0, 1)])
-    Image.fromarray((img * 255 + 0.5).astype(np.uint8), 'RGBA').save(path, optimize=True)
+    import os
+    Image.fromarray((img * 255 + 0.5).astype(np.uint8), 'RGBA').save(path + '.tmp.png', optimize=True)
+    os.replace(path + '.tmp.png', path)   # atomic for the preview server
     print('wrote', path, rgb.shape[1], 'x', rgb.shape[0])
 
 CREAM = (0.94, 0.92, 0.87)
@@ -217,9 +220,55 @@ def gen_ceiling(path='models/palace/ceiling.png', size=1024):
         img[m] = (np.array(BRASS)[None, :] * (0.95 + 0.25 * cloud[m][:, None])).clip(0, 1)
     save(path, img)
 
+VELVETS = {   # (field, light) per seat colour
+    'red': ((0.46, 0.07, 0.11), (0.62, 0.12, 0.16)),
+    'green': ((0.08, 0.32, 0.16), (0.14, 0.44, 0.22)),
+    'blue': ((0.09, 0.16, 0.42), (0.14, 0.24, 0.56)),
+    'yellow': ((0.62, 0.46, 0.08), (0.78, 0.60, 0.14)),
+}
+
+def seat_disc(size, colour, seed):
+    """One seat pad disc: velvet field with a soft sheen, gold rim + inner ring, gold eight-point star;
+    transparent outside the circle. Returns (rgb, alpha)."""
+    s = size
+    yy, xx = np.mgrid[0:s, 0:s].astype(np.float64) + 0.5
+    cx = cy = s / 2
+    r = np.hypot(xx - cx, yy - cy) / (s / 2)          # 0 centre .. 1 rim
+    field, light = VELVETS[colour]
+    sheen = fractal_noise(s, s, 3.0, seed)
+    img = np.array(field)[None, None, :] * (0.85 + 0.3 * sheen[..., None]) + np.array(light)[None, None, :] * 0.2 * (1 - r[..., None])
+    # gold rim (0.90..1.0), inner ring (0.74..0.78)
+    rim = (r > 0.90)
+    ring = (r > 0.74) & (r < 0.78)
+    shade_rim = 0.85 + 0.3 * np.cos((r - 0.95) / 0.05 * np.pi)
+    img[rim] = (np.array(BRASS)[None, :] * shade_rim[rim][:, None]).clip(0, 1)
+    img[ring] = np.array(BRASS) * 0.95
+    # eight-point star: two squares rotated 45 deg
+    def square(a, half):
+        x = (xx - cx) / (s / 2); y = (yy - cy) / (s / 2)
+        xr = x * np.cos(a) - y * np.sin(a); yr = x * np.sin(a) + y * np.cos(a)
+        return (np.abs(xr) < half) & (np.abs(yr) < half)
+    star = square(0, 0.16) | square(np.pi / 4, 0.16)
+    img[star] = np.array(BRASS) * (0.9 + 0.2 * sheen[star][:, None]).clip(0, 1)
+    core = r < 0.06
+    img[core] = np.array(BRASS_DARK)
+    alpha = np.clip((1.0 - r) * (s / 2) + 0.5, 0, 1)    # 1 px anti-aliased edge, transparent corners
+    return img, alpha
+
+def gen_seat(path='models/palace/seat.png', size=512):
+    """2x2 sheet of seat pads: red (top-left), green (top-right), blue (bottom-left), yellow (bottom-right);
+    gen-models maps each pad onto one quadrant (two-seat tables red + green, Ludo all four)."""
+    sheet = np.zeros((size * 2, size * 2, 3)); alpha = np.zeros((size * 2, size * 2))
+    for k, colour in enumerate(['red', 'green', 'blue', 'yellow']):
+        rgb, a = seat_disc(size, colour, 41 + k)
+        r0, c0 = (k // 2) * size, (k % 2) * size
+        sheet[r0:r0 + size, c0:c0 + size] = rgb; alpha[r0:r0 + size, c0:c0 + size] = a
+    save(path, sheet, alpha)
+
 if __name__ == '__main__':
     gen_floor()
     gen_wall()
     gen_column()
     gen_marble_plain()
     gen_ceiling()
+    gen_seat()

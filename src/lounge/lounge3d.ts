@@ -230,31 +230,47 @@ function zoneBanner(z: ZoneDef): void {
  */
 function elevatorShaft(pad: Vector3): void {
   // models/shaft.glb: posts, glass on three sides (open towards -Z = the plaza), roof, pads + light rings on every floor
-  prop(finish('shaft'), Vector3.create(pad.x, 0, pad.z), yawToward(pad, PLAZA))
+  const shaft = prop(finish('shaft'), Vector3.create(pad.x, 0, pad.z), yawToward(pad, PLAZA))
   for (const f of FLOORS) {
     liveLabel(Vector3.create(pad.x, f.y + 3.05, pad.z), () => L().elevator, 2.0, Color4.White(), 6)
     liveLabel(Vector3.create(pad.x, f.y + 2.35, pad.z), () => L().floors.join(' · '), 0.9, PALETTE.cream, 6)
+    if (!PALACE) continue
+    // parchment directory on the back wall of the cabin (local +Z), readable from inside on every floor
+    const sign = engine.addEntity()
+    Transform.create(sign, { parent: shaft, position: Vector3.create(0, f.y + 1.78, 1.17), scale: Vector3.create(1.9, 1.5, 1) })
+    MeshRenderer.setPlane(sign)
+    const parchment = Material.Texture.Common({ src: 'images/ui/panel-royal.png' })
+    Material.setPbrMaterial(sign, { texture: parchment, roughness: 0.9, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: parchment, emissiveColor: Color3.create(1, 0.97, 0.9), emissiveIntensity: 0.35 })
+    const txt = engine.addEntity()
+    Transform.create(txt, { parent: shaft, position: Vector3.create(0, f.y + 1.78, 1.14) })
+    TextShape.create(txt, { text: directoryText(), fontSize: 0.5, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: Color4.fromHexString('#2b1d12ff'), width: 1.6, height: 1.3, textWrapping: true })
+    liveLabels.push({ entity: txt, text: directoryText })
   }
 }
 
 /** Directory: which games are on which floor, in the UI language (models/board.glb + a live label). */
+/** The directory text: every floor with its games, in the UI language. */
+function directoryText(): string {
+  const names = (floor: number) =>
+    ZONES.filter((zn) => zn.floor === floor && BUILT_GAMES.includes(zn.gameId))
+      .map((zn) => localeInfo(uiLang.code).games[zn.gameId]?.name ?? GAME_NAMES[zn.gameId])
+      .join(' · ')
+  const f = L().floors
+  return `${f[0].toUpperCase()}\n${names(0)}\n\n${f[1].toUpperCase()} ▲\n${names(1)}\n\n${f[2].toUpperCase()} ▲▲\n${names(2)}\n\n${f[3].toUpperCase()} ▲▲▲`
+}
+
 function directoryBoard(x: number, z: number): void {
-  const yaw = 90 // plate faces east, towards the spawn
+  // palace: one marble monument (plinth, stele, pediment) with the plate on its front, which local -Z turns
+  // east towards the spawn with yaw 270; lounge: the framed board on a post, plate symmetric, at 2.2 m
+  const yaw = PALACE ? 270 : 90
   const e = engine.addEntity()
-  Transform.create(e, { position: Vector3.create(x, 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
-  GltfContainer.create(e, { src: finish('board') })
-  const text = (): string => {
-    const names = (floor: number) =>
-      ZONES.filter((zn) => zn.floor === floor && BUILT_GAMES.includes(zn.gameId))
-        .map((zn) => localeInfo(uiLang.code).games[zn.gameId]?.name ?? GAME_NAMES[zn.gameId])
-        .join(' · ')
-    const f = L().floors
-    return `${f[0].toUpperCase()}\n${names(0)}\n\n${f[1].toUpperCase()} ▲\n${names(1)}\n\n${f[2].toUpperCase()} ▲▲\n${names(2)}\n\n${f[3].toUpperCase()} ▲▲▲`
-  }
+  Transform.create(e, { position: Vector3.create(x, PALACE ? 0 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
+  GltfContainer.create(e, { src: PALACE ? 'models/directory-palace.glb' : 'models/board.glb' })
+  const text = directoryText
   const lbl = engine.addEntity()
-  // text shapes read from their -Z side: turn the label the other way round than the plate
-  Transform.create(lbl, { position: Vector3.create(x + 0.06, 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw + 180, 0) })
-  TextShape.create(lbl, { text: text(), fontSize: 0.95, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: 2.4, height: 1.8, textWrapping: true })
+  // text shapes read from their -Z side: yaw 270 faces east (the lounge board plate sits at yaw 90, so its label is turned round)
+  Transform.create(lbl, { position: Vector3.create(x + (PALACE ? 0.175 : 0.06), PALACE ? 1.86 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, 270, 0) })
+  TextShape.create(lbl, { text: text(), fontSize: PALACE ? 0.46 : 0.95, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: PALACE ? 1.05 : 2.4, height: PALACE ? 1.5 : 1.8, textWrapping: true })
   liveLabels.push({ entity: lbl, text })
 }
 
@@ -392,7 +408,7 @@ export function buildLounge(): void {
   liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
   infoKiosk(20.3, 16.0)
   feedbackBox(27.7, 16.0)
-  directoryBoard(18.9, 14.9)
+  directoryBoard(21.4, 11.9) // on top of the left bar counter beside the spawn, so it is read on entering (the column at 200 deg hid the old spot)
 
   buildTower()
 
@@ -426,7 +442,7 @@ function buildTower(): void {
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 4.6, 0, PLAZA.z + Math.cos(t) * 4.6)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
-  prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true)
+  if (!PALACE) prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true) // palace: the directory monument stands here
   prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
 
   // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture and seats,
