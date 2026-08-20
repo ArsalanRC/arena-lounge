@@ -33,6 +33,7 @@ import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
 import { board, leaderboardEnabled, leaderboardTicker } from './leaderboard'
+import { openExternalUrl } from '~system/RestrictedActions'
 import { feedbackEnabled } from './feedback'
 
 /**
@@ -111,13 +112,17 @@ export function rug(pos: Vector3, size: number, tint: Color4, y = 0.012, glow?: 
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(pos.x, y, pos.z), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(size, size, 1) })
   MeshRenderer.setPlane(e)
+  // Palace: every zone gets the same royal round carpet (red velvet, gold border) so the marble
+  // floors stay coherent; lounge: the neutral weave tinted per zone. Both glow softly on their own:
+  // scene lights never reach the slab corners and the mobile client renders no lights at all.
   const g = glow ?? tint
+  const weave = Material.Texture.Common({ src: PALACE ? 'models/palace/rug.png' : 'images/rug.png' })
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: 'images/rug.png' }),
-    albedoColor: tint,
-    emissiveTexture: Material.Texture.Common({ src: 'images/rug-ring.png' }),
-    emissiveColor: Color3.create(g.r, g.g, g.b),
-    emissiveIntensity: 1.6,
+    texture: weave,
+    albedoColor: PALACE ? Color4.White() : tint,
+    emissiveTexture: weave,
+    emissiveColor: PALACE ? Color3.create(1, 0.9, 0.85) : Color3.create((tint.r + g.r) / 2, (tint.g + g.g) / 2, (tint.b + g.b) / 2),
+    emissiveIntensity: PALACE ? 0.28 : 0.5,
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 1,
@@ -191,11 +196,10 @@ function pathRing(y: number, outer: number, tex: string): Entity {
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(PLAZA.x, y + 0.006, PLAZA.z), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(outer * 2, outer * 2, 1) })
   MeshRenderer.setPlane(e)
-  // a touch of self-light keeps the runner cream under the purple night sky instead of turning it magenta;
-  // in the palace finish the cream texture is tinted to a deep red carpet on the marble
-  const tint = PALACE ? PALETTE.runnerRed : Color4.White()
-  const glow = PALACE ? Color3.create(0.9, 0.35, 0.35) : Color3.create(1, 0.96, 0.9)
-  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), albedoColor: tint, roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: glow, emissiveIntensity: PALACE ? 0.16 : 0.22 })
+  // a touch of self-light keeps the runner readable under the purple night sky; the palace textures
+  // carry their own red velvet + gold borders, the lounge's cream texture is used untinted
+  const glow = PALACE ? Color3.create(1, 0.9, 0.85) : Color3.create(1, 0.96, 0.9)
+  Material.setPbrMaterial(e, { texture: Material.Texture.Common({ src: tex }), roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: Material.Texture.Common({ src: tex }), emissiveColor: glow, emissiveIntensity: PALACE ? 0.16 : 0.22 })
   return e
 }
 
@@ -205,7 +209,7 @@ function zoneBanner(z: ZoneDef): void {
   const y = z.position.y
   const centre = Vector3.create(PLAZA.x, y, PLAZA.z)
   const away = Vector3.normalize(Vector3.subtract(z.position, centre))
-  const pos = Vector3.add(z.position, Vector3.scale(away, 2.6))
+  const pos = Vector3.add(z.position, Vector3.scale(away, z.floor === 1 ? 1.8 : 2.6)) // floor 1: 2.6 put the pole in the railing
   cylinder(Vector3.create(pos.x, y + 1.7, pos.z), Vector3.create(0.12, 3.4, 0.12), PALACE ? PALETTE.brass : PALETTE.woodDark, true)
   const cloth = engine.addEntity()
   Transform.create(cloth, {
@@ -260,8 +264,8 @@ function directoryText(): string {
 }
 
 function directoryBoard(x: number, z: number): void {
-  // palace: one marble monument (plinth, stele, pediment) with the plate on its front, which local -Z turns
-  // east towards the spawn with yaw 270; lounge: the framed board on a post, plate symmetric, at 2.2 m
+  // palace: one marble stele with the plate on its front (-Z); on the left of the entrance the front
+  // turns east towards the path (yaw 270); lounge: the framed board on a post, plate symmetric
   const yaw = PALACE ? 270 : 90
   const e = engine.addEntity()
   Transform.create(e, { position: Vector3.create(x, PALACE ? 0 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, yaw, 0) })
@@ -269,9 +273,42 @@ function directoryBoard(x: number, z: number): void {
   const text = directoryText
   const lbl = engine.addEntity()
   // text shapes read from their -Z side: yaw 270 faces east (the lounge board plate sits at yaw 90, so its label is turned round)
-  Transform.create(lbl, { position: Vector3.create(x + (PALACE ? 0.175 : 0.06), PALACE ? 1.86 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, 270, 0) })
+  Transform.create(lbl, { position: Vector3.create(x + (PALACE ? 0.175 : 0.06), PALACE ? 1.83 : 2.2, z), rotation: Quaternion.fromEulerDegrees(0, 270, 0) })
   TextShape.create(lbl, { text: text(), fontSize: PALACE ? 0.46 : 0.95, font: Font.F_SANS_SERIF, textAlign: TextAlignMode.TAM_MIDDLE_CENTER, textColor: PALETTE.cream, width: PALACE ? 1.05 : 2.4, height: PALACE ? 1.5 : 1.8, textWrapping: true })
   liveLabels.push({ entity: lbl, text })
+}
+
+/**
+ * Welcome stele left of the entrance (palace): the host's portrait, a greeting, credits and a
+ * GL & HF; tapping it opens the builder's profile page. Landscape sibling of the directory stele.
+ */
+function welcomeBoard(x: number, z: number): void {
+  const e = engine.addEntity()
+  // right of the entrance: front (-Z local) turns west towards the path with yaw 90
+  Transform.create(e, { position: Vector3.create(x, 0, z), rotation: Quaternion.fromEulerDegrees(0, 90, 0) })
+  GltfContainer.create(e, { src: 'models/welcome-palace.glb' })
+  // portrait on the viewer's left (local +X with yaw 90); plate centre y 1.565, 2.25 x 1.35;
+  // the plane's unmirrored face is +Z, so it turns 180 to show correctly on the front
+  const pic = engine.addEntity()
+  Transform.create(pic, { parent: e, position: Vector3.create(0.72, 1.565, -0.155), rotation: Quaternion.fromEulerDegrees(0, 180, 0), scale: Vector3.create(0.72, 1.17, 1) })
+  MeshRenderer.setPlane(pic)
+  const host = Material.Texture.Common({ src: 'images/host.jpg' })
+  Material.setPbrMaterial(pic, { texture: host, roughness: 0.9, metallic: 0, castShadows: false, emissiveTexture: host, emissiveColor: Color3.create(1, 1, 1), emissiveIntensity: 0.3 })
+  const txt = engine.addEntity()
+  Transform.create(txt, { parent: e, position: Vector3.create(-0.38, 1.565, -0.16) })
+  TextShape.create(txt, {
+    text: 'Hi, welcome to Arena Lounge!\n\nBuilt with love by <b>ArsalanRC</b>\nArsalanRC.dcl.eth\n\n<b>GL & HF!</b>\n\n<i>Tap the board for my profile</i>',
+    fontSize: 0.62,
+    font: Font.F_SANS_SERIF,
+    textAlign: TextAlignMode.TAM_MIDDLE_CENTER,
+    textColor: PALETTE.cream,
+    width: 1.4,
+    height: 1.3,
+    textWrapping: true
+  })
+  pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'ArsalanRC', maxDistance: 12 } }, () => {
+    void openExternalUrl({ url: 'https://arsalanrc.github.io' })
+  })
 }
 
 /** A post with a glowing "?" cube: tap to open How to play. */
@@ -367,7 +404,9 @@ export function buildLounge(): void {
   // the plaza: a big warm rug, a tree in the middle as the landmark, four
   // benches facing in, lamps at the corners
   rug(PLAZA, 9.5, Color4.fromHexString('#e3c9a3ff'), 0.008, Color4.fromHexString('#ffd27aff'))
-  prop(finish('plazatree'), Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
+  // plaza centre: in the palace a Roman three-tier marble fountain; in the lounge the potted tree
+  if (PALACE) prop('models/statue-palace.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
+  else prop('models/plazatree.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
   for (const [x, z] of [[PLAZA.x - 3.6, PLAZA.z + 2.6], [PLAZA.x + 3.6, PLAZA.z + 2.6], [PLAZA.x - 3.6, PLAZA.z - 2.6], [PLAZA.x + 3.6, PLAZA.z - 2.6]]) {
     bench(Vector3.create(x, 0, z), PLAZA)
   }
@@ -404,11 +443,12 @@ export function buildLounge(): void {
   // entrance sequence (south to north): portal, bars flanking the path, gateway with the
   // welcome sign, then the ring path; kiosk and directory sit off the path to the west
   const gz = PLAZA.z - 8.6
-  prop(finish('gateway'), Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
+  // palace: no gateway frame; the carpet, the two steles and the marquee carry the entrance (his call, 20 Aug)
+  if (!PALACE) prop(finish('gateway'), Vector3.create(SPAWN.x, 0, gz), 0, 1, true)
   liveLabel(Vector3.create(SPAWN.x, 4.2, gz), () => L().welcome, 1.6, PALETTE.cream, 12)
   infoKiosk(20.3, 16.0)
-  feedbackBox(27.7, 16.0)
-  directoryBoard(21.4, 11.9) // on top of the left bar counter beside the spawn, so it is read on entering (the column at 200 deg hid the old spot)
+  feedbackBox(27.0, 15.4) // clear of the east elevator shaft
+  directoryBoard(21.4, 11.9) // left of the entrance (mirrors the welcome stele); lounge: on the left bar
 
   buildTower()
 
@@ -442,15 +482,32 @@ function buildTower(): void {
     const pos = Vector3.create(PLAZA.x + Math.sin(t) * 4.6, 0, PLAZA.z + Math.cos(t) * 4.6)
     prop(finish('sofa'), pos, yawToward(pos, PLAZA) + 180, 1, true)
   }
-  if (!PALACE) prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true) // palace: the directory monument stands here
-  prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
+  if (!PALACE) {
+    prop(finish('bar'), Vector3.create(21.4, 0, 11.9), 90, 1, true)
+    prop(finish('bar'), Vector3.create(26.6, 0, 11.9), -90, 1, true)
+  } else {
+    welcomeBoard(26.6, 11.9) // right of the entrance: the host's welcome stele
+  }
 
   // the walkable ring on every floor: one alpha-cut runner plane each, clear of furniture and seats,
-  // 2 m+ wide (path-a inner/outer 0.705: ground 5.4..7.6, game room 5.2..7.4, rooftop 4.65..6.6; path-b 0.60: sky room 3.4..5.7)
-  pathRing(FLOORS[0].y, 7.6, 'images/path-a.png')
-  pathRing(FLOORS[1].y, 7.4, 'images/path-a.png')
-  pathRing(FLOORS[2].y, 5.7, 'images/path-b.png')
-  pathRing(FLOORS[3].y, 6.6, 'images/path-a.png')
+  // 2 m+ wide (ratio 0.705: ground 5.4..7.6, game room 5.2..7.4, rooftop 4.65..6.6; 0.60: sky room 3.4..5.7).
+  // Palace: red velvet with gold border bands baked in; lounge: the cream runners, tinted in pathRing
+  const ringA = PALACE ? 'models/palace/runner-a.png' : 'images/path-a.png'
+  const ringB = PALACE ? 'models/palace/runner-b.png' : 'images/path-b.png'
+  pathRing(FLOORS[0].y, 7.6, ringA)
+  pathRing(FLOORS[1].y, 7.4, ringA)
+  pathRing(FLOORS[2].y, 5.7, ringB)
+  pathRing(FLOORS[3].y, 6.6, ringA)
+  if (PALACE) {
+    // straight entrance carpet: from the fence gap up into the ring band, same velvet + gold edges
+    const carpet = engine.addEntity()
+    const z0 = 7.6 // the fence line is at z 8.15: run through the gap onto the garden path
+    const z1 = PLAZA.z - 6.4 // reaches into the ring band (16.4 .. 18.6), the ring draws above it
+    Transform.create(carpet, { position: Vector3.create(SPAWN.x, 0.005, (z0 + z1) / 2), rotation: Quaternion.fromEulerDegrees(90, 0, 0), scale: Vector3.create(2.6, z1 - z0, 1) })
+    MeshRenderer.setPlane(carpet)
+    const ct = Material.Texture.Common({ src: 'models/palace/runner-s.png' })
+    Material.setPbrMaterial(carpet, { texture: ct, roughness: 1, metallic: 0, castShadows: false, transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST, alphaTest: 0.5, emissiveTexture: ct, emissiveColor: Color3.create(1, 0.9, 0.85), emissiveIntensity: 0.16 })
+  }
 
   // columns carrying the slabs, between the corners so they never block a table
   const columnAt = (deg: number, r: number, y0: number, y1: number, thick: number) => {
@@ -458,8 +515,11 @@ function buildTower(): void {
     column(Vector3.create(PLAZA.x + Math.sin(t) * r, (y0 + y1) / 2, PLAZA.z + Math.cos(t) * r), Vector3.create(thick, y1 - y0, thick), true)
   }
   // ground: between the corners, two flanking the entrance path; game room: between its corners
-  for (const deg of [160, 200, 262, 304, 0, 56, 101]) columnAt(deg, 11.4, 0, 8, 0.6)
-  for (const deg of [112, 158, 202, 338]) columnAt(deg, 10.4, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
+  // r 12.6 / 12.2: the two-table zones reach further out than the old single tables; at 11.4/10.4 the
+  // columns stood in the outer seat pads (walkthrough 20 Aug)
+  for (const deg of [160, 200, 262, 304, 0, 56, 101]) columnAt(deg, 12.6, 0, 8, 0.6)
+  // game room: eight uniform columns on the 22.5° grid (clear of all six zones and both shafts)
+  for (let k = 0; k < 8; k++) columnAt(22.5 + k * 45, 12.2, 8, 16, 0.5) // between the game-room corners, clear of both elevators and of the walkways
 
   for (const pad of ELEVATORS) elevatorShaft(pad)
 
@@ -488,12 +548,13 @@ function buildTower(): void {
   if (PALACE) {
     for (const deg of [45, 135, 225, 315]) {
       const t = (deg * Math.PI) / 180
-      const pos = Vector3.create(PLAZA.x + Math.sin(t) * 8.0, y3, PLAZA.z + Math.cos(t) * 8.0)
-      prop('models/pavilion.glb', pos, deg, 1, true)
+      // r 7.3: at 8.0 the pavilion corners (half-diagonal ~2.1) pierced the edge balustrade at r 9.95
+      const pos = Vector3.create(PLAZA.x + Math.sin(t) * 7.3, y3, PLAZA.z + Math.cos(t) * 7.3)
+      prop('models/pavilion.glb', pos, deg + 45, 1, true)
     }
   }
-  planter(PLAZA.x - 8.9, PLAZA.z + 3, y3)
-  planter(PLAZA.x + 8.9, PLAZA.z + 3, y3)
+  planter(PLAZA.x - 8.3, PLAZA.z + 3, y3) // 8.9 pushed the leaf ball through the balustrade
+  planter(PLAZA.x + 8.3, PLAZA.z + 3, y3)
   liveLabel(Vector3.create(PLAZA.x, y3 + 3.4, PLAZA.z - 7.0), () => L().rooftop, 2.6, Color4.White(), 8) // south, clear of the board
   if (leaderboardEnabled()) leaderboardBoard(Vector3.create(PLAZA.x, y3, PLAZA.z + 8.4))
   else liveLabel(Vector3.create(PLAZA.x, y3 + 2.2, PLAZA.z + 7.0), () => L().rooftopNote, 1.1, PALETTE.cream, 10)

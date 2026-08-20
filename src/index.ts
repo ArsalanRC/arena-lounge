@@ -5,7 +5,7 @@
  * engine.addSystem call must happen inside main() (the player profile is not
  * ready before that), so all setup is funnelled through here.
  */
-import { SkyboxTime, engine } from '@dcl/sdk/ecs'
+import { InputModifier, SkyboxTime, engine } from '@dcl/sdk/ecs'
 import { DUSK_TIME } from './lounge/config'
 import { buildLounge, relabelSystem } from './lounge/lounge3d'
 import { buildTableVisual, tableVisualsSystem } from './lounge/table3d'
@@ -17,6 +17,8 @@ import { setupUi } from './lounge/ui'
 export function main(): void {
   // permanent blue hour: the lounge is lit for the evening (scene.json carries the same time for the World)
   SkyboxTime.create(engine.RootEntity, { fixedTime: DUSK_TIME })
+  // no jumping in the lounge: keeps avatars off the boards and the marble (workshop 3 tip; mobile + desktop)
+  InputModifier.create(engine.PlayerEntity, { mode: InputModifier.Mode.Standard({ disableJump: true }) })
   buildLounge()
   setupPersonalSfx()
   setupMusic()

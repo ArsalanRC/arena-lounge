@@ -73,41 +73,44 @@ def save(path, rgb, alpha):
     os.replace(path + '.tmp.png', path)   # atomic for the preview server
     print('wrote', path)
 
-def gen_panel(path='images/ui/panel-royal.png', w=512, h=512, r=28, rosettes=True):
+def gen_panel(path='images/ui/panel-royal.png', w=1024, h=1024, r=56, rosettes=True):
+    k = w / 512
     sdf = rounded_rect_sdf(w, h, r)
     img = parchment(w, h, 11)
     # darker vignette towards the edge (aged paper)
-    edge = np.clip((-sdf) / 40.0, 0, 1)
+    edge = np.clip((-sdf) / (40.0 * k), 0, 1)
     img = img * (0.86 + 0.14 * edge[..., None])
-    gold_line(img, sdf, -5.0, 6.0)      # outer gold band
-    gold_line(img, sdf, -14.0, 2.0)     # thin inner line
+    gold_line(img, sdf, -5.0 * k, 6.0 * k)      # outer gold band
+    gold_line(img, sdf, -14.0 * k, 2.0 * k)     # thin inner line
     if rosettes:
-        for cx, cy in ((22, 22), (w - 22, 22), (22, h - 22), (w - 22, h - 22)):
-            rosette(img, cx, cy, 11)
+        for cx, cy in ((22 * k, 22 * k), (w - 22 * k, 22 * k), (22 * k, h - 22 * k), (w - 22 * k, h - 22 * k)):
+            rosette(img, cx, cy, 11 * k)
     alpha = coverage(sdf) * 0.96
     save(path, img, alpha)
 
-def gen_pill(path='images/ui/pill-royal.png', w=512, h=128):
+def gen_pill(path='images/ui/pill-royal.png', w=1024, h=256):
+    k = h / 128
     sdf = rounded_rect_sdf(w, h, h / 2 - 1)
     img = parchment(w, h, 13)
-    edge = np.clip((-sdf) / 24.0, 0, 1)
+    edge = np.clip((-sdf) / (24.0 * k), 0, 1)
     img = img * (0.88 + 0.12 * edge[..., None])
-    gold_line(img, sdf, -4.0, 5.0)
-    gold_line(img, sdf, -11.0, 1.6)
+    gold_line(img, sdf, -4.0 * k, 5.0 * k)
+    gold_line(img, sdf, -11.0 * k, 1.6 * k)
     save(path, img, coverage(sdf) * 0.96)
 
-def gen_button(path='images/ui/button-royal.png', w=256, h=64, r=14):
+def gen_button(path='images/ui/button-royal.png', w=512, h=128, r=28):
+    k = h / 64
     sdf = rounded_rect_sdf(w, h, r)
     yy = np.mgrid[0:h, 0:w][0].astype(np.float64) / h
     # white fill with a soft top gloss (tinted at runtime), gold border with a darker inner shadow line
     img = np.ones((h, w, 3)) * (0.90 + 0.10 * (1 - yy))[..., None]
-    inner = np.clip(-(sdf + 5.5) / 2.0, 0, 1)
+    inner = np.clip(-(sdf + 5.5 * k) / (2.0 * k), 0, 1)
     img = img * (0.92 + 0.08 * inner[..., None])
-    gold_line(img, sdf, -3.0, 4.0)
+    gold_line(img, sdf, -3.0 * k, 4.0 * k)
     save(path, img, coverage(sdf))
 
 if __name__ == '__main__':
     gen_panel()
     gen_pill()
     gen_button()
-    gen_button('images/ui/button-sq-royal.png', 64, 64, 14)
+    gen_button('images/ui/button-sq-royal.png', 128, 128, 28)

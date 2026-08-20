@@ -84,6 +84,29 @@ Source: https://www.youtube.com/watch?v=dWd_RGItkw0 (DCL Regenesis Labs, 48 min)
   last hour; repo must be public at that moment); top 10 may be featured in
   Mobile Discover if the World stays up; maintenance is on the builder.
 
+## 2c. Workshops 2 + 3 digest (read 20 Aug from the captions; raw transcripts in docs/workshops/)
+
+Compliance check against everything they stated:
+- PASS deployed World, public through judging; social/multiplayer; no host needed; desktop not broken.
+- PASS canvas math: only the long axis is fixed at 1600, the short axis varies per phone (~703 iPhone,
+  ~738 Galaxy); our UI anchors bottom/right/centre, nothing measures against 720 (DEBUG_MOBILE_UI only).
+- PASS (applied 20 Aug): UI textures preload invisibly at start (first panel open used to flash white:
+  AssetLoad does not cover UI textures); jumping disabled scene-wide (InputModifier).
+- KNOWN GAP, mobile-only judging risk: the mobile client renders NO scene lights (workshop 2; slated for
+  a later client release). Everything readable must be emissive: rugs/runners/marble/fresco/pads now
+  self-glow. VERIFY on the phone pass: night look readable in a bright room.
+- VERIFY on the phone pass: the explorer chat column reserves ~328/1600 units on the LEFT and cannot be
+  hidden by the scene; the seated phone bottom bar may start left of x 436. If chips hide under chat,
+  shift/centre the bar. Also the bottom-right native action cluster is never subtracted from any UI
+  area; we hideAll while seated, so only unseated UI could collide.
+- Whitelist: iOS Discover hides Worlds until whitelisted (one Discord curation post; only adult content
+  is filtered). Requested 20 Aug. Direct links/QR work regardless.
+- Dates: Show & Tell 28 Aug (optional demo, his call), final troubleshooting 2 Sept explicitly covering
+  GitHub upload; repo flip to public is part of submission, do not leave it for deadline day.
+- Later polish candidates from workshop 3: seated VirtualCamera over the board (0.5-3 s transition),
+  remap the big main action button to interact while seated, 2x UI texture export for devicePixelRatio
+  ~1.5, staged skippable onboarding hints. Workshop 4 (21 Aug, performance budgets) still to read.
+
 ## 3. Names, links, accounts
 
 - Working title: **Arena Lounge** (rename possible; World name follows the NAME bought)
