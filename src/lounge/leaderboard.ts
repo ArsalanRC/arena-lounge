@@ -11,6 +11,7 @@
  * playing people. Everything here degrades to "no board" when the config is
  * empty or the network is down; the game never waits on it.
  */
+import { timers } from '@dcl/sdk/ecs'
 import { signedFetch } from '~system/SignedFetch'
 import { LEADERBOARD } from './config'
 
@@ -89,23 +90,31 @@ export async function refreshLeaderboard(force = false): Promise<void> {
  */
 export async function reportResult(name: string, gameId: string, result: 'win' | 'loss' | 'draw', roundKey: string, opponents: string[]): Promise<void> {
   if (!leaderboardEnabled() || opponents.length === 0) return
-  try {
-    const res = await signedFetch({
-      url: `${LEADERBOARD.url}/functions/v1/report`,
-      init: {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: LEADERBOARD.key },
-        body: JSON.stringify({ name, game: gameId, result, round_key: roundKey, opponents })
-      }
-    })
-    if (!res.ok) throw new Error(`report ${res.status} ${res.body}`)
-    const stats = JSON.parse(res.body) as (MyStats & { confirmed?: boolean }) | null
-    if (stats && typeof stats.wins === 'number') board.me = stats
-    board.version++
-    board.fetchedAt = 0
-    void refreshLeaderboard(true)
-  } catch (e) {
-    console.log('[arena] result report failed', e)
+  // Up to 3 attempts, 9 s apart: a cold function isolate can be rejected by the database with
+  // "JWT issued at future" (its service token races the db clock; seen live 21 Aug), and the
+  // velocity rule needs 8 s+ between rows per address. The confirm window is 10 min, so late
+  // retries still pair up with the opponent's report.
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await signedFetch({
+        url: `${LEADERBOARD.url}/functions/v1/report`,
+        init: {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: LEADERBOARD.key },
+          body: JSON.stringify({ name, game: gameId, result, round_key: roundKey, opponents })
+        }
+      })
+      if (!res.ok) throw new Error(`report ${res.status} ${res.body}`)
+      const stats = JSON.parse(res.body) as (MyStats & { confirmed?: boolean }) | null
+      if (stats && typeof stats.wins === 'number') board.me = stats
+      board.version++
+      board.fetchedAt = 0
+      void refreshLeaderboard(true)
+      return
+    } catch (e) {
+      console.log(`[arena] result report failed (attempt ${attempt})`, e)
+      if (attempt < 3) await new Promise((r) => timers.setTimeout(r as () => void, 9000))
+    }
   }
 }
 

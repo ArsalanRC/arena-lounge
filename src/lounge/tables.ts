@@ -32,6 +32,7 @@ import {
   FLOORS,
   HEARTBEAT_MS,
   NEAR_TABLE_DISTANCE,
+  NEAR_TABLE_DISTANCE_PHONE,
   PLAZA,
   SEAT_PAD_OFFSET,
   SEAT_STALE_MS,
@@ -41,6 +42,7 @@ import {
   type FloorDef,
   type TableDef
 } from './config'
+import { phone } from './device'
 import { getGame } from './games/registry'
 import type { TableGame } from './games/types'
 import {
@@ -662,7 +664,7 @@ function proximitySystem(dt: number): void {
     }
   }
   local.nearDistance = bestD
-  local.nearTableId = bestD <= NEAR_TABLE_DISTANCE ? best : -1
+  local.nearTableId = bestD <= (phone() ? NEAR_TABLE_DISTANCE_PHONE : NEAR_TABLE_DISTANCE) ? best : -1
   if (local.dismissedTableId >= 0 && local.dismissedTableId !== local.nearTableId) local.dismissedTableId = -1
   // elevator pads: stepping on one opens the floor panel, stepping off closes it
   local.floor = floorAt(p.y).id
