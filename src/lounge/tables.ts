@@ -97,7 +97,7 @@ export const local = {
   showMiniBoard: false,
   /** Reader panel: a stele/board's text blown up to readable size (title + body), or null.
    *  `links` adds tappable link buttons (the welcome stele: Decentraland profile + portfolio). */
-  infoPanel: null as { title: string; body: string; links?: Array<{ label: string; url: string }> } | null,
+  infoPanel: null as { title: string; body: string; host?: boolean; links?: Array<{ label: string; url: string }> } | null,
   /** Whether the "How to play" panel is open, which game tab it shows, and whether the language grid is expanded. */
   helpOpen: false,
   helpGame: '',

@@ -28,6 +28,7 @@ import { openExternalUrl } from '~system/RestrictedActions'
 import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
 import { phone } from './device'
+import { hostCard } from './profilecard'
 import { ATLAS, uiSprite, type SpriteName } from './atlas'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
@@ -690,7 +691,15 @@ function InfoPanel() {
       uiBackground={{ color: Color4.create(0, 0, 0, 0.5) }}
     >
       <Panel width={mobile ? 860 : 560} place={{}} padding={20}>
-        <Text value={info.title} size={T.title} margin={{ top: 10, bottom: 4 }} />
+        <Text value={info.host ? hostCard.name : info.title} size={T.title} margin={{ top: 10, bottom: 4 }} />
+        {info.host && (
+          <UiEntity uiTransform={{ width: mobile ? 700 : 456, height: 128, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: { top: 4 } }}>
+            <UiEntity uiTransform={{ width: 116, height: 116, margin: { right: 14 }, flexShrink: 0 }} uiBackground={{ texture: { src: 'images/host.jpg' }, textureMode: 'stretch' }} />
+            {hostCard.about !== '' && (
+              <UiEntity uiTransform={{ width: mobile ? 540 : 316, height: 'auto' }} uiText={{ value: hostCard.about, fontSize: 17, color: UI.muted, textAlign: 'middle-left' }} />
+            )}
+          </UiEntity>
+        )}
         <UiEntity
           uiTransform={{ width: mobile ? 756 : 456, height: 'auto', margin: { top: 6, bottom: 10 } }}
           uiText={{ value: info.body, fontSize: mobile ? 26 : 22, color: UI.text, textAlign: 'middle-center' }}
