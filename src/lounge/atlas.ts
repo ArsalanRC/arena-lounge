@@ -9,7 +9,7 @@
  * rows from the top, so v is flipped here. Corner order for the client is
  * bottom-left, bottom-right, top-right, top-left.
  */
-import { MeshRenderer, type Entity } from '@dcl/sdk/ecs'
+import { Material, MeshRenderer, type Entity } from '@dcl/sdk/ecs'
 import { ATLAS_SIZE, SPRITES, type SpriteName } from './atlas.gen'
 import { phone } from './device'
 
@@ -27,6 +27,14 @@ export function spriteRect(name: SpriteName): [number, number, number, number] {
 export function spriteUvs(name: SpriteName): number[] {
   const [u0, v0, u1, v1] = spriteRect(name)
   return [u0, v0, u1, v0, u1, v1, u0, v1]
+}
+
+/** Texture for a 3D sprite mesh: the atlas on desktop; on phones the sprite's own file,
+ * because the mobile client ignores custom uvs on plane/box meshes just like on UI
+ * backgrounds (every placed mark rendered the WHOLE sheet in miniature, seen live 21 Aug).
+ * Views pass the SAME name here and to spritePlane/spriteBox. */
+export function spriteTexture(name: SpriteName): ReturnType<typeof Material.Texture.Common> {
+  return Material.Texture.Common({ src: phone() ? `images/ui/sprites/${name}.png` : ATLAS })
 }
 
 /** Plane showing the sprite on both faces (the back face mirrored so it reads the same from behind). */

@@ -6,7 +6,7 @@
  */
 import { EasingFunction, Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { CheckersGameState, CheckersPiece } from '../../engine/checkers'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -43,9 +43,10 @@ function spriteFor(p: CheckersPiece): SpriteName {
 }
 
 function pieceMaterial(e: Entity, p: CheckersPiece, glow: boolean): void {
-  spriteBox(e, spriteFor(p))
+  const s3d = spriteFor(p)
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,

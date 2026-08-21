@@ -5,7 +5,7 @@
  */
 import { EasingFunction, Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { SnakesLaddersGameState } from '../../engine/snakesladders'
 import { squareToCoords } from '../../engine/snakesladders'
 import type { PlayerColor } from '../../engine/types'
@@ -34,9 +34,10 @@ export function squareLocal(square: number, side: 0 | 1): Vector3 {
 }
 
 function pieceMaterial(e: Entity, side: 0 | 1): void {
-  spriteBox(e, SNAKES_SPRITES[side])
+  const s3d = SNAKES_SPRITES[side]
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,

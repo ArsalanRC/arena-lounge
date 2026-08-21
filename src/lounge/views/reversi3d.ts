@@ -6,7 +6,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox } from '../atlas'
+import { spriteBox, spriteTexture } from '../atlas'
 import type { ReversiGameState } from '../../engine/reversi'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -36,9 +36,10 @@ function boardPlane(parent: Entity, z: number): void {
 }
 
 function discMaterial(e: Entity, v: number, glow: boolean): void {
-  spriteBox(e, v === 1 ? 'disc-dark' : 'disc-light')
+  const s3d = v === 1 ? 'disc-dark' : 'disc-light'
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,

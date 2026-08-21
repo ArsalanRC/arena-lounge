@@ -6,7 +6,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color4, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import { SYMBOL_POOL, type MatchPairsGameState } from '../../engine/matchpairs'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -67,9 +67,10 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
     for (let i = 0; i < ROWS * COLS; i++) {
       const sym = engine.addEntity()
       Transform.create(sym, { parent: root, position: cellLocal(i), scale: Vector3.create(CELL * 0.6, CELL * 0.6, HALF_T * 2 + 0.014) })
-      spriteBox(sym, SHAPE_SPRITES[0])
+      const s3d = SHAPE_SPRITES[0]
+      spriteBox(sym, s3d)
       Material.setPbrMaterial(sym, {
-        texture: Material.Texture.Common({ src: ATLAS }),
+        texture: spriteTexture(s3d),
         albedoColor: SYMBOL_TINTS[0],
         transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
         alphaTest: 0.5,
@@ -102,9 +103,10 @@ export function createMatchPairsView(root: Entity, onAction: (a: PairsAction) =>
     const symbols = symbolPool.get()
     VisibilityComponent.getMutable(symbols[i]).visible = mode !== 0
     if (mode !== 0) {
-      spriteBox(symbols[i], symbolSprite(sym))
+      const s3d2 = symbolSprite(sym)
+      spriteBox(symbols[i], s3d2)
       Material.setPbrMaterial(symbols[i], {
-        texture: Material.Texture.Common({ src: ATLAS }),
+        texture: spriteTexture(s3d2),
         albedoColor: symbolTint(sym),
         transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
         alphaTest: 0.5,
