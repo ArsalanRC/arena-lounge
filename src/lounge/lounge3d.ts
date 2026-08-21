@@ -458,9 +458,13 @@ export function buildLounge(): void {
   // the plaza: a big warm rug, a tree in the middle as the landmark, four
   // benches facing in, lamps at the corners
   rug(PLAZA, 9.5, Color4.fromHexString('#e3c9a3ff'), 0.008, Color4.fromHexString('#ffd27aff'))
-  // plaza centre: in the palace a Roman three-tier marble fountain; in the lounge the potted tree
-  if (PALACE) prop('models/statue-palace.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
-  else prop('models/plazatree.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, true)
+  // plaza centre: in the palace a Roman three-tier marble fountain; in the lounge the potted tree.
+  // No visible-mesh collider here: 1.7k collider triangles in the single busiest walking spot is
+  // exactly workshop 4's tanks-the-phone anti-pattern; a primitive cylinder does the same job.
+  prop(PALACE ? 'models/statue-palace.glb' : 'models/plazatree.glb', Vector3.create(PLAZA.x, 0, PLAZA.z), 0, 1, false)
+  const centrepiece = engine.addEntity()
+  Transform.create(centrepiece, { position: Vector3.create(PLAZA.x, 1.25, PLAZA.z), scale: Vector3.create(3.2, 2.5, 3.2) })
+  MeshCollider.setCylinder(centrepiece, 0.5, 0.5)
   for (const [x, z] of [[PLAZA.x - 3.6, PLAZA.z + 2.6], [PLAZA.x + 3.6, PLAZA.z + 2.6], [PLAZA.x - 3.6, PLAZA.z - 2.6], [PLAZA.x + 3.6, PLAZA.z - 2.6]]) {
     bench(Vector3.create(x, 0, z), PLAZA)
   }

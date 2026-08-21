@@ -84,7 +84,7 @@ Source: https://www.youtube.com/watch?v=dWd_RGItkw0 (DCL Regenesis Labs, 48 min)
   last hour; repo must be public at that moment); top 10 may be featured in
   Mobile Discover if the World stays up; maintenance is on the builder.
 
-## 2c. Workshops 2 + 3 digest (read 20 Aug from the captions; raw transcripts in docs/workshops/)
+## 2c. Workshops 2 + 3 + 4 digest (read 20/21 Aug from the captions; raw transcripts in docs/workshops/)
 
 Compliance check against everything they stated:
 - PASS deployed World, public through judging; social/multiplayer; no host needed; desktop not broken.
@@ -108,7 +108,35 @@ Compliance check against everything they stated:
   GitHub upload; repo flip to public is part of submission, do not leave it for deadline day.
 - Later polish candidates from workshop 3: seated VirtualCamera over the board (0.5-3 s transition),
   remap the big main action button to interact while seated, 2x UI texture export for devicePixelRatio
-  ~1.5, staged skippable onboarding hints. Workshop 4 (21 Aug, performance budgets) still to read.
+  ~1.5, staged skippable onboarding hints.
+
+Workshop 4 (21 Aug, performance + VFX, Kirk + Manu, last of the series; ws4-transcript.txt):
+- Judged on phones: measure on a REAL device (fresh launch -> stats icon -> scrollable scene-limits
+  panel) and FORCE the graphics profile HIGH (the adaptive system silently downgrades on heat/low
+  FPS, so defaults hide the worst case). Their closing line: measure, measure, measure.
+- Budgets in the docs table are soft warning/block lines but exceeding them costs real FPS. Phone
+  reality: shared CPU/GPU memory, thermal throttling, transparency is brutal, assume 4G.
+- Demo dungeon fixed over 4 public PRs: dedupe byte-identical assets (they had 136 copies), cap
+  textures at 1024 (the publish pipeline downsizes to 1024 anyway, bigger uploads are pure waste),
+  merge meshes (2500 -> 70), throttle per-frame systems + never allocate in loops, room visibility,
+  streaming islands, and COLLIDERS above all: one complex mesh collider can tank a whole scene
+  (their story: a tree with per-leaf colliders); axis-aligned box colliders, none on decor props.
+  Publish adds LODs + asset bundles server-side.
+- VFX: prefer emission over lights, few/low-count particles, UV tricks; everything has a cost.
+- Nico: "scene optimizer" CLI (dedupe, strip unused textures, cap sizes) plus the desktop-Explorer
+  MCP + AI hotspot flow (our tools/dev harness IS that flow); a mobile MCP is planned.
+Compliance, checked against Arena Lounge 21 Aug:
+- PASS by construction: merged generator meshes, zero particles, emissive-first night look, alpha
+  TEST (not blend) on carpets/rugs, no duplicate assets, one compact tower (no streaming needed),
+  5 s sync heartbeats.
+- FIXED the same evening: the plaza fountain/tree carried its 1.7k-triangle visible mesh as a
+  PHYSICS collider in the busiest walking spot (their exact anti-pattern) -> primitive cylinder;
+  the three fresco jpgs were 2048^2 -> now 1024^2 (deploy 3.1 MB -> 1.0 MB).
+- WATCH, measure before optimizing: the per-file mobile sprites (PR #65/#68) trade one atlas for
+  up to ~36 small textures on phones; texture count + draw calls may push the soft limits at busy
+  tables. Next phone pass reads the stats panel with the profile forced high; per-game mini-sheets
+  only if the numbers demand it. Further candidates: box colliders for pavilions/planters, the
+  glass facade's transparency.
 
 ## 3. Names, links, accounts
 
@@ -340,8 +368,10 @@ version works as well", 16 Aug 11:30):
    leaderboard points live; 22:20: tap-to-read steles + Decentraland-profile
    button. 21 Aug evening: two-identity round DONE (confirm race found + fixed,
    migration 006; first board rows live), mobile pass DONE (sprites fixed via
-   per-file fallback, both 2c verifications PASS). Left: workshop 4 digest when
-   the recording lands, README phone screenshots, submission 1 to 3 Sept.) Next: the mobile pass on the live World (controller bar with the
+   per-file fallback, both 2c verifications PASS), workshop 4 digested + its two
+   scene actions applied (fountain collider, fresco downsizing). Left: his
+   stats-panel reading on the phone with graphics forced HIGH, README phone
+   screenshots, submission 1 to 3 Sept.) Next: the mobile pass on the live World (controller bar with the
    new client UI, elevator panel, seat cards, help panel tabs, suggestion box typing
    on the phone keyboard, music toggle); everything through PR #62 deployed 20 Aug
    20:22. NEXT: his phone pass (two verifications from spec 2c: emissive-only look
@@ -518,6 +548,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-21 23:10 workshop 4 digest + perf pass (PR #69): recording digested into 2c (ws4-transcript.txt; performance budgets are soft but real, measure on device with graphics forced HIGH, colliders are the classic scene-killer, textures cap at 1024 in the publish pipeline). Two scene actions applied the same evening: the plaza fountain/tree no longer uses its 1.7k-triangle visible mesh as the physics collider (primitive cylinder instead, in the busiest walking spot of the World) and the three fresco jpgs went 2048^2 -> 1024^2 (deploy 3.1 MB -> 1.0 MB, zero mobile-visual cost). Watch item recorded: per-file mobile sprites vs texture/draw-call budgets, measure next phone pass before optimizing further
 
 - 2026-08-21 22:55 mobile 3D sprites DEPLOYED (PR #68 merged, his signature): the uv gap goes deeper than UI, the mobile client also ignores custom uvs on PLANE/BOX MESHES, so every 3D mark a player placed drew the whole atlas sheet in miniature (his screenshots: "weird icons where the other player clicked" on the upright TTT board). New spriteTexture(name) in atlas.ts (atlas on desktop, the sprite's own file on phones); all 13 uv-sprite sites across the 13 game views now hoist the sprite name and pass it to both spritePlane/spriteBox AND the material texture (assignment re-runs both, so promotions/kings/reassignments stay correct). Chat-overlap verdict recorded: expanded chat covers only the seated panel's score text, every action stays clear; no scene API to detect chat state, accepted as is
 
