@@ -8,7 +8,7 @@
  */
 import { ColliderLayer, Entity, Font, InputAction, Material, MaterialTransparencyMode, MeshCollider, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { BackgammonColor, BackgammonGameState } from '../../engine/backgammon'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -53,9 +53,10 @@ function barLocal(color: BackgammonColor, k: number): Vector3 {
 }
 
 function discMaterial(e: Entity, color: BackgammonColor, glow: boolean): void {
-  spriteBox(e, color === 'white' ? BG_SPRITES[0] : BG_SPRITES[1])
+  const s3d = color === 'white' ? BG_SPRITES[0] : BG_SPRITES[1]
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,

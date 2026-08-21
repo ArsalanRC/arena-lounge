@@ -10,7 +10,7 @@
  */
 import { Billboard, BillboardMode, EasingFunction, Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { LudoGameState } from '../../engine/ludo'
 import { positionToXY } from '../../engine/ludo'
 import type { PlayerColor } from '../../engine/types'
@@ -37,9 +37,10 @@ export function cellLocal(row: number, col: number, jitter = 0): Vector3 {
 }
 
 function pieceMaterial(e: Entity, color: PlayerColor, glow: boolean): void {
-  spriteBox(e, LUDO_SPRITES[LUDO_COLORS.indexOf(color)])
+  const s3d = LUDO_SPRITES[LUDO_COLORS.indexOf(color)]
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.4,

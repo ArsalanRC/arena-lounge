@@ -8,7 +8,7 @@
  */
 import { EasingFunction, Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { ChessGameState, ChessPiece } from '../../engine/chess'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -40,9 +40,10 @@ export function chessSquareLocal(sq: number): Vector3 {
 }
 
 function pieceMaterial(e: Entity, sprite: SpriteName, glow: boolean): void {
-  spriteBox(e, sprite)
+  const s3d = sprite
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.5,

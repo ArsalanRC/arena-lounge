@@ -5,7 +5,7 @@
  */
 import { Entity, Material, MaterialTransparencyMode, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox } from '../atlas'
+import { spriteBox, spriteTexture } from '../atlas'
 import type { TTTGameState } from '../../engine/tictactoe'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -30,9 +30,10 @@ function cellLocal(i: number): Vector3 {
 
 function markMaterial(e: Entity, mark: 'X' | 'O', glow: boolean): void {
   const tint = mark === 'X' ? TTT_COLORS[0] : TTT_COLORS[1]
-  spriteBox(e, mark === 'X' ? 'mark-x' : 'mark-o')
+  const s3d = mark === 'X' ? 'mark-x' : 'mark-o'
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     albedoColor: tint,
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,

@@ -7,7 +7,7 @@
  */
 import { Entity, Font, Material, MaterialTransparencyMode, MeshRenderer, TextAlignMode, TextShape, Transform, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Color3, Color4, Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spriteBox, type SpriteName } from '../atlas'
+import { spriteBox, spriteTexture, type SpriteName } from '../atlas'
 import type { DiceFace } from '../../engine/diceroyale'
 import { PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -35,9 +35,10 @@ export interface DuelView {
 }
 
 function dieMaterial(e: Entity, face: DiceFace, held: boolean): void {
-  spriteBox(e, `die-${face}` as SpriteName)
+  const s3d = `die-${face}` as SpriteName
+  spriteBox(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.5,

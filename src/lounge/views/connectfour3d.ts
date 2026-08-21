@@ -8,7 +8,7 @@
  */
 import { EasingFunction, Entity, Material, MaterialTransparencyMode, MeshRenderer, Transform, Tween, VisibilityComponent, engine } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
-import { ATLAS, spritePlane } from '../atlas'
+import { spritePlane, spriteTexture } from '../atlas'
 import { COLS, ROWS, type ConnectFourGameState } from '../../engine/connectfour'
 import { EMISSIVE_RED, EMISSIVE_YELLOW, PALETTE } from '../config'
 import type { View3DHandle } from '../games/types'
@@ -58,9 +58,10 @@ function boardPlane(parent: Entity, z: number): void {
  * gap between the two frame planes, so they are only ever seen face-on.
  */
 function applyDiscMaterial(e: Entity, v: number, glow: boolean): void {
-  spritePlane(e, v === 1 ? 'disc-yellow' : 'disc-red')
+  const s3d = v === 1 ? 'disc-yellow' : 'disc-red'
+  spritePlane(e, s3d)
   Material.setPbrMaterial(e, {
-    texture: Material.Texture.Common({ src: ATLAS }),
+    texture: spriteTexture(s3d),
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_TEST,
     alphaTest: 0.5,
     roughness: 0.5,
