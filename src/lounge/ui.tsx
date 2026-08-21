@@ -27,7 +27,7 @@ import { Color4 } from '@dcl/sdk/math'
 import { openExternalUrl } from '~system/RestrictedActions'
 import ReactEcs, { Input, ReactEcsRenderer, UiEntity, type UiTransformProps } from '@dcl/sdk/react-ecs'
 import { isStateSyncronized } from '@dcl/sdk/network'
-import { isMobile } from '@dcl/sdk/platform'
+import { phone } from './device'
 import { ATLAS, uiSprite, type SpriteName } from './atlas'
 import { DEBUG_MOBILE_UI, FLOORS, TURN_LIMIT_MS, UI } from './config'
 import { botSettings } from './games/botSettings'
@@ -74,10 +74,7 @@ export function setupUi(): void {
   ReactEcsRenderer.setUiRenderer(LoungeUi, size)
 }
 
-/** True on the phone client (or when the phone layout is being emulated). */
-function phone(): boolean {
-  return DEBUG_MOBILE_UI || isMobile()
-}
+
 
 // ---------------------------------------------------------------- tokens
 
@@ -285,6 +282,8 @@ function visibleTableCard(): Table | undefined {
   if (local.elevatorOpen) return undefined
   const t = local.nearTableId >= 0 ? getTable(local.nearTableId) : undefined
   if (!t || !me.ready || mySeatAt(t) || local.dismissedTableId === t.def.id) return undefined
+  // a full table has nothing to join: no card (Arsalan, phone pass 21 Aug)
+  if (occupiedSeats(t).length >= t.seats) return undefined
   return t
 }
 

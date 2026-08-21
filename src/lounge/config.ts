@@ -189,6 +189,7 @@ export const BOT_THINK_MS = 700 // small delay so the bot feels like a player
 export const AUTO_STAND_DISTANCE = 7 // metres from the table before auto-stand
 export const AUTO_STAND_AFTER_MS = 8_000
 export const NEAR_TABLE_DISTANCE = 4.5 // metres: shows the table UI / seat buttons
+export const NEAR_TABLE_DISTANCE_PHONE = 3.0 // phone: the card covers half the screen, so it must not chase players walking past (Arsalan, 21 Aug)
 export const AFK_MS = 150_000 // idle at a table (when it is on you to act) frees the seat
 
 /** Distance from a table centre to each seat pad centre (local Z). */
