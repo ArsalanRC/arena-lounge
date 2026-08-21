@@ -32,6 +32,7 @@ import { BUILT_GAMES, ELEVATORS, FLOORS, LIGHTS, LOUNGE_MAX, LOUNGE_MIN, LOUNGE_
 import { GAME_NAMES, getGame } from './games/registry'
 import { localeInfo, t as L, uiLang } from './i18n'
 import { local } from './tables'
+import { HOST_ADDRESS, loadHostCard } from './profilecard'
 import { board, leaderboardEnabled, leaderboardTicker } from './leaderboard'
 import { feedbackEnabled } from './feedback'
 
@@ -337,10 +338,12 @@ function welcomeBoard(x: number, z: number): void {
   // tap -> reader panel with BOTH profile links (Arsalan 20 Aug: Decentraland profile AND
   // the portfolio underneath; address = the World owner wallet, verified via /permissions)
   pointerEventsSystem.onPointerDown({ entity: e, opts: { button: InputAction.IA_POINTER, hoverText: 'ArsalanRC', maxDistance: 12 } }, () => {
+    loadHostCard() // live name + about, shown inside the panel: no browser jump needed
     local.infoPanel = {
       title: 'ArsalanRC',
       body: 'Hi, welcome to Arena Lounge!\nBuilt with love by ArsalanRC (ArsalanRC.dcl.eth)\n\nGL & HF!',
-      links: [{ label: 'Decentraland profile', url: 'https://decentraland.org/profile/accounts/0x3451a1e45b5f6b54c3c6a65d29db2584a53e5e9f' }]
+      host: true,
+      links: [{ label: 'Full profile (browser)', url: `https://decentraland.org/profile/accounts/${HOST_ADDRESS}` }]
     }
   })
   // museum label on the stele base: the ceiling artworks' visible credit (details in

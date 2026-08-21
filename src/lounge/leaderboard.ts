@@ -88,7 +88,7 @@ export async function refreshLeaderboard(force = false): Promise<void> {
  * `roundKey` = "<table>:<round>:<dealtAt>" (identical on every client of that round),
  * `opponents` = the other human addresses of the round. Refreshes the board afterwards. Never throws.
  */
-export async function reportResult(name: string, gameId: string, result: 'win' | 'loss' | 'draw', roundKey: string, opponents: string[]): Promise<void> {
+export async function reportResult(name: string, gameId: string, result: 'win' | 'loss' | 'draw', roundKey: string, opponents: string[], reconfirm = true): Promise<void> {
   if (!leaderboardEnabled() || opponents.length === 0) return
   // Up to 3 attempts, 9 s apart: a cold function isolate can be rejected by the database with
   // "JWT issued at future" (its service token races the db clock; seen live 21 Aug), and the
@@ -110,6 +110,12 @@ export async function reportResult(name: string, gameId: string, result: 'win' |
       board.version++
       board.fetchedAt = 0
       void refreshLeaderboard(true)
+      // unconfirmed = the partner's report may still be in flight; one more pass 12 s later
+      // re-runs the server's confirm scan (the insert is idempotent, and 12 s clears the 8 s
+      // velocity rule). The advisory lock in migration 006 makes this a rare path.
+      if (reconfirm && stats && stats.confirmed !== true) {
+        timers.setTimeout(() => void reportResult(name, gameId, result, roundKey, opponents, false), 12_000)
+      }
       return
     } catch (e) {
       console.log(`[arena] result report failed (attempt ${attempt})`, e)
