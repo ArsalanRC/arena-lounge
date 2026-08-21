@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-18 08:50 (Europe/Berlin), leaderboard live on the World
+Last update: 2026-08-21 23:20 (Europe/Berlin). Live World runs PR #69: weighted+race-fixed leaderboard verified end to end, all known mobile rendering defects fixed (UI + 3D sprites per-file on phones), in-app profile card, new cover art, workshop 4 perf pass (fountain collider, 1024 frescos). Six signed deploys on 21 Aug.
 
 ## 1. What this is
 
@@ -335,6 +335,15 @@ version works as well", 16 Aug 11:30):
 - Docs: README.md, docs/DEPLOY.md, docs/SUBMISSION.md (draft), CLAUDE.md.
 
 ### 4b. Next up (in order)
+
+0. PLAN FOR 22 AUG (his words, 21 Aug 23:20): (a) mobile re-test on the current
+   build: verify 3D board sprites on the phone, then the workshop-4 homework,
+   stats panel with graphics profile forced HIGH, report the numbers (decides
+   whether the per-file sprites need per-game mini-sheets); (b) README refresh
+   + phone screenshots (landing page gets them too); (c) after that the
+   submission window 1 to 3 Sept: re-measure docs/SUBMISSION.md numbers, flip
+   the repo public, DoraHacks form, restore the portfolio arena-lounge page
+   from docs/landing/ per its README.
 
 1. Arsalan: reload the phone build, walk the plaza, try every corner, send
    screenshots (the mobile controller layout has never been seen by Claude).
