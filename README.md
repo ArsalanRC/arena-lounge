@@ -3,7 +3,7 @@
 **Live World:** [arenalounge.dcl.eth](https://decentraland.org/jump/?realm=arenalounge.dcl.eth) (open on a phone with the Decentraland app installed, or on desktop).
 
 A game lounge for Decentraland, built for phones first. Walk in under the
-twisted tower, pick a corner, take a seat, and play Four in a Row, Dot Lines,
+marble palace tower, pick a corner, take a seat, and play Four in a Row, Dot Lines,
 Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon,
 Ludo, Super Tic Tac Toe, Snakes & Ladders, Sea Strike or a Dice Royale duel
 against a friend or the house bot. Every table is shared: whoever is in the World sees
@@ -14,12 +14,12 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/tower-night.jpg" alt="The tower at night: a woven lattice with beacon lights, glowing rims and rug rings, the game room and the rooftop terrace" /></td>
-    <td width="50%"><img src="docs/screenshots/lounge.jpg" alt="Arrival at night: string lights, the plaza tree, the corners and the game room above" /></td>
+    <td width="50%"><img src="docs/screenshots/keyart.jpg" alt="Arena Lounge key art: the marble palace tower with brass ribs and string lights under a purple night sky" /></td>
+    <td width="50%"><img src="docs/screenshots/phone-entrance.jpg" alt="iPhone capture at the entrance: the neon marquee, the red carpet and the nave fresco through the arch" /></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/connect-four.jpg" alt="Seated at Four in a Row in first person, controller docked right" /></td>
-    <td width="50%"><img src="docs/screenshots/how-to-play.jpg" alt="How to play panel with the language picker" /></td>
+    <td width="50%"><img src="docs/screenshots/phone-tictactoe.jpg" alt="iPhone capture seated at Tic Tac Toe: parchment controller bar, crisp marks, a won round" /></td>
+    <td width="50%"><img src="docs/screenshots/game-room.jpg" alt="The game room floor with its corners and tables" /></td>
   </tr>
 </table>
 
@@ -40,17 +40,19 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
   facing the board, in first person. *Stand up* is always one tap away.
 - **One step to change floors.** Stand on an elevator pad and a panel offers
   Lounge / Game room / Rooftop; a tap teleports you there. No stairs.
-- **Nothing heavy to download.** Sixteen small GLBs written by a Python
-  script (tower, glass facade, neon marquee, elevator shafts, furniture; 1.8 MB
-  together), procedural textures (about 1 MB) and tiny synthesised sounds.
-  Twenty-eight tables on four floors, ~510 entities idle (piece pools exist only
-  while a round runs), ~59k triangles on a 3x3 World; the production script is
-  0.9 MB (0.25 MB gzipped), so it loads in seconds on 4G.
-- **Safe-area aware, no hover states, no tiny targets, no rounded-corner CSS
-  (unsupported on mobile), no particles.** The night look is carried by
-  emissive materials (beacons, string lights, neon, glowing rims) plus a
-  handful of point lights the phone is free to skip; the sky is fixed at 04:30
-  so the lighting is the same for everyone, always.
+- **Nothing heavy to download.** Small generated GLBs written by Python
+  scripts (tower, facade, marquee, elevator shafts, furniture), compact
+  procedural textures and tiny synthesised sounds; the production script is
+  under 1 MB, so it loads in seconds on 4G.
+- **Measured, not guessed.** On a real iPhone with graphics forced to maximum
+  the stats panel reads **100% performance** at every spot tested: 116k of
+  1.2M triangles, ~850 of 6K entities, 49 of 500 textures, 21.7 MB content.
+  Twenty-eight tables on four floors.
+- **Safe-area aware, no hover states, no tiny targets, no particles.** The
+  night look is carried by emissive materials (string lights, neon, glowing
+  rims, self-lit rugs and frescoes), so it reads identically on the mobile
+  client, which renders no scene lights at all; the sky is fixed at a clean
+  22:00 night so the lighting is the same for everyone, always.
 
 ## Why it is social
 
@@ -134,7 +136,7 @@ from `applyMove`. Bot moves are computed by the human sharing the table.
 
 - [x] Fourteen games from the same engine family: Four in a Row, Dot Lines, Reversi, Tic Tac Toe, Match Pairs, Checkers, Chess, Croc Snap, Backgammon, Ludo (two to four players at one table), Super Tic Tac Toe, Snakes & Ladders, Sea Strike, Dice Royale duel
 - [ ] Card games (hidden hands) if wanted: Color Clash, Card Lines
-- [x] The tower: game room, sky room and rooftop terrace, elevator pads, night lighting (fixed 04:30 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights), curved neon marquee over the entrance, walkable runner rings on every floor
+- [x] The tower: game room, sky room and rooftop terrace, elevator pads, night lighting (fixed 22:00 skybox, string lights, beacons, glowing rims and rug rings, a few real point lights), curved neon marquee over the entrance, walkable runner rings on every floor
 - [x] Sound effects (drop, win chime, your-move ding)
 - [x] How-to-play panel in 19 languages (rules from Game Arena)
 - [x] Lounge UI (cards, controller, toasts, signs, hints) in EN / DE / ES / PT / FR, other languages fall back to English

@@ -40,13 +40,14 @@ tables become natural gathering points: play, watch, take the next seat.
   the board in first person; "Stand up" is always one tap away. One step
   onto an elevator pad opens the floor picker; no stairs.
 - Everything is generated: sixteen small GLBs written by a Python script
-  (tower, facade, neon marquee, elevator shafts, furniture, 1.8 MB together),
-  procedural textures (about 1 MB) and tiny synthesised sounds. Idle scene on
-  a 3x3 World: ~510 entities, 59k triangles, about twenty textures; the
-  production script is 0.9 MB (0.25 MB gzipped), so it loads in seconds on
+  (tower, facade, neon marquee, elevator shafts, furniture),
+  procedural textures and tiny synthesised sounds. Measured on a real iPhone
+  at forced-maximum graphics (22 Aug 2026): 100% performance everywhere,
+  116.2k / 1.2M triangles, ~850 / 6K entities, 49 / 500 textures, 533 / 1.5K
+  colliders, 21.7 MB content, ~950 MB / 2 GB memory; the
+  production script is under 1 MB (0.25 MB gzipped), so it loads in seconds on
   4G. Game pieces are pooled and only exist while a table is in play. The
   chess bot searches under a time budget so a slow phone never freezes.
-  (Re-measure entities / triangles / textures right before submitting.)
 - Safe-area aware UI, no hover states, no tiny targets, no particles. The
   night look is carried by emissive materials (beacons, string lights, neon)
   with a handful of point lights the phone is free to skip.
