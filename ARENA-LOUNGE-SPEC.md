@@ -409,9 +409,9 @@ version works as well", 16 Aug 11:30):
 9. Later: Multiplayer Server for a persistent leaderboard on the rooftop,
    tournaments (see sections 6 and 10).
 
-Not done: DoraHacks form (World is live, repo still private: flip it public
-right before submitting), phone screenshots for the README, two-player test on
-the deployed World.
+ALL DONE 22 Aug 2026: submitted on DoraHacks (Under Review), repo public,
+portfolio page restored, README carries phone screenshots, two-player test
+verified live incl. the points pipeline.
 
 ## 5. Decisions log
 
@@ -557,6 +557,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-22 11:27 SUBMITTED to DoraHacks (BUIDL "Arena Lounge", track Friendzone, status Under Review; 13 days before deadline, inside the first-50 voucher window). He chose to submit early instead of 1-2 Sept (secrecy consciously waived: submitting IS the reveal). Same morning, in order: repo flipped PUBLIC via ghrc (MIT verified, anonymous 200; hygiene sweep was clean), portfolio arena-lounge page RESTORED from the vault (portfolio PR #42; hero + 28-tables copy verified live), 480x480 BUIDL logo generated from the marquee art (Downloads), Vision cut to 249 chars for the 256 limit, Details = full markdown with embedded live hero + phone capture, questionnaire answered (wallet 0x3451...5e9f, first DCL World, per-file-sprite uv story as biggest blocker, materials-103-percent disclosure). REMAINING for the buildathon: keep the World up through 11 Sept judging, X announcement post (next), Show & Tell 28 Aug 20:00 his time (optional), winners 13 Sept
 
 - 2026-08-22 midday 2: LANDING REFRESH in the vault (PR #73, docs only; publishes at submission). New hero re-stitched on the live palace (his OK for the camera, avatar parked out of frame; v2 pose (24,2.9,-3.2)->(24,7.2,12) keeps the fountain in frame) to docs/landing/screenshots/hero-3840+1920. Six fresh cards: entrance (steles+fountain+fresco), tower-overview (garden view), lounge (plaza), game-room (oculus ring), ludo-table, rooftop (the LIVE leaderboard showing Mikasa 4 pts, extra production proof of the points pipeline), plus the two phone captures. index.html: 20 surgical swaps EN+DE natively (28 tables, palace wording, fountain not tree, points-leaderboard card + terrace band "live", on-iOS-Discover card replaces the languages card, languages folded into the seated card); old connect-four/how-to-play/rooftop-night pruned. Restore day stays: copy folder to the portfolio repo per the vault README
 
