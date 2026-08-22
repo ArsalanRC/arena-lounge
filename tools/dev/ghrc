@@ -1,6 +1,6 @@
 #!/bin/bash
 # gh as ArsalanRC, cwd-independent: enter game-platform (its .envrc holds GH_TOKEN), load direnv, then run gh inside arena-lounge
-cd /Users/arsalankhadim/PR-PROJECT/game-platform || exit 1
+cd "$HOME/PR-PROJECT/game-platform" || exit 1
 eval "$(direnv export bash 2>/dev/null)"
 cd /Users/arsalankhadim/PR-PROJECT/arena-lounge || exit 1
 exec gh "$@"
