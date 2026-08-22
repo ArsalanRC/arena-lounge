@@ -24,7 +24,7 @@ and stay public; nothing gets published beyond that without asking. The
 the lounge now has the tower with a game room and a rooftop, and he wants
 more games (Chess first) and a bold exterior.
 
-Last update: 2026-08-21 23:20 (Europe/Berlin). Live World runs PR #69: weighted+race-fixed leaderboard verified end to end, all known mobile rendering defects fixed (UI + 3D sprites per-file on phones), in-app profile card, new cover art, workshop 4 perf pass (fountain collider, 1024 frescos). Six signed deploys on 21 Aug.
+Last update: 2026-08-22 12:05 (Europe/Berlin). SUBMITTED to DoraHacks (Under Review, track Friendzone). Repo PUBLIC, portfolio page live, World must stay up through 11 Sept judging. Left: X + Discord posts (staged), optional Show & Tell 28 Aug, winners 13 Sept.
 
 ## 1. What this is
 
@@ -557,6 +557,8 @@ cleanup + help tabs; 15:05 plaza layout with six corners; 15:25 Tic Tac Toe;
 input); 16:40 texture trim; 16:55 handoff (this file, tools/dev).
 
 ## 9. Changelog
+
+- 2026-08-22 12:05 post-submission polish: the seated phone capture predated the sprite fix and showed the atlas glitch on the background board (he caught it before the X post went out). Replaced everywhere under the SAME filenames so the live page and the DoraHacks Details hotlink healed in place (PR #74 + portfolio PR #43, Pages verified byte-for-byte): new capture = seated at Chess (Table 13) in the phone layout via the desktop client's DEBUG_MOBILE_UI canvas (flag + strip tint flipped locally only and reverted; avatar driven with his go-ahead: move_to + robot-token click_entity; auto-stand by walking off re-armed the round after the 60 s timer once fed a round to the bot). Wording now says "phone layout", not "iPhone capture". X post staged on his clipboard + 3 images in Downloads; Discord post drafted, waiting for the tweet
 
 - 2026-08-22 11:27 SUBMITTED to DoraHacks (BUIDL "Arena Lounge", track Friendzone, status Under Review; 13 days before deadline, inside the first-50 voucher window). He chose to submit early instead of 1-2 Sept (secrecy consciously waived: submitting IS the reveal). Same morning, in order: repo flipped PUBLIC via ghrc (MIT verified, anonymous 200; hygiene sweep was clean), portfolio arena-lounge page RESTORED from the vault (portfolio PR #42; hero + 28-tables copy verified live), 480x480 BUIDL logo generated from the marquee art (Downloads), Vision cut to 249 chars for the 256 limit, Details = full markdown with embedded live hero + phone capture, questionnaire answered (wallet 0x3451...5e9f, first DCL World, per-file-sprite uv story as biggest blocker, materials-103-percent disclosure). REMAINING for the buildathon: keep the World up through 11 Sept judging, X announcement post (next), Show & Tell 28 Aug 20:00 his time (optional), winners 13 Sept
 
