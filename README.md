@@ -18,7 +18,7 @@ Built for the [Decentraland Friendzone Mobile Buildathon 2026](https://dorahacks
     <td width="50%"><img src="docs/screenshots/phone-entrance.jpg" alt="iPhone capture at the entrance: the neon marquee, the red carpet and the nave fresco through the arch" /></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/phone-tictactoe.jpg" alt="iPhone capture seated at Tic Tac Toe: parchment controller bar, crisp marks, a won round" /></td>
+    <td width="50%"><img src="docs/screenshots/phone-tictactoe.jpg" alt="Seated at Chess in the phone layout: parchment controller bar, full board, finger-sized cells" /></td>
     <td width="50%"><img src="docs/screenshots/game-room.jpg" alt="The game room floor with its corners and tables" /></td>
   </tr>
 </table>
