@@ -7,24 +7,36 @@ honest: only verified facts under "State".
 
 ## 0. Continuation prompt (paste this into a fresh Claude Code chat)
 
-> Read ~/PR-PROJECT/arena-lounge/ARENA-LOUNGE-SPEC.md fully, then
-> ~/PR-PROJECT/arena-lounge/CLAUDE.md, before doing anything. This is the
-> Decentraland Friendzone Mobile Buildathon entry (deadline 4 Sept 2026). The
-> repo is PRIVATE until submission; branch + PR for every change; commits as
-> ArsalanRC with the noreply address; no AI attribution; no em-dashes in copy.
-> Start the previews with `pnpm start:mcp` (desktop + MCP harness) and
-> `pnpm start:mobile` (phone QR), test through tools/dev (README there).
-> Then continue with the "Next up" list in section 4b of the spec, and keep
-> the spec's changelog updated after every merged PR.
-
-Rules Arsalan set on 16 Aug (keep them): code stays private until the
-DoraHacks submission; the landing page + profile/portfolio entries are fine
-and stay public; nothing gets published beyond that without asking. The
-"one floor only" rule from 14:05 was lifted by him at ~14:30 (see decisions):
-the lounge now has the tower with a game room and a rooftop, and he wants
-more games (Chess first) and a bold exterior.
-
-Last update: 2026-08-22 12:05 (Europe/Berlin). SUBMITTED to DoraHacks (Under Review, track Friendzone). Repo PUBLIC, portfolio page live, World must stay up through 11 Sept judging. Left: X + Discord posts (staged), optional Show & Tell 28 Aug, winners 13 Sept.
+> Continue Arena Lounge (Decentraland Friendzone Buildathon). Repo
+> ~/PR-PROJECT/arena-lounge. FIRST read ARENA-LOUNGE-SPEC.md: section 0, the
+> 22 Aug changelog entries in 9 (submission day), 2c workshop digests, 8
+> gotchas, 4b. STATE: SUBMITTED to DoraHacks 22 Aug 2026 (Under Review, track
+> Friendzone). Everything through PR #74 merged; the World runs PR #69's scene
+> build (later PRs were docs/images). Repo PUBLIC (MIT); landing page live at
+> arsalanrc.github.io/arena-lounge (edit vault-first: docs/landing/ then sync
+> to ~/Development/ArsalanRC.github.io via branch+PR; same filenames keep the
+> DoraHacks embeds alive). Leaderboard live with real rows; performance
+> measured 100 percent on a real iPhone at forced-max graphics (accepted soft
+> warning: materials 514/500, lazy piece pools are the post-judging fix).
+> OBLIGATIONS: keep arenalounge.dcl.eth up through judging 5 to 11 Sept
+> (judges test ONLY the mobile app); winners 13 Sept.
+> NEXT: (1) verify the X post + Discord Friendzone post actually went out
+> (staged 22 Aug: X text was on his clipboard, images x-post-*.jpg in
+> Downloads, Discord text in that chat; re-stage on request), (2) optional
+> Show & Tell 28 Aug 18:00 UTC (20:00 Duisburg): prep a 3 to 5 minute live
+> walkthrough if he wants it, (3) post-judging polish only if asked (lazy
+> pools, real-iPhone capture swap, demo video on the BUIDL).
+> RULES: tools/dev/ghrc for every gh call; branch+PR, no AI attribution
+> anywhere; deploys stay allowed post-submission and need HIS signature within
+> 5 min (pnpm deploy:world, linker :8010, Mainnet); after ANY model/texture
+> regen restart Explorer + preview (assets path-keyed and cached; generators
+> write atomically); NEVER move his avatar or camera while he explores
+> (screenshots fine; driving only with his explicit go-ahead, park the avatar
+> out of frame for captures); preview: pnpm start:mcp, harness tools/dev/mcp.sh
+> + shot.sh (no UI-tap tool: use robot tokens); scene time fixed 22:00;
+> Supabase via tools/dev/supa + supa-sql (PERSONAL project, token in
+> ~/.config/arena-lounge/supabase-token, valid to 31 Oct); auto-memory was
+> updated 22 Aug (secrecy ENDED at submission).
 
 ## 1. What this is
 
