@@ -243,11 +243,10 @@ function Controls(props: { state: LudoGameState; ctx: GameContext; phone: boolea
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${die}${die && hint ? '   ·   ' : ''}${hint}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <UiEntity uiTransform={{ flexDirection: props.phone ? 'row' : 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
         <MiniBoard state={s} cell={cell} />
-        {buttons.length > 0 && (
-          <UiEntity uiTransform={{ flexDirection: props.phone ? 'column' : 'row', flexWrap: props.phone ? 'nowrap' : 'wrap', justifyContent: 'center', alignItems: 'center', width: props.phone ? 216 : '100%', height: 'auto', margin: props.phone ? { left: 8 } : { top: 6 } }}>
-            {buttons}
-          </UiEntity>
-        )}
+        {/* always mounted at a constant width: unmounting it recentred the board every turn */}
+        <UiEntity uiTransform={{ flexDirection: props.phone ? 'column' : 'row', flexWrap: props.phone ? 'nowrap' : 'wrap', justifyContent: 'center', alignItems: 'center', width: props.phone ? 216 : '100%', height: 'auto', margin: props.phone ? { left: 8 } : { top: 6 } }}>
+          {buttons}
+        </UiEntity>
       </UiEntity>
     </UiEntity>
   )

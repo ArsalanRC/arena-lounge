@@ -191,7 +191,7 @@ function Row(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; 
 }
 
 /** Rounded dark panel; `place` positions it absolutely ('auto' width hugs the content). */
-function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; width: Width; place: UiTransformProps; padding?: number }) {
+function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]; width: Width; place: UiTransformProps; padding?: number; nineSlice?: boolean }) {
   // The parchment sprite draws its gold border a little inside the edge, so the content keeps extra
   // room at the bottom. Children are laid out in an inner box of explicit width: percentage widths
   // ('100%' rows, the note input) resolve against the parent's full width in this renderer and would
@@ -202,7 +202,7 @@ function Panel(props: { children?: ReactEcs.JSX.Element | ReactEcs.JSX.Element[]
   return (
     <UiEntity
       uiTransform={{ ...props.place, width: props.width, height: 'auto', padding: { top: pad, left: sidePad, right: sidePad, bottom: pad + 28 }, flexDirection: 'column', alignItems: 'center', pointerFilter: 'block' }}
-      uiBackground={{ texture: { src: IMG_ROYAL.panel }, textureMode: 'stretch' }}
+      uiBackground={props.nineSlice ? { texture: { src: IMG_ROYAL.panel }, textureMode: 'nine-slices', textureSlices: { top: 0.12, bottom: 0.12, left: 0.12, right: 0.12 } } : { texture: { src: IMG_ROYAL.panel }, textureMode: 'stretch' }}
     >
       <UiEntity uiTransform={{ width: inner, height: 'auto', flexDirection: 'column', alignItems: 'center' }}>{props.children}</UiEntity>
     </UiEntity>
@@ -276,6 +276,9 @@ function tableTitle(tb: Table): string {
 
 const bottomCentre = (width: number, bottom: number): UiTransformProps => ({ positionType: 'absolute', position: { bottom, left: '50%' }, margin: { left: -width / 2 } })
 const rightMiddle = (width: number, halfHeight: number): UiTransformProps => ({ positionType: 'absolute', position: { right: 36, top: '50%' }, margin: { top: -halfHeight } })
+/** Fixed-top right anchor: the seated panel grows DOWNWARD as controls change per phase, so
+ * everything above the growth point stays exactly where it was (no per-turn recentring). */
+const rightTop = (): UiTransformProps => ({ positionType: 'absolute', position: { right: 36, top: 150 } })
 
 // ---------------------------------------------------------------- hint + toast
 
@@ -390,7 +393,8 @@ function TableCard() {
         </Row>
       )}
       <Row height={64}>
-        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={68} margin={6} />
+        {/* 112 draws ~68 under the renderer's content-box width (see the seated panel note) */}
+        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={112} margin={6} />
         <Btn label={str.notNow} quiet onClick={() => (local.dismissedTableId = t.def.id)} width={170} margin={6} />
       </Row>
     </Panel>
@@ -470,10 +474,10 @@ function Controller() {
     </UiEntity>
   )
   // host of a multi-seat table: how many play the next round (never below the seated count)
-  const playersRow = !showPlayers ? null : (
-    <Row height={46} margin={{ top: 4 }}>
-      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.players, fontSize: T.small, color: UI.muted }} />
-      <Segmented
+  const playersRow = !multi ? null : (
+    <UiEntity uiTransform={{ width: mobile ? 240 : 476, height: 46, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', margin: { top: 4 } }}>
+      {showPlayers && <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.players, fontSize: T.small, color: UI.muted }} />}
+      {showPlayers && <Segmented
         options={seatsOf(t)
           .filter((n) => n >= 2)
           .map((n) => ({ key: `${n}`, label: `${n}` }))}
@@ -483,61 +487,67 @@ function Controller() {
         }}
         width={mobile ? 44 : 52}
         fontSize={17}
-      />
-    </Row>
+      />}
+    </UiEntity>
   )
   const controls = state !== null ? <t.game.Controls state={state} ctx={contextFor(t)} phone={mobile} fullBoard={local.showMiniBoard} /> : null
   const difficulty = <DifficultyPicker width={mobile ? 66 : 92} fontSize={mobile ? 15 : 16} />
   // Bot strength: caption beside the control on desktop, above it on the narrow phone column
-  const botRow = !showBotRow ? null : mobile ? (
-    <UiEntity uiTransform={{ width: '100%', height: 66, flexDirection: 'column', alignItems: 'center', margin: { top: 4 } }}>
-      <Text value={str.bot} size={T.small} color={UI.muted} />
-      {difficulty}
+  // the rows keep their height even when their contents hide, so nothing below them jumps
+  // when a round starts or ends (Arsalan, 11 Sept: components must not change position)
+  const botRow = mobile ? (
+    <UiEntity uiTransform={{ width: 240, height: 66, flexDirection: 'column', alignItems: 'center', margin: { top: 4 } }}>
+      {showBotRow && <Text value={str.bot} size={T.small} color={UI.muted} />}
+      {showBotRow && difficulty}
     </UiEntity>
   ) : (
     <Row height={46} margin={{ top: 6 }}>
-      <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.bot, fontSize: T.small, color: UI.muted }} />
-      {difficulty}
+      {showBotRow && <UiEntity uiTransform={{ width: 'auto', height: 30, margin: { right: 6 } }} uiText={{ value: str.bot, fontSize: T.small, color: UI.muted }} />}
+      {showBotRow && difficulty}
     </Row>
   )
 
   if (mobile) {
-    // Phone bar: the actions column stacks its buttons; the info column is fixed
-    // width so the board stays centred as names and status change.
-    const btnW = 190
+    // Phone bar, mobile-first (Arsalan, 11 Sept): a FIXED-width panel pinned right, so it
+    // never sits under the client's 328-unit chat column on the left, and its geometry
+    // never changes while phases swap. Three fixed columns: info | game controls | actions.
+    // The panel width is a number, so Panel's inner box is explicit and '100%' rows inside
+    // resolve correctly (the auto-width panel squashed the "?" button to a sliver).
+    const W = 1250
+    const INFO_W = 300
+    const ACT_W = 240
+    const SLOT_W = W - 72 - INFO_W - ACT_W // the game controls slot: ~640, fits every board
+    const btnW = 200
     return (
-      <UiEntity uiTransform={{ positionType: 'absolute', position: { bottom: 10, left: 0 }, width: '100%', height: 'auto', flexDirection: 'row', justifyContent: 'center' }}>
-        <Panel width="auto" place={{}} padding={12}>
-          <UiEntity uiTransform={{ width: 'auto', height: 'auto', flexDirection: 'row', alignItems: 'center' }}>
-            <UiEntity uiTransform={{ width: 320, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { right: 12 } }}>
-              {header}
-              <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 4 }} />
-              <Text value={status} size={T.status} color={statusColor} margin={{ top: 4 }} />
-            </UiEntity>
-            {/* explicit vertical margins: nested auto-height wrappers eat the panel padding */}
-            <UiEntity uiTransform={{ width: 'auto', height: 'auto', margin: { top: 10, bottom: 10 } }}>{controls}</UiEntity>
-            <UiEntity uiTransform={{ width: 220, height: 'auto', flexDirection: 'column', alignItems: 'center', margin: { left: 12 } }}>
-              {showBotInvite && <Btn label={multi && players > 2 ? str.fillBots : str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} />}
-              {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={btnW} />}
-              {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} />}
-              {playersRow}
-              {botRow}
-              {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} />}
-              <Row height={60}>
-                <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={52} />
-                <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={126} fontSize={18} />
-              </Row>
-            </UiEntity>
+      <Panel width={W} place={{ positionType: 'absolute', position: { bottom: 10, right: 8 } }} padding={20} nineSlice>
+        <UiEntity uiTransform={{ width: W - 72, height: 'auto', flexDirection: 'row', alignItems: 'center', margin: { top: 10, bottom: 4 } }}>
+          <UiEntity uiTransform={{ width: INFO_W, height: 170, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            {header}
+            <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 4 }} />
+            <Text value={status} size={T.status} color={statusColor} margin={{ top: 4 }} />
           </UiEntity>
-        </Panel>
-      </UiEntity>
+          {/* explicit vertical margins: nested auto-height wrappers eat the panel padding */}
+          <UiEntity uiTransform={{ width: SLOT_W, height: 'auto', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', margin: { top: 10, bottom: 10 } }}>{controls}</UiEntity>
+          <UiEntity uiTransform={{ width: ACT_W, height: 'auto', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+            {showBotInvite && <Btn label={multi && players > 2 ? str.fillBots : str.playBot} onClick={() => inviteBot(t)} width={btnW} fontSize={17} margin={4} />}
+            {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={btnW} margin={4} />}
+            {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={btnW} fontSize={18} margin={4} />}
+            {playersRow}
+            {botRow}
+            {showBoardToggle && <Btn label={local.showMiniBoard ? str.hideBoard : str.showBoard} quiet onClick={() => (local.showMiniBoard = !local.showMiniBoard)} width={btnW} fontSize={18} margin={4} />}
+            {/* stacked full-width buttons: thumb-sized targets, and no row packing to squash */}
+            <Btn label={str.howToPlay} quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={btnW} fontSize={17} margin={4} />
+            <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={btnW} fontSize={18} margin={4} />
+          </UiEntity>
+        </UiEntity>
+      </Panel>
     )
   }
 
   // wide enough for the largest mini board (Match Pairs, 4 x 68 px cells) plus the panel padding
   const W = 520
   return (
-    <Panel width={W} place={rightMiddle(W, 250)} padding={22}>
+    <Panel width={W} place={rightTop()} padding={22}>
       {header}
       <Text value={tableTitle(t)} size={T.small} color={UI.muted} margin={{ top: 2 }} />
       <Text value={status} size={T.status} color={statusColor} margin={{ top: 4, bottom: 6 }} />
@@ -545,13 +555,15 @@ function Controller() {
       {playersRow}
       {botRow}
       {/* explicit widths: 'auto' buttons hug their text and the pair drifts off centre */}
-      <Row wrap height={showRematch || showBotInvite ? 64 : 0}>
+      <Row wrap height={64}>
         {showBotInvite && <Btn label={multi && players > 2 ? str.fillBots : str.playBot} onClick={() => inviteBot(t)} width={270} margin={6} />}
         {showRematch && <Btn label={str.playAgain} onClick={() => rematch(t)} width={200} margin={6} />}
         {showDismiss && <Btn label={str.dismissBot} quiet onClick={() => dismissBot(t)} width={200} margin={6} />}
       </Row>
       <Row height={64} margin={{ top: 2, bottom: 6 }}>
-        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={68} margin={6} />
+        {/* width 112 draws ~68: this renderer subtracts the Btn's 22+22 padding from the
+            declared width (content-box), so narrow buttons need the padding added back */}
+        <Btn label="?" quiet onClick={() => (local.helpOpen = !local.helpOpen)} width={112} margin={6} />
         <Btn label={str.standUp} color={UI.danger} onClick={() => stand(t)} width={190} margin={6} />
       </Row>
     </Panel>
