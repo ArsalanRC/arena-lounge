@@ -122,14 +122,17 @@ function Controls(props: { state: SnakesLaddersGameState; ctx: GameContext; phon
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: info, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <UiEntity uiTransform={{ flexDirection: props.phone ? 'row' : 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
         <MiniBoard state={s} cell={cell} />
-        {ctx.myTurn && !finished && (
-          <UiEntity
-            uiTransform={{ width: 200, height: 56, margin: props.phone ? { left: 10 } : { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-            uiBackground={uiSprite(IMG.button, UI.accent)}
-            uiText={{ value: g.rollDie, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
-            onMouseDown={() => ctx.act({ roll: d6() } as SnakesAction)}
-          />
-        )}
+        {/* the slot keeps its size when the button hides: unmounting recentred the board */}
+        <UiEntity uiTransform={{ width: 200, height: 56, margin: props.phone ? { left: 10 } : { top: 6 }, justifyContent: 'center', alignItems: 'center' }}>
+          {ctx.myTurn && !finished && (
+            <UiEntity
+              uiTransform={{ width: 200, height: 56, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+              uiBackground={uiSprite(IMG.button, UI.accent)}
+              uiText={{ value: g.rollDie, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
+              onMouseDown={() => ctx.act({ roll: d6() } as SnakesAction)}
+            />
+          )}
+        </UiEntity>
       </UiEntity>
     </UiEntity>
   )

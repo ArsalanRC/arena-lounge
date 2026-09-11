@@ -14,7 +14,7 @@
  * Concurrent identical writes converge; concurrent conflicting writes are
  * only possible on seat claims, and the loser simply sees the seat taken.
  */
-import { engine, Entity, Transform, timers, TouchScreenControls } from '@dcl/sdk/ecs'
+import { engine, Entity, InputAction, Transform, timers, TouchScreenControls } from '@dcl/sdk/ecs'
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { isStateSyncronized, syncEntity } from '@dcl/sdk/network'
 import { getPlayer, onLeaveScene } from '@dcl/sdk/src/players'
@@ -706,9 +706,36 @@ function touchControlsSystem(): void {
     TouchScreenControls.hideAll()
     TouchScreenControls.hideCrosshair()
   } else {
-    TouchScreenControls.showAll()
-    TouchScreenControls.showCrosshair()
+    applyTouchControlBaseline()
   }
+}
+
+/**
+ * The on-screen buttons our scene never uses (Arsalan, 11 Sept): every interaction is a
+ * direct tap or scene UI (IA_POINTER only), and jumping is input-disabled scene-wide, so
+ * the bottom-right cluster (jump, E, F, the hand button) is dead weight on phones. The
+ * joystick stays. showAll clears the hide list, so the baseline is re-applied after it.
+ */
+// Every on-screen button: the scene is tap-and-UI only, so none of them do anything here.
+// The joystick is NOT in this list and stays functional: the mobile client draws it
+// dynamically under the thumb while dragging, so there is no resting stick graphic.
+const UNUSED_TOUCH_BUTTONS = [
+  InputAction.IA_JUMP,
+  InputAction.IA_PRIMARY,
+  InputAction.IA_SECONDARY,
+  InputAction.IA_POINTER,
+  InputAction.IA_ACTION_3,
+  InputAction.IA_ACTION_4,
+  InputAction.IA_ACTION_5,
+  InputAction.IA_ACTION_6
+]
+export function applyTouchControlBaseline(): void {
+  TouchScreenControls.showAll()
+  TouchScreenControls.hide(UNUSED_TOUCH_BUTTONS)
+  TouchScreenControls.showCrosshair()
+  // explicit: creating the component at boot leaves the joystick field unset, which the
+  // client treats as hidden (the movement stick vanished on phones until this line)
+  TouchScreenControls.showJoystick()
 }
 
 let janitorTimer = 0

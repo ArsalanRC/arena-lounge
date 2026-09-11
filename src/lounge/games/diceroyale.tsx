@@ -231,14 +231,17 @@ function Controls(props: { state: DuelState; ctx: GameContext; phone: boolean })
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${g.totals(d.view.totalA, d.view.totalB)}${status ? '   ·   ' + status : ''}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <UiEntity uiTransform={{ flexDirection: 'row', alignItems: 'center', width: 'auto', height: 'auto' }}>
         {dice}
-        {canRoll && (
-          <UiEntity
-            uiTransform={{ width: 130, height: 52, margin: { left: 8 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-            uiBackground={uiSprite(IMG.button, UI.accent)}
-            uiText={{ value: `${g.rollDice} (${cur.rollsLeft})`, fontSize: 17, color: UI.onAccent, textAlign: 'middle-center' }}
-            onMouseDown={() => ctx.act({ roll: cur.dice.map((f, i) => (cur.held[i] ? f : d6())) } as RoyaleAction)}
-          />
-        )}
+        {/* the slot keeps its width when the button hides: mounting it shoved the dice left */}
+        <UiEntity uiTransform={{ width: 130, height: 52, margin: { left: 8 }, justifyContent: 'center', alignItems: 'center' }}>
+          {canRoll && (
+            <UiEntity
+              uiTransform={{ width: 130, height: 52, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+              uiBackground={uiSprite(IMG.button, UI.accent)}
+              uiText={{ value: `${g.rollDice} (${cur.rollsLeft})`, fontSize: 17, color: UI.onAccent, textAlign: 'middle-center' }}
+              onMouseDown={() => ctx.act({ roll: cur.dice.map((f, i) => (cur.held[i] ? f : d6())) } as RoyaleAction)}
+            />
+          )}
+        </UiEntity>
       </UiEntity>
       {grid}
     </UiEntity>

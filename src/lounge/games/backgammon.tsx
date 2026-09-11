@@ -248,14 +248,17 @@ function Controls(props: { state: BackgammonGameState; ctx: GameContext; phone: 
     <UiEntity uiTransform={{ flexDirection: 'column', alignItems: 'center', width: 'auto', height: 'auto' }}>
       <UiEntity uiTransform={{ width: '100%', height: 26, justifyContent: 'center', alignItems: 'center' }} uiText={{ value: `${diceText}${diceText && hint ? '   ·   ' : ''}${hint}`, fontSize: 17, color: UI.muted, textAlign: 'middle-center' }} />
       <Board state={s} ctx={props.ctx} phone={props.phone} />
-      {props.ctx.myTurn && !rolled && !finished && (
-        <UiEntity
-          uiTransform={{ width: 220, height: 52, margin: { top: 6 }, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
-          uiBackground={uiSprite(IMG.button, UI.accent)}
-          uiText={{ value: g.rollDice, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
-          onMouseDown={() => props.ctx.act({ roll: [d6(), d6()] } as BgAction)}
-        />
-      )}
+      {/* the slot keeps its height when the button hides: mounting it pushed the board up */}
+      <UiEntity uiTransform={{ width: 220, height: 52, margin: { top: 6 }, justifyContent: 'center', alignItems: 'center' }}>
+        {props.ctx.myTurn && !rolled && !finished && (
+          <UiEntity
+            uiTransform={{ width: 220, height: 52, justifyContent: 'center', alignItems: 'center', pointerFilter: 'block' }}
+            uiBackground={uiSprite(IMG.button, UI.accent)}
+            uiText={{ value: g.rollDice, fontSize: 20, color: UI.onAccent, textAlign: 'middle-center' }}
+            onMouseDown={() => props.ctx.act({ roll: [d6(), d6()] } as BgAction)}
+          />
+        )}
+      </UiEntity>
     </UiEntity>
   )
 }
